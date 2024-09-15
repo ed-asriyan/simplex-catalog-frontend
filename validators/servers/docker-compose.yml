@@ -1,0 +1,44 @@
+version: '2'
+
+services:
+  redis:
+    image: redis
+    healthcheck:
+      test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
+    restart: always
+
+  smp-client:
+    build:
+      context: https://github.com/simplex-chat/simplex-chat.git#v6.0.4
+      target: build
+    command: sh -c "echo a | ./simplex-chat -p 80"
+    restart: always
+
+  worker:
+    build: worker
+    env_file:
+      - .env
+    environment:
+      - SMP_CLIENT_URI=ws://smp-client:80
+      - REDIS_QUEUE_URL=redis://redis
+      - QUEUE_NAME=default
+      - CRON_RULE=0 * * * *
+      - SUPABASE_TABLE_NAME=servers
+      # - SUPABASE_URL=<to be filled in .env>
+      # - SUPABASE_KEY=<to be filled in .env>
+    depends_on:
+      - smp-client
+      - redis
+    restart: always
+
+  admin:
+    build: admin
+    environment:
+      - REDIS_QUEUE_URL=redis://redis
+      - QUEUE_NAME=default
+      - PORT=80
+    depends_on:
+      - redis
+    ports:
+      - 8080:80
+    restart: always

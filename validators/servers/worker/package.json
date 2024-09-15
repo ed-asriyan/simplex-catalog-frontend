@@ -1,0 +1,25 @@
+{
+    "name": "simplex-servers-registry-validator-worker",
+    "version": "0.0.1",
+    "main": "index.js",
+    "type": "module",
+    "scripts": {
+        "start": "node --loader ts-node/esm index.ts"
+    },
+    "author": "Ed Asriyan",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "git+ssh://git@github.com/ed-asriyan/simplex-servers-registry-validator.git"
+    },
+    "dependencies": {
+        "@supabase/supabase-js": "^2.45.4",
+        "@types/node": "^22.5.5",
+        "bullmq": "^5.13.0",
+        "ioredis": "^5.4.1",
+        "node-cron": "^3.0.3",
+        "ts-node": "^10.9.2",
+        "typescript": "^5.6.2",
+        "ws": "^8.18.0"
+    }
+}

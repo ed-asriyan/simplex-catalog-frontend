@@ -1,0 +1,24 @@
+{
+    "name": "simplex-servers-registry-validator-admin",
+    "version": "0.0.1",
+    "main": "index.js",
+    "type": "module",
+    "scripts": {
+        "start": "node --loader ts-node/esm index.ts"
+    },
+    "author": "Ed Asriyan",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "git+ssh://git@github.com/ed-asriyan/simplex-servers-registry-validator.git"
+    },
+    "dependencies": {
+        "@bull-board/api": "^5.21.6",
+        "@bull-board/express": "^5.21.6",
+        "@types/node": "^22.5.5",
+        "bullmq": "^5.13.0",
+        "ioredis": "^5.4.1",
+        "ts-node": "^10.9.2",
+        "typescript": "^5.6.2"
+    }
+}
