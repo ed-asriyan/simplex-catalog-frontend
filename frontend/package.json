@@ -1,0 +1,31 @@
+{
+	"name": "simplex-servers-registry-frontend",
+	"version": "0.0.1",
+	"private": false,
+	"scripts": {
+		"dev": "vite dev",
+		"build": "vite build",
+		"copy-static": "cp -r static/* dist/",
+		"preview": "vite preview",
+		"clean-db": "node --experimental-json-modules clean-db.js",
+		"stats": "node --experimental-json-modules stats.js",
+		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch"
+	},
+	"devDependencies": {
+		"@castlenine/svelte-qrcode": "^2.2.0",
+		"@sentry/svelte": "^8.30.0",
+		"@supabase/supabase-js": "^2.45.4",
+		"@sveltejs/vite-plugin-svelte": "^3.1.1",
+		"@tsconfig/svelte": "^5.0.2",
+		"moment": "^2.30.1",
+		"sass": "^1.77.8",
+		"svelte": "^4.2.12",
+		"svelte-check": "^3.8.4",
+		"tslib": "^2.6.2",
+		"typescript": "^5.2.2",
+		"uikit": "^3.19.1",
+		"vite": "^5.4.1"
+	},
+	"type": "module"
+}
