@@ -2,24 +2,59 @@ import { createClient } from '@supabase/supabase-js';
 import { supabaseKey, supabaseTableName, supabaseUrl } from './settings';
 import { snakeToCamel } from './utils';
 
+export interface ServerUri {
+    type: 'smp' | 'xftp';
+    domain: string;
+};
+
+const onionRegex = /(smp|xftp):\/\/(.+)@(.+)\.onion$/;
+const onionExtendedRegex = /(smp|xftp):\/\/(.+)@(.+)\,(.+)\.onion$/;
+const defaultRegex = /(smp|xftp):\/\/(.+)@(.+)/;
+const parseUri = function (uri: string): ServerUri {
+    if (uri.endsWith('.onion')) {
+        if (uri.includes(',')){
+            const result = onionExtendedRegex.exec(uri);
+            return result && {
+                type: result[1] as 'smp' | 'xftp',
+                domain: result[3],
+            };
+        } else {
+            const result = onionRegex.exec(uri);
+            return result && {
+                type: result[1] as 'smp' | 'xftp',
+                domain: null,
+            };
+        }
+    } else {
+        const result = defaultRegex.exec(uri);
+        return result && {
+            type: result[1] as 'smp' | 'xftp',
+            domain: result[3],
+        };
+    }
+};
+
 export interface Server {
     uuid: string;
     uri: string;
     status: boolean;
     statusSince: string;
     lastCheck: string;
-}
+    parsedUri: ServerUri;
+};
 
 export type Column = keyof Server;
 
 const deserialize = function (data: any): Server {
-    return Object.entries(data).reduce((obj, [key, value]) => {
+    const server = Object.entries(data).reduce((obj, [key, value]) => {
         if (typeof value === "string") {
             value = value.trim();
         }
         obj[snakeToCamel(key)] = value;
         return obj;
     }, {}) as Server;
+    server.parsedUri = parseUri(server.uri);
+    return server;
 };
 
 const supabase = createClient(supabaseUrl, supabaseKey);

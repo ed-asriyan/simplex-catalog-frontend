@@ -28,4 +28,5 @@ export const convertUTCDateToLocalDate = function (date: Date): Date {
   newDate.setHours(hours - offset);
 
   return newDate;   
-}
+};
+

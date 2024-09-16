@@ -6,6 +6,7 @@
     import LineDate from './line-date.svelte';
     import { flagStore } from './flagged';
     import Flag from './flag.svelte';
+    import LineServerInfo from './line-server-info.svelte';
 
     export let params: FetchParams;
 
@@ -44,7 +45,7 @@
         }
     };
 
-    let qrCodeText: string = '';
+    let qrCodeServer: Server = null;
 
     const changePage = async function (pageCount: number, newPage: number) {
         if (newPage < 1 || newPage > pageCount) {
@@ -54,7 +55,7 @@
     };
 </script>
 
-<QrCodeModal bind:uri={qrCodeText} />
+<QrCodeModal bind:server={qrCodeServer} />
 
 {#await fetch(localParams)}
     <div class="loader uk-flex uk-flex-center uk-flex-middle uk-flex-direction-column">
@@ -66,6 +67,7 @@
             <tr>
                 <th></th>
                 <th>URI</th>
+                <th>Info page</th>
                 <th>QR Code</th>
                 <th>Status</th>
                 <th>Status Since</th>
@@ -80,10 +82,13 @@
                             <Flag value={$flagStore.has(server.uri)} on:click={() => flagStore.toggle(server.uri) } />
                         </td>
                         <td>
-                            <LineUri uri={server.uri} />
+                            <LineUri server={server} />
                         </td>
                         <td>
-                            <button class="uk-button uk-button-secondary uk-button-small" on:click={() => qrCodeText = server.uri}>QR</button>
+                            <LineServerInfo server={server} icon={true} />
+                        </td>
+                        <td>
+                            <button class="uk-button uk-button-secondary uk-button-small" on:click={() => qrCodeServer = server}>QR</button>
                         </td>
                         <td>
                             <LineStatus status={server.status} />
@@ -108,7 +113,7 @@
                         <div class="uk-width-1-1">
                             <Flag value={$flagStore.has(server.uri)} on:click={() => flagStore.toggle(server.uri) } />
                             &nbsp;
-                            <LineUri uri={server.uri} />
+                            <LineUri server={server} />
                         </div>
                         <div class="uk-width-1-1">
                             Status since: <LineDate date={server.statusSince} />
@@ -116,13 +121,16 @@
                         <div class="uk-width-1-1 uk-margin-remove-top">
                             Last check: <LineDate date={server.lastCheck} />
                         </div>
+                        <div class="uk-width-1-1 uk-margin-remove-top">
+                            <LineServerInfo server={server} icon={false} />
+                        </div>
                     </div>
                     <div class="uk-width-1-3 uk-text-center">
                         <div>
                             Status: 
                             <LineStatus status={server.status} />
                         </div>
-                        <button class="uk-block uk-margin-top uk-width-1-1 uk-button uk-button-secondary uk-button-small" on:click={() => qrCodeText = server.uri}>QR Code</button>
+                        <button class="uk-block uk-margin-top uk-width-1-1 uk-button uk-button-secondary uk-button-small" on:click={() => qrCodeServer = server}>QR Code</button>
                     </div>
                 </div>
             </li>

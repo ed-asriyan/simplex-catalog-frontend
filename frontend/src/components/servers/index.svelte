@@ -1,14 +1,24 @@
 <script lang="ts">
-    import { onMount, onDestroy } from 'svelte';
-    import { addServer, doesServerExist, type FetchParams, type Server } from '../../database';
+    import { onMount } from 'svelte';
+    import { addServer, doesServerExist, type FetchParams } from '../../database';
     import Filters from './filters.svelte';
     import Table from './table.svelte';
 
     let params: FetchParams;
 
+    const isServerOfficial = function (uri: string): boolean {
+        return uri.includes('simplex.im');
+    };
+
     const addServerClick = async function () {
-        const input = prompt('Enter SMP or XFTP server URI:');
+        let input = prompt('Enter SMP or XFTP server URI:');
+        input = input?.trim();
         if (!input) return;
+
+        if (isServerOfficial(input)) {
+            alert('You entered official SimpleX server. Please add only unofficial SimpleX servers');
+            return;
+        }
 
         try {
             if (await doesServerExist(input)) {

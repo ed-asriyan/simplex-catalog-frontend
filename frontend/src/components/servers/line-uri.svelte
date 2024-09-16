@@ -1,5 +1,7 @@
 <script lang="ts">
-    export let uri: string;
+    import type { Server, ServerUri } from '../../database';
+
+    export let server: Server;
 
     let copyTumbler: string = '';
     let timeout: number;
@@ -16,23 +18,14 @@
         timeout = setTimeout(() => copyTumbler = '', 4000);
     };
 
-    const maskUri = function (uri: string): string {
-        if (uri.endsWith('.onion')) {
-            if (uri.includes(',')){
-                return uri.replace(/(smp|xftp):\/\/(.+)@(.+)\,(.+)\.onion$/, "$1://<...>@$3,<...>.onion")
-            } else {
-                return uri.replace(/(smp|xftp):\/\/(.+)@(.+)\.onion$/, "$1://<...>@<...>.onion");
-            }
-        } else {
-            return uri.replace(/(smp|xftp):\/\/(.+)@(.+)/, "$1://<...>@$3");
-        }
-    };
+    $: domain = server.parsedUri.domain || `...${server.uri.slice(server.uri.length - 12)}`;
+    $: maskedUri =  `${server.parsedUri.type}://${domain}`;;
 </script>
 
-<span class="pointer uk-text-break" uk-tooltip="Click to copy full URI" on:click={copyToClipboard(uri)}>
-    {#if copyTumbler === uri}
+<span class="pointer uk-text-break" uk-tooltip="Click to copy full URI" on:click={copyToClipboard(server.uri)}>
+    {#if copyTumbler === server.uri}
         Copied to clipboard
     {:else}
-        <a>{maskUri(uri)}</a>
+        <a>{maskedUri}</a>
     {/if}
 </span>
