@@ -1,16 +1,9 @@
 import { createClient } from '@supabase/supabase-js';
-import { supabaseKey, supabaseTableName, supabaseUrl } from '../settings';
-
-const camelToSnakeCase = (str: string) => str.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`);
-const snakeToCamel = (str: string) =>
-    str.toLowerCase().replace(/([-_][a-z])/g, group =>
-      group
-        .toUpperCase()
-        .replace('-', '')
-        .replace('_', '')
-    );
+import { supabaseKey, supabaseTableName, supabaseUrl } from './settings';
+import { snakeToCamel } from './utils';
 
 export interface Server {
+    uuid: string;
     uri: string;
     status: boolean;
     statusSince: string;
@@ -44,21 +37,19 @@ export interface Filter {
 export interface FetchParams {
     limit: number;
     offset: number;
-    sort?: Sort;
-    filter?: Filter;
+    filters?: (a: any) => any;
+    modifyers?: (a: any) => any;
 }
 
 export const fetchServers = async function (params: FetchParams): Promise<{ servers: Server[], count: number }> {
     let query = supabase.from(supabaseTableName).select('*', { count: 'exact' });
 
-    // Apply status filter
-    if (params.filter) {
-        query = query.eq(camelToSnakeCase(params.filter.column), params.filter.value);
+    if (params.filters) {
+        query = params.filters(query);
     }
 
-    // Apply sorting
-    if (params.sort) {
-        query = query.order(camelToSnakeCase(params.sort.column), { ascending: params.sort.direction === 'asc' });
+    if (params.modifyers) {
+        query = params.modifyers(query);
     }
 
     const { data, count, error } = await query.range(params.offset, params.limit + params.offset);

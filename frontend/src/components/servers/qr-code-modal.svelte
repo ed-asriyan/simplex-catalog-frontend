@@ -23,22 +23,30 @@
 	</div>
 </dialog>
 
-<style>
+<style lang="scss">
 	dialog {
 		max-width: 32em;
 		border-radius: 0.2em;
 		border: none;
 		padding: 0;
+
+		&::backdrop {
+			background: rgba(0, 0, 0, 0.3);
+		}
+
+		& > div {
+			padding: 1em;
+		}
+
+		&[open] {
+			animation: zoom 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+		}
+
+		&[open]::backdrop {
+			animation: fade 0.2s ease-out;
+		}
 	}
-	dialog::backdrop {
-		background: rgba(0, 0, 0, 0.3);
-	}
-	dialog > div {
-		padding: 1em;
-	}
-	dialog[open] {
-		animation: zoom 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-	}
+
 	@keyframes zoom {
 		from {
 			transform: scale(0.95);
@@ -47,9 +55,7 @@
 			transform: scale(1);
 		}
 	}
-	dialog[open]::backdrop {
-		animation: fade 0.2s ease-out;
-	}
+
 	@keyframes fade {
 		from {
 			opacity: 0;
