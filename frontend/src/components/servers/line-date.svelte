@@ -9,7 +9,7 @@
     $: dateObj = new Date(date);
 
     const getMoment = function (): moment.Moment {
-        return moment(convertUTCDateToLocalDate(dateObj));
+        return dateObj && moment(convertUTCDateToLocalDate(dateObj));
     };
  
     let display: Readable<moment.Moment>;
