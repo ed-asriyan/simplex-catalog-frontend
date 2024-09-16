@@ -25,29 +25,31 @@
         }
     };
 
-    let refreshTimeout: number = 0;
-    const updateI = function () {
-        clearTimeout(refreshTimeout);
-        refreshTimeout = setTimeout(updateI, 60 * 1000);
+    let refreshCounter: number = 0;
+    const refresh = function () {
+        ++refreshCounter;
     }
-    onMount(updateI);
-    onDestroy(() => clearInterval(refreshTimeout));
+    onMount(refresh);
 
     $: refreshedParams = {
         ...params,
-        [Symbol()]: refreshTimeout
+        [Symbol()]: refreshCounter,
     };
 </script>
 
-<div uk-grid>
-    <div class="uk-width-1-3@m">
+<div uk-grid class="uk-width-1-1">
+    <div class="uk-width-1-3@m uk-width-1-1@s">
         <div class="uk-text-lead uk-margin-bottom">Filters</div>
         <Filters bind:params={params} />
     </div>
-    <div class="uk-width-expand@m">
-        <div class="uk-text-lead uk-width-1-1">
-            Servers
-            <button class="uk-button uk-button-default uk-margin-auto-left" on:click={addServerClick}>Add server</button>
+    <div class="uk-width-expand@m uk-width-1-1@s">
+        <div class="uk-width-1-1" uk-grid>
+            <div class="uk-text-lead uk-width-1-3@s uk-width-expand@m">
+                Servers
+                &nbsp;
+                <span class="pointer" on:click={refresh} uk-tooltip="Refresh">🔄</span>
+            </div>
+            <button class="uk-width-1-3@m uk-width-1-1@s uk-button uk-button-default uk-margin-left uk-margin-remove-right" on:click={addServerClick}>Add server</button>
         </div>
         <Table params={refreshedParams} />
     </div>
