@@ -26,9 +26,26 @@ new Worker(queueName, async job => {
     await handleServer(serverUri, log);
 }, { connection });
 
+const shuffle = function<T> (array: T[]): T[] {
+    let currentIndex = array.length;
+  
+    // While there remain elements to shuffle...
+    while (currentIndex != 0) {
+  
+      // Pick a remaining element...
+      let randomIndex = Math.floor(Math.random() * currentIndex);
+      currentIndex--;
+  
+      // And swap it with the current element.
+      [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+    }
+
+    return array;
+};
+
 const addServerChecksToQueue = async function () {
     const queue = new Queue(queueName, { connection });
-    for (const server of await getAllRecords()) {
+    for (const server of shuffle(await getAllRecords())) {
         await queue.add(`schedule ${server.uri}`, { serverUri: server.uri });
     }
 };
