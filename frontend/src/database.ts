@@ -7,30 +7,31 @@ export interface ServerUri {
     domain: string;
 };
 
-const onionRegex = /(smp|xftp):\/\/(.+)@(.+)\.onion$/;
-const onionExtendedRegex = /(smp|xftp):\/\/(.+)@(.+)\,(.+)\.onion$/;
-const defaultRegex = /(smp|xftp):\/\/(.+)@(.+)/;
+const domainPattern = /(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}/g;
+const extractDomain = function (inputString: string): string | null {
+    const matches = inputString.match(domainPattern);
+    return matches ? matches[0] : null;
+}
+
 const parseUri = function (uri: string): ServerUri {
+    const type = uri.split(':')[0] as 'smp' | 'xftp';
     if (uri.endsWith('.onion')) {
         if (uri.includes(',')){
-            const result = onionExtendedRegex.exec(uri);
-            return result && {
-                type: result[1] as 'smp' | 'xftp',
-                domain: result[3],
+            return {
+                type,
+                domain: extractDomain(uri),
             };
         } else {
-            const result = onionRegex.exec(uri);
-            return result && {
-                type: result[1] as 'smp' | 'xftp',
+            return {
+                type,
                 domain: null,
             };
         }
     } else {
-        const result = defaultRegex.exec(uri);
-        return result && {
-            type: result[1] as 'smp' | 'xftp',
-            domain: result[3],
-        };
+        return {
+            type,
+            domain: extractDomain(uri),
+        }
     }
 };
 
@@ -40,6 +41,7 @@ export interface Server {
     status: boolean;
     statusSince: string;
     lastCheck: string;
+    country: string;
     parsedUri: ServerUri;
 };
 

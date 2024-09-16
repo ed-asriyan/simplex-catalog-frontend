@@ -25,6 +25,7 @@
             · <a class="uk-text-muted" href="https://svelte.dev" target="_blank">Svelte</a>
             · <a class="uk-text-muted" href="https://supabase.com" target="_blank">Supabase</a>
             · <a class="uk-text-muted" href="https://getuikit.com" target="_blank">UIkit</a>
+            · <a class="uk-text-muted" href="https://icons8.com" target="_blank">Icons8</a>
         </div>
         <div>
             <a class="uk-text-muted" href="https://asriyan.me" target="_blank">Ed Asriyan</a>

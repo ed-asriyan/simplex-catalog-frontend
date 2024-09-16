@@ -22,6 +22,7 @@
 		"sass": "^1.77.8",
 		"svelte": "^4.2.12",
 		"svelte-check": "^3.8.4",
+		"svelte-flags": "^1.0.3",
 		"tslib": "^2.6.2",
 		"typescript": "^5.2.2",
 		"uikit": "^3.19.1",

@@ -19,7 +19,7 @@
     };
 
     $: domain = server.parsedUri.domain || `...${server.uri.slice(server.uri.length - 12)}`;
-    $: maskedUri =  `${server.parsedUri.type}://${domain}`;;
+    $: maskedUri =  `${domain}`;;
 </script>
 
 <span class="pointer uk-text-break" uk-tooltip="Click to copy full URI" on:click={copyToClipboard(server.uri)}>

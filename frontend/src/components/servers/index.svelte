@@ -57,7 +57,9 @@
             <div class="uk-text-lead uk-width-1-3@s uk-width-expand@m">
                 Servers
                 &nbsp;
-                <span class="pointer" on:click={refresh} uk-tooltip="Refresh">🔄</span>
+                <span class="pointer" on:click={refresh} uk-tooltip="Refresh">
+                    <img width="24" height="24" src="https://img.icons8.com/ios-filled/50/update-left-rotation.png" alt="update-left-rotation"/>
+                </span>
             </div>
             <button class="uk-width-1-3@m uk-width-1-1@s uk-button uk-button-default uk-margin-left uk-margin-remove-right" on:click={addServerClick}>Add server</button>
         </div>

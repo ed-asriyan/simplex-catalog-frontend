@@ -7,6 +7,7 @@
     import { flagStore } from './flagged';
     import Flag from './flag.svelte';
     import LineServerInfo from './line-server-info.svelte';
+    import LineCountry from './line-country.svelte';
 
     export let params: FetchParams;
 
@@ -66,7 +67,8 @@
         <thead>
             <tr>
                 <th></th>
-                <th>URI</th>
+                <th>Server</th>
+                <th>Country</th>
                 <th>Info page</th>
                 <th>QR Code</th>
                 <th>Status</th>
@@ -83,6 +85,9 @@
                         </td>
                         <td>
                             <LineUri server={server} />
+                        </td>
+                        <td>
+                            <LineCountry country={server.country} />
                         </td>
                         <td>
                             <LineServerInfo server={server} icon={true} />
@@ -112,6 +117,8 @@
                     <div class="uk-width-expand">
                         <div class="uk-width-1-1">
                             <Flag value={$flagStore.has(server.uri)} on:click={() => flagStore.toggle(server.uri) } />
+                            &nbsp;
+                            <LineCountry country={server.country} />
                             &nbsp;
                             <LineUri server={server} />
                         </div>
