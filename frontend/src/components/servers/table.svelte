@@ -1,10 +1,11 @@
 <script lang="ts">
-    import { onMount, onDestroy } from 'svelte';
     import { fetchServers, type FetchParams, type Server } from '../../database';
     import QrCodeModal from './qr-code-modal.svelte';
     import LineUri from './line-uri.svelte';
     import LineStatus from './line-status.svelte';
     import LineDate from './line-date.svelte';
+    import { flagStore } from './flagged';
+    import Flag from './flag.svelte';
 
     export let params: FetchParams;
 
@@ -51,19 +52,11 @@
         }
         page = newPage;
     };
-
-    let i = 0;
-    const updateI = function () {
-        clearTimeout(i);
-        i = setTimeout(updateI, 60 * 1000);
-    }
-    onMount(updateI);
-    onDestroy(() => clearInterval(i));
 </script>
 
-<QrCodeModal bind:text={qrCodeText} />
+<QrCodeModal bind:uri={qrCodeText} />
 
-{#await i, fetch(localParams)}
+{#await fetch(localParams)}
     <div class="loader uk-flex uk-flex-center uk-flex-middle uk-flex-direction-column">
         <div uk-spinner="ratio: 3"></div>
     </div>
@@ -71,6 +64,7 @@
     <table class="table uk-table uk-table-divider uk-table-hover uk-visible@m">
         <thead>
             <tr>
+                <th></th>
                 <th>URI</th>
                 <th>QR Code</th>
                 <th>Status</th>
@@ -81,7 +75,10 @@
         <tbody>
             {#if servers.length > 0}
                 {#each servers as server (server.uuid)}
-                    <tr class="uk-text-small" class:uk-text-danger={!server.status}>
+                    <tr class="uk-text-small" class:flagged={$flagStore.has(server.uri)} class:uk-text-danger={!server.status}>
+                        <td>
+                            <Flag value={$flagStore.has(server.uri)} on:click={() => flagStore.toggle(server.uri) } />
+                        </td>
                         <td>
                             <LineUri uri={server.uri} />
                         </td>
@@ -99,20 +96,18 @@
                         </td>
                     </tr>
                 {/each}
-            {:else}
-                <tr>
-                    <td colspan="5" class="uk-text-center">No Data Available</td>
-                </tr>
             {/if}
         </tbody>
     </table>
 
     <ul class="uk-hidden@m uk-list uk-list-divider uk-list-striped">
         {#each servers as server (server.uuid)}
-            <li class="uk-padding-small">
+            <li class="uk-padding-small" class:flagged={$flagStore.has(server.uri)} >
                 <div uk-grid class="uk-margin-bottom-remove">
                     <div class="uk-width-expand">
                         <div class="uk-width-1-1">
+                            <Flag value={$flagStore.has(server.uri)} on:click={() => flagStore.toggle(server.uri) } />
+                            &nbsp;
                             <LineUri uri={server.uri} />
                         </div>
                         <div class="uk-width-1-1">
@@ -164,10 +159,18 @@
         {e}
     </pre>
 {/await}
-<!-- {/key} -->
 
 <style lang="scss">
     .loader {
         height: 70vh;
+    }
+
+    .flagged {
+        opacity: 0.7;
+        background-color: rgba(0, 0, 0, 0.05);
+    }
+
+    .flag:checked {
+        background-color: #222222 !important;
     }
 </style>

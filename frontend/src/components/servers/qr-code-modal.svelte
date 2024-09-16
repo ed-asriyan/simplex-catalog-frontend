@@ -1,24 +1,35 @@
 <script lang="ts">
     import QRCode from '@castlenine/svelte-qrcode';
+  	import LineUri from './line-uri.svelte';
+	import Flag from './flag.svelte';
+  	import { flagStore } from './flagged';
 
-	export let text: string;
+	export let uri: string;
 
 	let dialog;
 
-	$: if (dialog && text) dialog.showModal();
+	$: if (dialog && uri) dialog.showModal();
 </script>
 
 <dialog
 	bind:this={dialog}
-	on:close={() => (text = null)}
+	on:close={() => (uri = null)}
 	on:click|self={() => dialog.close()}
 >
-	<div on:click|stopPropagation>
-        {#if text}
-		    <QRCode data={text} />
+	<div class="uk-text-center" on:click|stopPropagation>
+        {#if uri}
+		    <QRCode data={uri} />
+			<div class="uk-margin-small-top">
+				<LineUri uri={uri} />
+			</div>
         {/if}
         <div>
             <button class="uk-margin-top uk-width-1-1 uk-button uk-button-desfault" autofocus on:click={() => dialog.close()}>Close</button>
+			<button class="uk-margin-top uk-width-1-1 uk-button uk-button-desfault" autofocus on:click={() => { dialog.close(); flagStore.set(uri, true) } }>
+				<Flag value={true} />
+				&nbsp;
+				Close and flag
+			</button>
         </div>
 	</div>
 </dialog>

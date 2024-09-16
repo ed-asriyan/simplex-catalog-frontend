@@ -1,6 +1,8 @@
 <script lang="ts">
-  import { camelToSnakeCase, delay } from '../../utils';
+    import { camelToSnakeCase, delay } from '../../utils';
     import type { FetchParams, Column } from '../../database';
+  import { get } from 'svelte/store';
+  import { flagStore } from './flagged';
 
     export let params: FetchParams;
 
@@ -8,37 +10,55 @@
         limit: 0,
         offset: 0,
         filters: function (q: any) {
-            if (this.typeFilter) {
-                q.like('uri', this.typeFilter === 'smp' ? 'smp://%' : 'xftp://%')
+            if (this[typeFilterSymbol]) {
+                q.like('uri', this[typeFilterSymbol] === 'smp' ? 'smp://%' : 'xftp://%')
             }
-            if (this.uriFilter) {
-                q.like('uri', this.uriFilter);
+            if (this[uriFilterSymbol]) {
+                q.like('uri', this[uriFilterSymbol]);
             }
-            if (this.statusFilter !== null) {
-                q.eq('status', this.statusFilter);
+            if (this[statusFilterSymbol] !== null) {
+                q.eq('status', this[statusFilterSymbol]);
+            }
+            if (this[flagedFilterSymbol] !== 'any') {
+                const filter = this[flagedFilterSymbol] === 'flagged' ? 'eq' : 'neq';
+                for (const uri of get(flagStore)) {
+                    q[filter]('uri', uri);
+                }
             }
             return q;
         },
         modifyers: function (q: any) {
-            if (this.sortColumn) {
-                q.order(camelToSnakeCase(this.sortColumn), { ascending: sortDirection === 'asc' });
+            if (this[sortColumnSymbol]) {
+                q.order(camelToSnakeCase(this[sortColumnSymbol]), { ascending: this[sortDirectionSymbol] === 'asc' });
             }
             return q;
         },
-        typeFilter,
-        uriFilter,
-        statusFilter,
-        sortColumn,
-        sortDirection,
+        [typeFilterSymbol]: typeFilter,
+        [uriFilterSymbol]: uriFilter,
+        [statusFilterSymbol]: statusFilter,
+        [flagedFilterSymbol]: flagedFilter,
+        [sortColumnSymbol]: sortColumn,
+        [sortDirectionSymbol]: sortDirection,
     };
 
+    const typeFilterSymbol = Symbol();
     let typeFilter: 'smp' | 'xftp' = 'smp';
 
+    const uriFilterSymbol = Symbol();
     let uriFilter: string = '';
+
+    const statusFilterSymbol = Symbol();
     let statusFilter: boolean | null = true;
 
+    const flagedFilterSymbol = Symbol();
+    let flagedFilter: 'any' | 'unflaged' | 'flagged';
+
+    const sortColumnSymbol = Symbol();
     let sortColumn: Column | null = 'lastCheck';
+
+    const sortDirectionSymbol = Symbol();
     let sortDirection: 'asc' | 'desc' = 'desc';
+
 
     let _uriFilter: string = '';
 </script>
@@ -65,6 +85,17 @@
                 <option value={true}>Active</option>
                 <option value={false}>Inactive</option>
                 <option value={null}>Any</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="uk-margin">
+        <label class="uk-form-label" for="form-flag">Flag</label>
+        <div class="uk-form-controls">
+            <select class="uk-select" id="form-flag" bind:value={flagedFilter}>
+                <option value={'any'}>All</option>
+                <option value={'flagged'}>Show flagged only</option>
+                <option value={'unflagged'}>Show unflagged only</option>
             </select>
         </div>
     </div>

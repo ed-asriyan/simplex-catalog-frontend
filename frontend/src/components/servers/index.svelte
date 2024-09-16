@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { onMount, onDestroy } from 'svelte';
     import { addServer, doesServerExist, type FetchParams, type Server } from '../../database';
     import Filters from './filters.svelte';
     import Table from './table.svelte';
@@ -23,6 +24,19 @@
             throw e;
         }
     };
+
+    let refreshTimeout: number = 0;
+    const updateI = function () {
+        clearTimeout(refreshTimeout);
+        refreshTimeout = setTimeout(updateI, 60 * 1000);
+    }
+    onMount(updateI);
+    onDestroy(() => clearInterval(refreshTimeout));
+
+    $: refreshedParams = {
+        ...params,
+        [Symbol()]: refreshTimeout
+    };
 </script>
 
 <div uk-grid>
@@ -35,6 +49,6 @@
             Servers
             <button class="uk-button uk-button-default uk-margin-auto-left" on:click={addServerClick}>Add server</button>
         </div>
-        <Table params={params} />
+        <Table params={refreshedParams} />
     </div>
 </div>
