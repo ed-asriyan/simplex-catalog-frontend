@@ -6,6 +6,7 @@ Backend service and performs scheduled validation of SimpleX Servers Registry.
 2. Create table `servers` in `public` schema with the following columns:
    * `uuid` uuid, primary, default: `gen_random_uuid()`
    * `uri` text, is uniqie, check constraint: `uri ~* '^(smp|xftp)://.+@.+$'::text`
+   * `country` text, is nullable
    * `created_at` timestamp, default: `now()`
    * `status` bool, is nullable
    * `status_since` timestamp, is nullable

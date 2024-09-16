@@ -16,6 +16,7 @@
         "@supabase/supabase-js": "^2.45.4",
         "@types/node": "^22.5.5",
         "bullmq": "^5.13.0",
+        "geoip-country": "^5.0.202409132342",
         "ioredis": "^5.4.1",
         "node-cron": "^3.0.3",
         "ts-node": "^10.9.2",

@@ -12,5 +12,7 @@ COPY index.ts .
 COPY settings.ts .
 COPY api.ts .
 COPY database.ts .
+COPY geoip.ts .
+COPY uri-parser.ts .
 
 CMD npm start

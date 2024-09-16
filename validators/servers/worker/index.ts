@@ -4,15 +4,39 @@ import { Queue } from 'bullmq';
 import cron from 'node-cron';
 import { redisUri, queueName, cronRule } from './settings';
 import { testServer } from './api';
-import { getAllRecords, subscribe, updateRecord } from './database';
+import { deleteRecord, getAllRecords, subscribe, updateRecord } from './database';
+import { isServerOfficial, parseUri } from './uri-parser';
+import { getCountry } from './geoip';
 
 const connection = new Redis(redisUri, { maxRetriesPerRequest: null });
 
+
 const handleServer = async function (uri: string, log: (s: string) => void) {
+    if (isServerOfficial(uri)) {
+        log('Server is official. Deleting...');
+        await deleteRecord(uri);
+        log('Done');
+        return;
+    }
+
     log(`Testing ${uri}...`);
     const status = await testServer(uri);
-    log(`Done: ${status}. Updating the record in database...`);
-    await updateRecord(uri, status);
+    log(`Done: ${status}`);
+
+    log('Detecting geolocation...');
+    let country: string | undefined;
+    if (!uri.endsWith('.onion')) {
+        const parsedUri = parseUri(uri);
+        if (parsedUri?.domain) {
+            country = await getCountry(parsedUri.domain);
+        }
+    } else {
+        country = 'TOR';
+    }
+    log(`Done: ${country}`);
+
+    log('Updating the record in database...');
+    await updateRecord({ uri, status, country });
     log('Done');
 };
 

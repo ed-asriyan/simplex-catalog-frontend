@@ -42,8 +42,14 @@ export const getAllRecords = async function (): Promise<Record[]> {
     }
 };
 
-export const updateRecord = async function (uri: string, status: boolean): Promise<void> {
-    const currentRecord = await getRecord(uri);
+export interface UpdateRecordParams {
+    uri: string;
+    status: boolean;
+    country?: string;
+}
+
+export const updateRecord = async function (params: UpdateRecordParams): Promise<void> {
+    const currentRecord = await getRecord(params.uri);
     if (!currentRecord) return;
 
     const lastStatus = currentRecord.status;
@@ -53,13 +59,26 @@ export const updateRecord = async function (uri: string, status: boolean): Promi
         'last_check': now,
     };
 
-    if (lastStatus !== status) {
+    if (lastStatus !== params.status) {
         data['status'] = status;
         data['status_since'] = now;
     }
+
+    if (typeof params.country === 'string') {
+        data['country'] = params.country;
+    }
+
     const { error } = await supabase
         .from(supabaseTableName)
         .update(data)
+        .eq('uri', params.uri);
+    if (error) throw error;
+};
+
+export const deleteRecord = async function (uri: string): Promise<void> {
+    const { error } = await supabase
+        .from(supabaseTableName)
+        .delete()
         .eq('uri', uri)
     if (error) throw error;
 };
