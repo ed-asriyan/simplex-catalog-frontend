@@ -5,7 +5,7 @@
 
 <GithubCorner />
 
-<div class="uk-container uk-padding-remove-right">
+<div class="uk-container">
     <div class="uk-section uk-section-default uk-text-center uk-padding-remove-bottom">
         <h1 class="uk-heading-small">Unofficial <a href="https://simplex.chat" target="_blank">SimpleX</a> Servers Registry</h1>
     </div>

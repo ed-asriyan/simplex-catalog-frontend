@@ -1,9 +1,9 @@
 <script lang="ts">
-    import { camelToSnakeCase, delay } from '../../utils';
-    import type { FetchParams, Column } from '../../database';
+    import { camelToSnakeCase, countryCodeToName, delay, getFlagEmoji } from '../../utils';
+    import { type FetchParams, fetchCountries } from '../../database';
     import { get } from 'svelte/store';
     import { flagStore } from './flagged';
-  import { QueryStore } from '../../query-store';
+    import { QueryStore, QueryStoreList } from '../../query-store';
 
     export let params: FetchParams;
 
@@ -17,8 +17,15 @@
             if (this[uriFilterSymbol]) {
                 q.like('uri', this[uriFilterSymbol]);
             }
+            const filteredCountriesFilter = this[countriesFilterSymbol].filter(x => x);
+            if (filteredCountriesFilter.length) {
+                q.in('country', filteredCountriesFilter);
+            }
             if (this[statusFilterSymbol] !== 'any') {
                 q.eq('status', this[statusFilterSymbol] === '1');
+            }
+            if (this[infoPageFilterSymbol] !== 'any') {
+                q.eq('info_page_available', this[infoPageFilterSymbol] === '1');
             }
             if (this[flagedFilterSymbol] !== 'any') {
                 const filter = this[flagedFilterSymbol] === 'flagged' ? 'eq' : 'neq';
@@ -36,7 +43,9 @@
         },
         [typeFilterSymbol]: $typeFilter,
         [uriFilterSymbol]: $uriFilter,
+        [countriesFilterSymbol]: $countriesFilter,
         [statusFilterSymbol]: $statusFilter,
+        [infoPageFilterSymbol]: $infoPageFilter,
         [flagedFilterSymbol]: $flagedFilter,
         [sortColumnSymbol]: $sortColumn,
         [sortDirectionSymbol]: $sortDirection,
@@ -48,8 +57,14 @@
     const uriFilterSymbol = Symbol();
     const uriFilter = new QueryStore('filter-uri', '');
 
+    const countriesFilterSymbol = Symbol();
+    const countriesFilter = new QueryStoreList('filter-country', []);
+
     const statusFilterSymbol = Symbol();
     const statusFilter = new QueryStore('filter-status', '1');
+
+    const infoPageFilterSymbol = Symbol();
+    const infoPageFilter = new QueryStore('filter-info-page', 'any');
 
     const flagedFilterSymbol = Symbol();
     const flagedFilter = new QueryStore('filter-flagged', 'any');
@@ -80,11 +95,43 @@
     </div>
 
     <div class="uk-margin">
+        <label class="uk-form-label" for="form-country">
+            Countries:
+            <a class="uk-link uk-float-right" on:click={() => $countriesFilter = []}>Clear</a>
+        </label>
+        {#await fetchCountries() }
+            <div uk-spinner></div>
+        {:then countries}
+            <select multiple class="uk-select" id="form-country" bind:value={$countriesFilter}>
+                {#if countries.has('TOR')}
+                    <option value="TOR">{ getFlagEmoji('TOR') } TOR</option>
+                {/if}
+                {#each countries as country (country)}
+                    {#if country !== 'TOR'}
+                        <option value={country}>{ getFlagEmoji(country) } { countryCodeToName(country) }</option>
+                    {/if}
+                {/each}
+            </select>
+        {/await}
+    </div>
+
+    <div class="uk-margin">
         <label class="uk-form-label" for="form-status">Status</label>
         <div class="uk-form-controls">
             <select class="uk-select" id="form-status" bind:value={$statusFilter}>
                 <option value="1">Active</option>
                 <option value="0">Inactive</option>
+                <option value="any">Any</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="uk-margin">
+        <label class="uk-form-label" for="form-info-page">Info page</label>
+        <div class="uk-form-controls">
+            <select class="uk-select" id="form-info-page" bind:value={$infoPageFilter}>
+                <option value="1">Show servers only with info page</option>
+                <option value="0">Show servers only without info page</option>
                 <option value="any">Any</option>
             </select>
         </div>

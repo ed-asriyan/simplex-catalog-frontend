@@ -20,13 +20,28 @@ export const delay = function (callback, ms) {
 };
 
 export const convertUTCDateToLocalDate = function (date: Date): Date {
-  const newDate = new Date(date.getTime() - date.getTimezoneOffset() * 60 * 1000);
-
-  const offset = date.getTimezoneOffset() / 60;
-  const hours = date.getHours();
-
-  newDate.setHours(hours - offset);
-
-  return newDate;   
+    return new Date(date.getTime() - date.getTimezoneOffset() * 60 * 1000);  
 };
 
+export const countryCodeToName = function (code: string): string {
+    if (code) {
+        try {
+            code = new Intl.DisplayNames(['en'], {
+              type: 'region',
+            }).of(code) || code;
+        } catch {
+        }
+    }
+    return code;
+};
+
+export const getFlagEmoji = function (countryCode: string): string {
+    if (countryCode === 'TOR') {
+        return '🧅';
+    }
+    const codePoints = countryCode
+      .toUpperCase()
+      .split('')
+      .map(char => 127397 + char.charCodeAt());
+    return String.fromCodePoint(...codePoints) || '1';
+};

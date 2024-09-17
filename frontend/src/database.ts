@@ -99,6 +99,13 @@ export const fetchServers = async function (params: FetchParams): Promise<{ serv
     };
 };
 
+export const fetchCountries = async function (): Promise<Set<string[]>> {
+    const { data, error } = await supabase.from(supabaseTableName).select('country');
+    if (error) throw error;
+
+    return new Set(data.map(({ country }) => country));
+};
+
 export const doesServerExist = async function (uri: string): Promise<boolean> {
     const { data, error } = await supabase.from(supabaseTableName)
         .select('*')

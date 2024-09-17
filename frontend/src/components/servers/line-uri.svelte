@@ -22,10 +22,12 @@
     $: maskedUri =  `${domain}`;;
 </script>
 
-<span class="pointer uk-text-break" uk-tooltip="Click to copy full URI" on:click={copyToClipboard(server.uri)}>
+<span class="pointer uk-text-nowrap" uk-tooltip="Click to copy full URI" on:click={copyToClipboard(server.uri)}>
     {#if copyTumbler === server.uri}
         Copied to clipboard
     {:else}
         <a>{maskedUri}</a>
+        &#8239;
+        <img width="12" height="12" src="https://img.icons8.com/a7a7a7/material-sharp/24/copy.png" alt="copy--v1"/>
     {/if}
 </span>
