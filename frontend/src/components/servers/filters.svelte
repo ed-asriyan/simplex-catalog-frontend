@@ -1,8 +1,9 @@
 <script lang="ts">
     import { camelToSnakeCase, delay } from '../../utils';
     import type { FetchParams, Column } from '../../database';
-  import { get } from 'svelte/store';
-  import { flagStore } from './flagged';
+    import { get } from 'svelte/store';
+    import { flagStore } from './flagged';
+  import { QueryStore } from '../../query-store';
 
     export let params: FetchParams;
 
@@ -16,8 +17,8 @@
             if (this[uriFilterSymbol]) {
                 q.like('uri', this[uriFilterSymbol]);
             }
-            if (this[statusFilterSymbol] !== null) {
-                q.eq('status', this[statusFilterSymbol]);
+            if (this[statusFilterSymbol] !== 'any') {
+                q.eq('status', this[statusFilterSymbol] === '1');
             }
             if (this[flagedFilterSymbol] !== 'any') {
                 const filter = this[flagedFilterSymbol] === 'flagged' ? 'eq' : 'neq';
@@ -33,40 +34,40 @@
             }
             return q;
         },
-        [typeFilterSymbol]: typeFilter,
-        [uriFilterSymbol]: uriFilter,
-        [statusFilterSymbol]: statusFilter,
-        [flagedFilterSymbol]: flagedFilter,
-        [sortColumnSymbol]: sortColumn,
-        [sortDirectionSymbol]: sortDirection,
+        [typeFilterSymbol]: $typeFilter,
+        [uriFilterSymbol]: $uriFilter,
+        [statusFilterSymbol]: $statusFilter,
+        [flagedFilterSymbol]: $flagedFilter,
+        [sortColumnSymbol]: $sortColumn,
+        [sortDirectionSymbol]: $sortDirection,
     };
 
     const typeFilterSymbol = Symbol();
-    let typeFilter: 'smp' | 'xftp' = 'smp';
+    const typeFilter = new QueryStore('filter-type', 'smp');
 
     const uriFilterSymbol = Symbol();
-    let uriFilter: string = '';
+    const uriFilter = new QueryStore('filter-uri', '');
 
     const statusFilterSymbol = Symbol();
-    let statusFilter: boolean | null = true;
+    const statusFilter = new QueryStore('filter-status', '1');
 
     const flagedFilterSymbol = Symbol();
-    let flagedFilter: 'any' | 'unflaged' | 'flagged';
+    const flagedFilter = new QueryStore('filter-flagged', 'any');
 
     const sortColumnSymbol = Symbol();
-    let sortColumn: Column | null = 'lastCheck';
+    const sortColumn = new QueryStore('filter-sort-column', 'lastCheck');
 
     const sortDirectionSymbol = Symbol();
-    let sortDirection: 'asc' | 'desc' = 'desc';
+    const sortDirection = new QueryStore('filter-sort-direction', 'desc');
 
 
-    let _uriFilter: string = '';
+    $: _uriFilter = $uriFilter;
 </script>
 
 <form class="uk-form-stacked">
     <div class="uk-margin">
-        <button class="uk-button uk-button-default" class:uk-button-secondary={typeFilter === 'smp'} on:click|preventDefault={() => typeFilter = 'smp'}>SMP</button>
-        <button class="uk-button uk-button-default" class:uk-button-secondary={typeFilter === 'xftp'}  on:click|preventDefault={() => typeFilter = 'xftp'}>XFTP</button>
+        <button class="uk-button uk-button-default" class:uk-button-secondary={$typeFilter === 'smp'} on:click|preventDefault={() => $typeFilter = 'smp'}>SMP</button>
+        <button class="uk-button uk-button-default" class:uk-button-secondary={$typeFilter === 'xftp'}  on:click|preventDefault={() => $typeFilter = 'xftp'}>XFTP</button>
     </div>
 
     <div class="uk-margin">
@@ -74,17 +75,17 @@
             URI (like <a href="https://www.postgresqltutorial.com/postgresql-tutorial/postgresql-like" target="_blank">%Postgres% syntax</a>):
         </label>
         <div class="uk-form-controls">
-            <input class="uk-input" id="form-uri" type="text" on:keyup={delay(() => uriFilter = _uriFilter, 1500)} bind:value={_uriFilter}>
+            <input class="uk-input" id="form-uri" type="text" on:keyup={delay(() => $uriFilter = _uriFilter, 1500)} bind:value={_uriFilter}>
         </div>
     </div>
 
     <div class="uk-margin">
         <label class="uk-form-label" for="form-status">Status</label>
         <div class="uk-form-controls">
-            <select class="uk-select" id="form-status" bind:value={statusFilter}>
-                <option value={true}>Active</option>
-                <option value={false}>Inactive</option>
-                <option value={null}>Any</option>
+            <select class="uk-select" id="form-status" bind:value={$statusFilter}>
+                <option value="1">Active</option>
+                <option value="0">Inactive</option>
+                <option value="any">Any</option>
             </select>
         </div>
     </div>
@@ -92,10 +93,10 @@
     <div class="uk-margin">
         <label class="uk-form-label" for="form-flag">Flag</label>
         <div class="uk-form-controls">
-            <select class="uk-select" id="form-flag" bind:value={flagedFilter}>
-                <option value={'any'}>All</option>
-                <option value={'flagged'}>Show flagged only</option>
-                <option value={'unflagged'}>Show unflagged only</option>
+            <select class="uk-select" id="form-flag" bind:value={$flagedFilter}>
+                <option value="any">All</option>
+                <option value="flagged">Show flagged only</option>
+                <option value="unflagged">Show unflagged only</option>
             </select>
         </div>
     </div>
@@ -104,7 +105,7 @@
         <div>
             <label class="uk-form-label" for="form-sort-column">Sort by</label>
             <div class="uk-form-controls">
-                <select class="uk-select" id="form-sort-column" bind:value={sortColumn}>
+                <select class="uk-select" id="form-sort-column" bind:value={$sortColumn}>
                     <option value="uri">URI</option>
                     <option value="status">Status</option>
                     <option value="lastCheck">Last check</option>
@@ -115,7 +116,7 @@
         <div class="uk-margin-top">
             <label class="uk-form-label" for="form-sort-direction">Direction</label>
             <div class="uk-form-controls">
-                <select class="uk-select" id="form-sort-direction" bind:value={sortDirection}>
+                <select class="uk-select" id="form-sort-direction" bind:value={$sortDirection}>
                     <option value="asc">Ascending</option>
                     <option value="desc">Descending</option>
                 </select>
