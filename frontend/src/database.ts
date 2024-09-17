@@ -38,6 +38,7 @@ const parseUri = function (uri: string): ServerUri {
 export interface Server {
     uuid: string;
     uri: string;
+    infoPageAvailable: boolean;
     status: boolean;
     statusSince: string;
     lastCheck: string;

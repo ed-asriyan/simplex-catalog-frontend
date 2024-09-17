@@ -5,8 +5,8 @@
     export let icon: boolean;
 </script>
 
-{#if server.parsedUri.domain}
-    <a href="https://{server.parsedUri.domain}" target="_blank" uk-tooltip="May be unavailable">
+{#if server.parsedUri.domain && server.infoPageAvailable}
+    <a href="https://{server.parsedUri.domain}" target="_blank">
         {#if icon}
             🔗
         {:else}

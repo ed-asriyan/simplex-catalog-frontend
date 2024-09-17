@@ -26,7 +26,7 @@
                 return;
             }
             await addServer(input.trim());
-            alert('The server is added to the database. If server is available, it will apper in the table in a few minutes');
+            alert('The server is added to the database. If the server is available, it will apper in the table soon');
         } catch (e) {
             if (e.code === '42501') {
                 alert('Invalid URI. Please verufy that you entered it correctly.')
