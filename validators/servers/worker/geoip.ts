@@ -23,5 +23,5 @@ export const getCountry = async function (domainOrIp: string): Promise<string> {
     if (!isIPAddress(domainOrIp)) {
         domainOrIp = await resolve(domainOrIp)
     }
-    return await geoip.lookup(domainOrIp)?.country;
+    return await geoip.lookup(domainOrIp)?.country || null;
 };

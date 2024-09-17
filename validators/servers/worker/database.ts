@@ -46,6 +46,7 @@ export interface UpdateRecordParams {
     uri: string;
     status: boolean;
     country?: string;
+    infoPageAvailable: boolean;
 }
 
 export const updateRecord = async function (params: UpdateRecordParams): Promise<void> {
@@ -57,10 +58,11 @@ export const updateRecord = async function (params: UpdateRecordParams): Promise
     const now = new Date();
     const data = {
         'last_check': now,
+        'info_page_available': params.infoPageAvailable,
     };
 
     if (lastStatus !== params.status) {
-        data['status'] = status;
+        data['status'] = params.status;
         data['status_since'] = now;
     }
 

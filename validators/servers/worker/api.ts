@@ -1,4 +1,5 @@
 import WebSocket from 'ws';
+import fetch from 'node-fetch';
 import { simplexWsUri } from './settings';
 
 export const testServer = async function(uri: string): Promise<boolean> {
@@ -36,3 +37,16 @@ export const testServer = async function(uri: string): Promise<boolean> {
         });
     });
 }
+
+export const isInfoPageAvailable = async function (domain: string): Promise<boolean> {
+    try {
+        const response = await fetch(`https://${domain}`, { method: 'GET' });
+        if (!response.ok) {
+            return false;
+        }
+        const text = await response.text();
+        return text.toLowerCase().includes('simplex');
+      } catch (error) {
+        return false;
+      }
+};

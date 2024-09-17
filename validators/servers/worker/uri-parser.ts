@@ -9,7 +9,7 @@ const extractDomain = function (inputString: string): string | null {
     return matches ? matches[0] : null;
 }
 
-const parseUri = function (uri: string): ServerUri {
+export const parseUri = function (uri: string): ServerUri {
     const type = uri.split(':')[0] as 'smp' | 'xftp';
     if (uri.endsWith('.onion')) {
         if (uri.includes(',')){
