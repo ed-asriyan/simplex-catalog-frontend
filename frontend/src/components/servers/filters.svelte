@@ -107,7 +107,7 @@
                     <option value="TOR">{ getFlagEmoji('TOR') } TOR</option>
                 {/if}
                 {#each countries as country (country)}
-                    {#if country !== 'TOR'}
+                    {#if country && country !== 'TOR'}
                         <option value={country}>{ getFlagEmoji(country) } { countryCodeToName(country) }</option>
                     {/if}
                 {/each}

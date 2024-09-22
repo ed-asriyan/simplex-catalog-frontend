@@ -1,6 +1,36 @@
 <script lang="ts">
     import GithubCorner from './github-corner.svelte';
     import ServersTable from './servers/index.svelte';
+    import { addServer, doesServerExist, } from '../database';
+
+    const isServerOfficial = function (uri: string): boolean {
+        return uri.includes('simplex.im');
+    };
+
+    const addServerClick = async function () {
+        let input = prompt('Enter SMP or XFTP server URI:');
+        input = input?.trim();
+        if (!input) return;
+
+        if (isServerOfficial(input)) {
+            alert('You entered official SimpleX server. Please add only unofficial SimpleX servers');
+            return;
+        }
+
+        try {
+            if (await doesServerExist(input)) {
+                alert('Server already added to the registry');
+                return;
+            }
+            await addServer(input.trim());
+            alert('The server is added to the database. If the server is available, it will apper in the table for everyone soon');
+        } catch (e) {
+            if (e.message.includes('violates check constraint')) {
+                alert('Invalid URI. Please verufy that you entered it correctly.')
+            }
+            throw e;
+        }
+    };
 </script>
 
 <GithubCorner />
@@ -11,11 +41,17 @@
     </div>
     <div class="uk-section uk-section-xsmall uk-text-center uk-margin-bottom">
         <div>
-            Here, you can discover and share community-run <a href="https://simplex.chat/docs/server.html#overview" target="_blank">SMP</a> and <a href="https://simplex.chat/docs/xftp-server.html#overview" target="_blank">XFTP</a> servers contributed by users like you. The website allows for easy browsing and filtering of SMP & XFTP servers, but please note that all entries are submitted anonymously. Availability of the listed servers are periodically verifyed by the automation.
+            Discover and share community-run <a href="https://simplex.chat/docs/server.html#overview" target="_blank">SMP</a> and <a href="https://simplex.chat/docs/xftp-server.html#overview" target="_blank">XFTP</a> servers.
+            <br/>
+            Here anyone can anonymously add servers to the public list. The availability of each server is periodically checked.
         </div>
         <div class="uk-margin-top uk-margin-bottom">
-            It's important to remember that this site operates independently and is not affiliated with the SimpleX team. The content provided is solely the responsibility of the contributors.
+            The website is not affiliated with the SimpleX team. Content is contributed by anonymous users.
         </div>
+        <button class="uk-button uk-button-default uk-margin-left uk-margin-remove-right" on:click={addServerClick}>Add server anonymously</button>
+    </div>
+    <div class="uk-text-center">
+
     </div>
     <ServersTable />
     <div class="uk-section uk-section-default footer uk-text-small uk-text-muted uk-text-center">

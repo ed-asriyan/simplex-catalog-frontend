@@ -36,6 +36,9 @@ export const countryCodeToName = function (code: string): string {
 };
 
 export const getFlagEmoji = function (countryCode: string): string {
+    if (!countryCode) {
+        return null;
+    }
     if (countryCode === 'TOR') {
         return '🧅';
     }
