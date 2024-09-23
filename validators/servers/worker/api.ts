@@ -19,13 +19,8 @@ export const testServer = async function(uri: string): Promise<boolean> {
             try {
                 const response = JSON.parse(data);
                 if (response.corrId === corrId) {
-                    // Check if response contains "testFailure"
-                    if (response.resp.testFailure) {
-                        resolve(false); // Server is bad
-                    } else {
-                        resolve(true); // Server is OK
-                    }
                     ws.close();
+                    resolve(response.resp.type === "serverTestResult" && !response.resp.testFailure);
                 }
             } catch (error) {
                 reject(`Error parsing message: ${error}`);
