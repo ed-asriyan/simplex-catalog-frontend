@@ -3,7 +3,7 @@ export interface ServerUri {
     domain: string;
 };
 
-const domainPattern = /(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}/g;
+const domainPattern = /(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z0-9\.]{2,}/g;
 const extractDomain = function (inputString: string): string | null {
     const matches = inputString.match(domainPattern);
     return matches ? matches[0] : null;
