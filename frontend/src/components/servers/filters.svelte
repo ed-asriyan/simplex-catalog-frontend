@@ -28,10 +28,16 @@
                 q.eq('info_page_available', this[infoPageFilterSymbol] === '1');
             }
             if (this[flagedFilterSymbol] !== 'any') {
-                const filter = this[flagedFilterSymbol] === 'flagged' ? 'eq' : 'neq';
-                for (const uri of get(flagStore)) {
-                    q[filter]('uri', uri);
+                const filter = this[flagedFilterSymbol] === 'flagged' ? 'in' : 'nin';
+                const flaggedServers = get(flagStore)
+                if (this[flagedFilterSymbol] === 'flagged') {
+                    q.in('uuid',flaggedServers);
+                } else {
+                    for (const uuid of flaggedServers) {
+                        q.neq('uuid', uuid);
+                    }
                 }
+                
             }
             return q;
         },

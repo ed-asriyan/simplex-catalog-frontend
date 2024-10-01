@@ -4,32 +4,73 @@
 	import Flag from './flag.svelte';
   	import { flagStore } from './flagged';
   	import type { Server } from '../../database';
+	import LineCountry from './line-country.svelte';
+	import LineStatus from './line-status.svelte';
 
-	export let server: Server;
+	export let servers: Server[];
+	let i: number = 0;
+
+	$: server = servers && servers[i];
+	$: if (servers) i = 0;
 
 	let dialog;
 
-	$: if (dialog && server) dialog.showModal();
+	$: if (dialog && servers?.length) dialog.showModal();
+
+	$: isTheFirst = i === 0;
+	$: isTheLast = i + 1 === servers?.length;
+	$: nextText = isTheLast ? 'Close' : 'Next →';
+
+	const handleNext = function () {
+		if (isTheLast) {
+			dialog.close();
+		} else {
+			++i;
+		}
+	};
+
+	const handleBack = function () {
+		if (!isTheFirst) {
+			--i;
+		}
+	};
 </script>
 
 <dialog
 	bind:this={dialog}
-	on:close={() => (server = null)}
+	on:close={() => (servers = [])}
 	on:click|self={() => dialog.close()}
 >
 	<div class="uk-text-center" on:click|stopPropagation>
         {#if server}
-		    <QRCode data={server.uri} />
+			{#if servers.length > 1}
+				<div>{ i + 1 } / { servers?.length }</div>
+			{/if}
+			{#key server.uri}
+		    	<QRCode data={server.uri} />
+			{/key}
+			<div>
+				<span class="uk-margin-small-right">
+					<LineCountry country={server.country} />
+				</span>
+				<LineStatus status={server.status} />
+			</div>
+
 			<div class="uk-margin-small-top">
 				<LineUri server={server} />
 			</div>
         {/if}
         <div>
-            <button class="uk-margin-top uk-width-1-1 uk-button uk-button-desfault" autofocus on:click={() => dialog.close()}>Close</button>
-			<button class="uk-margin-top uk-width-1-1 uk-button uk-button-desfault" autofocus on:click={() => { dialog.close(); flagStore.set(server.uri, true) } }>
+			<div class="uk-flex uk-margin-top">
+				{#if !isTheFirst}
+					<button class="uk-flex-1 uk-button uk-button-default uk-margin-right" autofocus on:click={handleBack}>← Back</button>
+				{/if}
+				<button class="uk-flex-1 uk-button uk-button-defadult" autofocus on:click={handleNext}>{ nextText }</button>
+			</div>
+			<button class="uk-margin-top uk-width-1-1 uk-button uk-button" autofocus on:click={() => { flagStore.set(server.uuid, true); handleNext() } }>
 				<Flag value={true} />
 				&nbsp;
-				Close and flag
+				Flag and { nextText }
 			</button>
         </div>
 	</div>

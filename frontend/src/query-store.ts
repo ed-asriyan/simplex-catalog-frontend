@@ -60,7 +60,7 @@ export class QueryStoreList implements Writable<string[]> {
     }
 
     private static deserialize(value: string): string[] {
-        return value.split(',');
+        return value.split(',').filter((x: string) => x !== '');
     }
 
     constructor (key: string, defaultValue: string[]) {

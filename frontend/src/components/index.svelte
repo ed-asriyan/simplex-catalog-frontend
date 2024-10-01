@@ -26,7 +26,7 @@
             alert('The server is added to the database. If the server is available, it will apper in the table for everyone soon');
         } catch (e) {
             if (e.message.includes('violates check constraint')) {
-                alert('Invalid URI. Please verufy that you entered it correctly.')
+                alert('Invalid URI. Please verify that you entered it correctly.')
             }
             throw e;
         }
@@ -49,9 +49,6 @@
             The website is not affiliated with the SimpleX team. Content is contributed by anonymous users.
         </div>
         <button class="uk-button uk-button-default uk-margin-left uk-margin-remove-right" on:click={addServerClick}>Add server anonymously</button>
-    </div>
-    <div class="uk-text-center">
-
     </div>
     <ServersTable />
     <div class="uk-section uk-section-default footer uk-text-small uk-text-muted uk-text-center">

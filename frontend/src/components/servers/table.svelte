@@ -8,6 +8,7 @@
     import Flag from './flag.svelte';
     import LineServerInfo from './line-server-info.svelte';
     import LineCountry from './line-country.svelte';
+    import { QueryStoreList } from '../../query-store';
 
     export let params: FetchParams;
 
@@ -46,7 +47,7 @@
         }
     };
 
-    let qrCodeServer: Server = null;
+    let qrCodeServers: Server[] = [];
 
     const changePage = async function (pageCount: number, newPage: number) {
         if (newPage < 1 || newPage > pageCount) {
@@ -54,46 +55,91 @@
         }
         page = newPage;
     };
+
+    const selectedServers = new QueryStoreList('selected-servers', []);
+
+    const toggleSelectedServer = function (server: Server) {
+        if ($selectedServers.includes(server.uuid)) {
+            $selectedServers = $selectedServers.filter((uuid: string) => server.uuid !== uuid);
+        } else {
+            $selectedServers = [...$selectedServers, server.uuid];
+        }
+    };
+
+    const toggleAllSelectedServers = function (servers: Server[]) {
+        if ($selectedServers.length) {
+            $selectedServers = [];
+        } else {
+            $selectedServers = servers.map(({ uuid }) => uuid);
+        }
+    };
+
+    const getSelectedServers = function (servers: Server[]) {
+        return servers.filter(({ uuid }) => $selectedServers.includes(uuid));
+    };
 </script>
 
-<QrCodeModal bind:server={qrCodeServer} />
+<QrCodeModal bind:servers={qrCodeServers} />
+
+<select bind:value={pageSize} class="uk-select uk-width-small@m uk-margin-small-bottom uk-width-1-1@s">
+    {#each [5, 10, 20, 50] as size}
+        <option value={size}>Page size: { size }</option>
+    {/each}
+</select>
 
 {#await fetch(localParams)}
     <div class="loader uk-flex uk-flex-center uk-flex-middle uk-flex-direction-column">
         <div uk-spinner="ratio: 3"></div>
     </div>
 {:then { servers, count, pageCount }}
-    <table class="table uk-table uk-table-divider uk-table-hover uk-visible@m">
+    <button class="uk-button uk-button-secondary uk-float-right uk-width-auto@m uk-width-1-1@s" 
+            on:click={() => qrCodeServers = getSelectedServers(servers)}
+            disabled={$selectedServers.length < 2}
+            uk-tooltip={$selectedServers.length < 2 ? "Select 2 or more servers" : ""}
+        >
+        Bulk mode ({ $selectedServers.length })
+    </button>
+    <table class="table uk-table uk-table-divider uk-table-hover uk-visible@m uk-margin-remove-top">
         <thead>
             <tr>
-                <th></th>
+                <th>
+                    <input class="pointer"
+                           type="checkbox"
+                           uk-tooltip={$selectedServers.length ? "Unselect all" : "Select all"}
+                           checked={$selectedServers.length}
+                           on:click={() => toggleAllSelectedServers(servers)}
+                    />
+                </th>
+                <th>Flag</th>
                 <th>Server</th>
                 <th>Country</th>
-                <th>Info page</th>
                 <th>QR Code</th>
                 <th>Status</th>
                 <th>Status Since</th>
                 <th>Last Check</th>
             </tr>
         </thead>
-        <tbody>
+        <tbody class="uk-list-striped">
             {#if servers.length > 0}
                 {#each servers as server (server.uuid)}
-                    <tr class="uk-text-small" class:flagged={$flagStore.has(server.uri)} class:uk-text-danger={!server.status}>
+                    <tr class="uk-text-small" class:flagged={$flagStore.has(server.uuid)} class:uk-text-danger={!server.status}>
                         <td>
-                            <Flag value={$flagStore.has(server.uri)} on:click={() => flagStore.toggle(server.uri) } />
+                            <input type="checkbox" checked={$selectedServers.includes(server.uuid)} on:click={() => toggleSelectedServer(server)} />
+                        </td>
+                        <td>
+                            <Flag value={$flagStore.has(server.uuid)} on:click={() => flagStore.toggle(server.uuid) } />
                         </td>
                         <td>
                             <LineUri server={server} />
                         </td>
                         <td>
                             <LineCountry country={server.country} />
+                            <span class="uk-margin-left">
+                                <LineServerInfo server={server} icon={true} />
+                            </span>
                         </td>
                         <td>
-                            <LineServerInfo server={server} icon={true} />
-                        </td>
-                        <td>
-                            <button class="uk-button uk-button-secondary uk-button-small" on:click={() => qrCodeServer = server}>QR</button>
+                            <button class="uk-button uk-button-secondary uk-button-small" on:click={() => qrCodeServers = [server]}>QR</button>
                         </td>
                         <td>
                             <LineStatus status={server.status} />
@@ -110,13 +156,22 @@
         </tbody>
     </table>
 
+    <div class="pointer uk-hidden@m uk-margin-xlarge-top uk-margin-small-left" on:click={() => toggleAllSelectedServers(servers)}>
+        <input class="pointer"
+               type="checkbox"
+               checked={$selectedServers.length}
+        />
+        {$selectedServers.length ? "Unselect all" : "Select all"}
+    </div>
     <ul class="uk-hidden@m uk-list uk-list-divider uk-list-striped">
         {#each servers as server (server.uuid)}
-            <li class="uk-padding-small" class:flagged={$flagStore.has(server.uri)} >
+            <li class="uk-padding-small" class:flagged={$flagStore.has(server.uuid)} >
                 <div uk-grid class="uk-margin-bottom-remove">
                     <div class="uk-width-expand">
                         <div class="uk-width-1-1">
-                            <Flag value={$flagStore.has(server.uri)} on:click={() => flagStore.toggle(server.uri) } />
+                            <input type="checkbox" checked={$selectedServers.includes(server.uuid)} on:click={() => toggleSelectedServer(server)} />
+                            &nbsp;
+                            <Flag value={$flagStore.has(server.uuid)} on:click={() => flagStore.toggle(server.uuid) } />
                             &nbsp;
                             <LineCountry country={server.country} />
                             &nbsp;
@@ -137,7 +192,7 @@
                             Status: 
                             <LineStatus status={server.status} />
                         </div>
-                        <button class="uk-block uk-margin-top uk-width-1-1 uk-button uk-button-secondary uk-button-small" on:click={() => qrCodeServer = server}>QR Code</button>
+                        <button class="uk-block uk-margin-top uk-width-1-1 uk-button uk-button-secondary uk-button-small" on:click={() => qrCodeServers = [server]}>QR Code</button>
                     </div>
                 </div>
             </li>
@@ -181,8 +236,8 @@
     }
 
     .flagged {
-        opacity: 0.7;
-        background-color: rgba(0, 0, 0, 0.05);
+        opacity: 0.6;
+        text-decoration: line-through;
     }
 
     .flag:checked {

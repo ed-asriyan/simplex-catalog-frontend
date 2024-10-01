@@ -24,7 +24,7 @@
         <Filters bind:params={params} />
     </div>
     <div class="uk-width-expand@m uk-width-1-1@s">
-        <div class="uk-width-1-1" uk-grid>
+        <div class="uk-width-1-1 uk-margin-bottom" uk-grid>
             <h2 class="uk-text-lead uk-width-1-3@s uk-width-expand@m">
                 Servers
                 &nbsp;

@@ -1,6 +1,6 @@
 import { writable, type Readable, type Writable } from 'svelte/store';
 
-const LOCAL_STORAGE_KEY = 'flagged_servers';
+const LOCAL_STORAGE_KEY = 'flagged_servers_uuid';
 const LOCAL_STORAGE_SEPARATOR = ' ';
 
 const saveToLocalStorage = function (uris: Set<string>) {
