@@ -7,6 +7,7 @@
     import { flagStore } from './flagged';
     import Flag from './flag.svelte';
     import LineServerInfo from './line-server-info.svelte';
+    import LineUptime from './line-uptime.svelte';
     import LineCountry from './line-country.svelte';
     import { QueryStoreList } from '../../query-store';
 
@@ -115,7 +116,7 @@
                 <th>Country</th>
                 <th>QR Code</th>
                 <th>Status</th>
-                <th>Status Since</th>
+                <th>Uptime</th>
                 <th>Last Check</th>
             </tr>
         </thead>
@@ -145,7 +146,7 @@
                             <LineStatus status={server.status} />
                         </td>
                         <td>
-                            <LineDate date={server.statusSince} />
+                            <LineUptime server={server} />
                         </td>
                         <td>
                             <LineDate date={server.lastCheck} />
@@ -178,7 +179,7 @@
                             <LineUri server={server} />
                         </div>
                         <div class="uk-width-1-1">
-                            Status since: <LineDate date={server.statusSince} />
+                            Uptime: <LineUptime server={server} />
                         </div>
                         <div class="uk-width-1-1 uk-margin-remove-top">
                             Last check: <LineDate date={server.lastCheck} />

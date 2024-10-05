@@ -40,7 +40,9 @@ export interface Server {
     uri: string;
     infoPageAvailable: boolean;
     status: boolean;
-    statusSince: string;
+    uptime7: number;
+    uptime30: number;
+    uptime90: number;
     lastCheck: string;
     country: string;
     parsedUri: ServerUri;

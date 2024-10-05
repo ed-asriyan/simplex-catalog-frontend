@@ -162,7 +162,9 @@
                     <option value="uri">URI</option>
                     <option value="status">Status</option>
                     <option value="lastCheck">Last check</option>
-                    <option value="statusSince">Status since</option>
+                    <option value="uptime7">Uptime 7d</option>
+                    <option value="uptime30">Uptime 30d</option>
+                    <option value="uptime90">Uptime 90d</option>
                 </select>
             </div>
         </div>
