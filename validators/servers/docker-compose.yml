@@ -23,7 +23,8 @@ services:
       - REDIS_QUEUE_URL=redis://redis
       - QUEUE_NAME=default
       - CRON_RULE=0 * * * *
-      - SUPABASE_TABLE_NAME=servers
+      - SUPABASE_SERVERS_TABLE_NAME=servers
+      - SUPABASE_SERVERS_STATUS_TABLE_NAME=servers_status
       # - SUPABASE_URL=<to be filled in .env>
       # - SUPABASE_KEY=<to be filled in .env>
     depends_on:

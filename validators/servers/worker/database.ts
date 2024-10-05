@@ -1,85 +1,65 @@
 import { createClient } from '@supabase/supabase-js';
-import { supabaseKey, supabaseUrl, supabaseTableName } from './settings';
+import { supabaseKey, supabaseUrl, supabaseServersTableName, supabaseServersStatusTableName } from './settings';
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-export interface Record {
+export interface Server {
+    uuid: string;
     uri: string;
-    statusSince: Date;
-    lastCheck: Date;
-    status: boolean | null;
 }
 
-const serialize = function(data: any): Record {
-    return {
-        uri: data['uri'],
-        statusSince: data['status_since'],
-        lastCheck: data['last_updated'],
-        status: data['status'],
-    };
-};
-
-export const getRecord = async function (uri: string): Promise<Record> {
-    const { data, error } = await supabase
-        .from(supabaseTableName)
-        .select()
-        .eq('uri', uri);
-    if (error) {
-        throw error;
-    } else {
-        return data[0] && serialize(data[0]);
-    }
-};
-
-export const getAllRecords = async function (): Promise<Record[]> {
-    const { data, error } = await supabase
-        .from(supabaseTableName)
-        .select();
-    if (error) {
-        throw error;
-    } else {
-        return data.map(serialize);
-    }
-};
-
-export interface UpdateRecordParams {
-    uri: string;
+export interface ServerStatus {
+    serverUuid: string;
     status: boolean;
     country?: string;
     infoPageAvailable: boolean;
 }
 
-export const updateRecord = async function (params: UpdateRecordParams): Promise<void> {
-    const currentRecord = await getRecord(params.uri);
-    if (!currentRecord) return;
-
-    const lastStatus = currentRecord.status;
-
-    const now = new Date();
-    const data = {
-        'last_check': now,
-        'info_page_available': params.infoPageAvailable,
+const serializeServer = function(data: any): Server {
+    return {
+        uuid: data['uuid'],
+        uri: data['uri'],
     };
+};
 
-    if (lastStatus !== params.status) {
-        data['status'] = params.status;
-        data['status_since'] = now;
+export const getServer = async function (uri: string): Promise<Server> {
+    const { data, error } = await supabase
+        .from(supabaseServersTableName)
+        .select()
+        .eq('uri', uri);
+    if (error) {
+        throw error;
+    } else {
+        return data[0] && serializeServer(data[0]);
     }
+};
 
-    if (typeof params.country === 'string') {
-        data['country'] = params.country;
+export const getAllServers = async function (): Promise<Server[]> {
+    const { data, error } = await supabase
+        .from(supabaseServersTableName)
+        .select();
+    if (error) {
+        throw error;
+    } else {
+        return data.map(serializeServer);
     }
+};
 
+export const addServerStatus = async function (status: ServerStatus): Promise<void> {
     const { error } = await supabase
-        .from(supabaseTableName)
-        .update(data)
-        .eq('uri', params.uri);
+        .from(supabaseServersStatusTableName)
+        .insert({
+            'server_uuid': status.serverUuid,
+            'status': status.status,
+            'country': status.country,
+            'info_page_available': status.infoPageAvailable,
+        });
     if (error) throw error;
 };
 
 export const deleteRecord = async function (uri: string): Promise<void> {
     const { error } = await supabase
-        .from(supabaseTableName)
+        .from(supabaseServersTableName)
         .delete()
         .eq('uri', uri)
     if (error) throw error;
@@ -93,7 +73,7 @@ export const subscribe = function (callback: (uri: string) => void) {
             {
                 event: 'INSERT',
                 schema: 'public',
-                table: supabaseTableName
+                table: supabaseServersTableName
             },
             (event) => callback(event['new']['uri']),
         )

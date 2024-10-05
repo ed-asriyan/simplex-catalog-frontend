@@ -4,14 +4,14 @@ import { Queue } from 'bullmq';
 import cron from 'node-cron';
 import { redisUri, queueName, cronRule } from './settings';
 import { isInfoPageAvailable, testServer } from './api';
-import { deleteRecord, getAllRecords, subscribe, updateRecord } from './database';
+import { deleteRecord, getAllServers, subscribe, addServerStatus } from './database';
 import { isServerOfficial, parseUri } from './uri-parser';
 import { getCountry } from './geoip';
 
 const connection = new Redis(redisUri, { maxRetriesPerRequest: null });
 
 
-const handleServer = async function (uri: string, log: (s: string) => void) {
+const handleServer = async function (uuid: string, uri: string, log: (s: string) => void) {
     if (isServerOfficial(uri)) {
         log('Server is official. Deleting...');
         await deleteRecord(uri);
@@ -48,18 +48,18 @@ const handleServer = async function (uri: string, log: (s: string) => void) {
     log(`Done: ${infoPageAvailable}`);
 
     log('Updating the record in database...');
-    await updateRecord({ uri, status, country, infoPageAvailable });
+    await addServerStatus({ serverUuid: uuid, status, country, infoPageAvailable });
     log('Done');
 };
 
 new Worker(queueName, async job => {
-    const { serverUri } = job.data;
+    const { serverUri, serverUuid } = job.data;
     const log = (s: string) => {
         const l = `${new Date().toISOString()} | ${s}`;
         console.log(`${job.id} | ${l}`);
         job.log(l);
     };
-    await handleServer(serverUri, log);
+    await handleServer(serverUuid, serverUri, log);
 }, { connection });
 
 const shuffle = function<T> (array: T[]): T[] {
@@ -81,8 +81,8 @@ const shuffle = function<T> (array: T[]): T[] {
 
 const addServerChecksToQueue = async function () {
     const queue = new Queue(queueName, { connection });
-    for (const server of shuffle(await getAllRecords())) {
-        await queue.add(`schedule ${server.uri}`, { serverUri: server.uri });
+    for (const server of shuffle(await getAllServers())) {
+        await queue.add(`schedule ${server.uri}`, { serverUri: server.uri, serverUuid: server.uuid });
     }
 };
 
