@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
-import { supabaseKey, supabaseTableName, supabaseUrl } from './settings';
+import { supabaseKey, supabaseServersQuickViewTableName, supabaseServersTableName, supabaseUrl } from './settings';
 import { snakeToCamel } from './utils';
 
 export interface ServerUri {
@@ -80,7 +80,7 @@ export interface FetchParams {
 }
 
 export const fetchServers = async function (params: FetchParams): Promise<{ servers: Server[], count: number }> {
-    let query = supabase.from(supabaseTableName).select('*', { count: 'exact' });
+    let query = supabase.from(supabaseServersQuickViewTableName).select('*', { count: 'exact' });
 
     if (params.filters) {
         query = params.filters(query);
@@ -100,14 +100,14 @@ export const fetchServers = async function (params: FetchParams): Promise<{ serv
 };
 
 export const fetchCountries = async function (): Promise<Set<string[]>> {
-    const { data, error } = await supabase.from(supabaseTableName).select('country');
+    const { data, error } = await supabase.from(supabaseServersQuickViewTableName).select('country');
     if (error) throw error;
 
     return new Set(data.map(({ country }) => country));
 };
 
 export const doesServerExist = async function (uri: string): Promise<boolean> {
-    const { data, error } = await supabase.from(supabaseTableName)
+    const { data, error } = await supabase.from(supabaseServersTableName)
         .select('*')
         .eq('uri', uri);
     if (error) throw error;
@@ -116,7 +116,7 @@ export const doesServerExist = async function (uri: string): Promise<boolean> {
 
 export const addServer = async function (uri: string) {
     const { error } = await supabase
-        .from(supabaseTableName)
+        .from(supabaseServersTableName)
         .insert({ uri });
     if (error) throw error;
 };
