@@ -17,7 +17,7 @@ const resolve = function (domain: string): Promise<string> {
             }
         });
     });
-}
+};
 
 export const getCountry = async function (domainOrIp: string): Promise<string> {
     if (!isIPAddress(domainOrIp)) {

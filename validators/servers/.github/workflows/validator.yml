@@ -1,0 +1,48 @@
+name: Validate
+
+on:
+  schedule:
+    - cron: '0 */12 * * *'
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Load Docker images from cache
+        uses: actions/cache@v4
+        id: cache-docker
+        with:
+          path: /tmp/docker
+          key: ${{ runner.os }}-docker-${{ github.sha }}
+          restore-keys: ${{ runner.os }}-docker-
+
+      - name: Load Docker images
+        run: |
+          if [ -d /tmp/docker ]; then
+            for image in /tmp/docker/*.tar; do
+            docker load -i $image
+            done
+          fi
+
+      - name: Save .env file
+        env:
+          ENV_FILE_CONTENT: ${{ secrets.ENV_FILE_CONTENT }}
+        shell: bash
+        run: |
+          echo "$ENV_FILE_CONTENT" > .env
+
+      - name: Run validation
+        run: make validate
+
+      - name: Save Docker images to cache
+        if: steps.cache-docker.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p /tmp/docker
+          images=$(docker images --format '{{.Repository}}:{{.Tag}}' | grep '^simplex-servers-registry-validator')
+          for image in $images; do
+            docker save $image -o /tmp/docker/$(echo $image | tr / _).tar
+          done

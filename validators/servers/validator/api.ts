@@ -31,7 +31,7 @@ export const testServer = async function(uri: string): Promise<boolean> {
             reject(`WebSocket error: ${err.message}`);
         });
     });
-}
+};
 
 export const isInfoPageAvailable = async function (domain: string): Promise<boolean> {
     try {
