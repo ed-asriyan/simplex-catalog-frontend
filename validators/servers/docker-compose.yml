@@ -3,7 +3,9 @@ services:
     build: smp-client
 
   validator:
-    build: validator
+    build:
+      context: validator
+      target: validate
     env_file:
       - .env
     environment:

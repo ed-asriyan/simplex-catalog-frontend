@@ -2,7 +2,9 @@ use std::net::{Ipv4Addr, Ipv6Addr, IpAddr};
 use std::net::ToSocketAddrs;
 use std::str::FromStr;
 use std::error::Error;
-use maxminddb::{self, MaxMindDBError};
+use maxminddb;
+
+pub type GeoIpClient = maxminddb::Reader<Vec<u8>>;
 
 fn is_ipv4(ip: &str) -> bool {
     ip.parse::<std::net::Ipv4Addr>().is_ok()
@@ -34,24 +36,32 @@ fn str_to_ip(ip: &str) -> Result<IpAddr, Box<dyn Error>> {
     }
 }
 
-pub fn create_reader(path: &str) -> Result<maxminddb::Reader<Vec<u8>>, MaxMindDBError> {
-    maxminddb::Reader::open_readfile(path)
+pub struct GeoIp {
+    reader: GeoIpClient,
 }
 
-pub fn get_country(ip_or_domain: &str, reader: &maxminddb::Reader<Vec<u8>>) -> Result<String, Box<dyn Error>> {
-    let ip: IpAddr = if is_ip_address(&ip_or_domain) {
-        str_to_ip(&ip_or_domain)?  
-    } else {
-        resolve(&ip_or_domain)?
-    };
+impl GeoIp {
+    pub fn new(path: &str) -> Result<Self, Box<dyn Error>> {
+        Ok(Self {
+            reader: maxminddb::Reader::open_readfile(path)?,
+        })
+    }
 
-    let country: maxminddb::geoip2::Country = reader.lookup(ip)?;
-    if let Some(country) = country.country {
-        match country.iso_code {
-            Some(code) => return Ok(code.to_string()),
-            None => return Err("No country code found".into())
+    pub fn get_country(&self, ip_or_domain: &str) -> Result<String, Box<dyn Error>> {
+        let ip: IpAddr = if is_ip_address(&ip_or_domain) {
+            str_to_ip(&ip_or_domain)?  
+        } else {
+            resolve(&ip_or_domain)?
+        };
+    
+        let country: maxminddb::geoip2::Country = self.reader.lookup(ip)?;
+        if let Some(country) = country.country {
+            match country.iso_code {
+                Some(code) => return Ok(code.to_string()),
+                None => return Err("No country code found".into())
+            }
+        } else {
+            Err("No country found".into())
         }
-    } else {
-        Err("No country found".into())
     }
 }
