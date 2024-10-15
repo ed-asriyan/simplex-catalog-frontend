@@ -1,7 +1,7 @@
-# SimpleX Servers Registry Validator
-Backend service and performs scheduled validation of SimpleX Servers Registry.
+# SimpleX Directory Servers Validator
+Backend service and performs scheduled validation of servers in [SimpleX Directory](https://simplex-directory.asriyan.me).
 
-Frontend repository: [simplex-servers-registry-frontend](https://github.com/ed-asriyan/simplex-servers-registry-frontend)
+Frontend repository: [simplex-directory-frontend](https://github.com/ed-asriyan/simplex-directory-frontend)
 
 ## How to run
 The project uses [Supabase](https://supabase.com) as storage for servers and their status history. So you should setup

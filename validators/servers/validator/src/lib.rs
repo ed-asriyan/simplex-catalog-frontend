@@ -28,7 +28,7 @@ pub fn init_logger() {
 }
 
 pub fn create_command() -> Command {
-    Command::new("simplex-servers-registry-validator")
+    Command::new("simplex-directory-servers-validator")
         .author("Ed Asriyan")
         .arg(
             Arg::new("supabase-url")

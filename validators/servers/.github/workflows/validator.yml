@@ -39,9 +39,11 @@ jobs:
 
       - name: Save Docker images to cache
         if: steps.cache-docker.outputs.cache-hit != 'true'
+        env:
+          REPO_NAME: ${{ github.event.repository.name }}
         run: |
           mkdir -p /tmp/docker
-          images=$(docker images --format '{{.Repository}}:{{.Tag}}' | grep '^simplex-servers-registry-validator')
+          images=$(docker images --format '{{.Repository}}:{{.Tag}}' | grep "^$REPO_NAME")
           for image in $images; do
             docker save $image -o /tmp/docker/$(echo $image | tr / _).tar
           done
