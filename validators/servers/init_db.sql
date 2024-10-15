@@ -1,9 +1,30 @@
+-- all servers
 CREATE TABLE servers (
     uuid UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     uri TEXT UNIQUE CHECK (uri ~* '^(smp|xftp)://.+@.+$'),
     created_at TIMESTAMP DEFAULT NOW(),
 );
 
+CREATE POLICY "[servers] Enable read access for all users"
+ON servers
+AS PERMISSIVE
+FOR SELECT
+TO public
+USING (
+  true
+);
+
+CREATE POLICY "[servers] Enable insert for all users"
+ON servers
+AS PERMISSIVE
+FOR INSERT
+TO public
+WITH CHECK (
+  true
+);
+
+
+-- all servers statuses records. 1 row per server per check in time
 CREATE TABLE servers_statuses (
     uuid UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     server_uuid UUID NOT NULL,
@@ -14,6 +35,17 @@ CREATE TABLE servers_statuses (
     FOREIGN KEY (server_uuid) REFERENCES servers (uuid) ON DELETE CASCADE
 );
 
+CREATE POLICY "[servers_statuses] Enable read access for all users"
+ON servers_statuses
+AS PERMISSIVE
+FOR SELECT
+TO public
+USING (
+  true
+);
+
+
+-- all servers with the latest status. 1 row per server with its the latest status
 CREATE VIEW servers_quick_view AS
     WITH latest_status AS (
         SELECT 

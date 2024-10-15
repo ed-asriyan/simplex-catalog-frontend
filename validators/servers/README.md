@@ -13,10 +13,6 @@ are two ways to do that: [run locally](#run-locally) (e.g. if you want to self-h
 ## Setup Supbase project
 1. Setup [Supabase](https://supabase.com) account, create project
 2. Run [init_db.sql](./init_db.sql) in `public` schema (e.g using SQL editor page in Supabase project)
-3. Enable realtime for the created tables
-4. Allow
-   * INSERT and SELECT for `public` in `servers` table security policy
-   * SELECT for `public` in `servers_status` table security policy
 
 ## Run locally
 1. Fill variables in [.env](./.env)
