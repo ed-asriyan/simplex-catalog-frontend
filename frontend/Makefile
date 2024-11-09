@@ -1,13 +1,13 @@
-IMAGE_NAME=simplex-servers-registry-frontend
+IMAGE_NAME=simplex-directory-frontend
 DEV_RUN_PARAMS=--workdir /app -v .:/app --rm -it
 DEV_INSTALL_COMMAND=npm ci
 CI_RUN_PARAMS=--workdir /app -v .:/app --rm
 CI_INSTALL_COMMAND=npm ci
 ENV_FILE=.env
-DOCKER_DEV_IMAGE_NAME=simplex-servers-registry-frontend-dev
-DOCKER_STAGING_IMAGE_NAME=simplex-servers-registry-frontend-staging
-DOCKER_PROD_BUNDLE_IMAGE_NAME=simplex-servers-registry-frontend-app
-TMP_CONTAINER_NAME=simplex-servers-registry-frontend-tmp
+DOCKER_DEV_IMAGE_NAME=${IMAGE_NAME}-dev
+DOCKER_STAGING_IMAGE_NAME=${IMAGE_NAME}-staging
+DOCKER_PROD_BUNDLE_IMAGE_NAME=${IMAGE_NAME}-app
+TMP_CONTAINER_NAME=${IMAGE_NAME}-tmp
 
 build_dev_image:
 	docker build -t ${DOCKER_DEV_IMAGE_NAME} --target dev .

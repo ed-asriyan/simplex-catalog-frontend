@@ -19,7 +19,7 @@
 
         try {
             if (await doesServerExist(input)) {
-                alert('Server already added to the registry');
+                alert('Server already added to the directory');
                 return;
             }
             await addServer(input.trim());
@@ -37,7 +37,7 @@
 
 <div class="uk-container uk-container-xlarge">
     <div class="uk-section uk-section-default uk-text-center uk-padding-remove-bottom">
-        <h1 class="uk-heading-small">Unofficial <a href="https://simplex.chat" target="_blank">SimpleX</a> Servers Registry</h1>
+        <h1 class="uk-heading-small">Unofficial <a href="https://simplex.chat" target="_blank">SimpleX</a> Directory</h1>
     </div>
     <div class="uk-section uk-section-xsmall uk-text-center uk-margin-bottom">
         <div>
