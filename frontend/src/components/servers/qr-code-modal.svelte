@@ -1,7 +1,4 @@
 <script lang="ts">
-	import { run, self, createBubbler, stopPropagation } from 'svelte/legacy';
-
-	const bubble = createBubbler();
     import QRCode from '@castlenine/svelte-qrcode';
   	import LineUri from './line-uri.svelte';
 	import Flag from './flag.svelte';
@@ -12,19 +9,20 @@
 
 	interface Props {
 		servers: Server[];
+		onclick: (server: Server) => void;
 	}
 
-	let { servers = $bindable() }: Props = $props();
+	let { servers = $bindable(), onclick }: Props = $props();
 	let i: number = $state(0);
 
 	let server = $derived(servers && servers[i]);
-	run(() => {
+	$effect(() => {
 		if (servers) i = 0;
 	});
 
 	let dialog = $state();
 
-	run(() => {
+	$effect(() => {
 		if (dialog && servers?.length) dialog.showModal();
 	});
 
@@ -50,9 +48,9 @@
 <dialog
 	bind:this={dialog}
 	onclose={() => (servers = [])}
-	onclick={self(() => dialog.close())}
+	onclick={(() => dialog.close())}
 >
-	<div class="uk-text-center" onclick={stopPropagation(bubble('click'))}>
+	<div class="uk-text-center" onclick={onclick}>
         {#if server}
 			{#if servers.length > 1}
 				<div>{ i + 1 } / { servers?.length }</div>

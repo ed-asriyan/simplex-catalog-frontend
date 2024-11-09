@@ -1,6 +1,4 @@
 <script lang="ts">
-    import { run } from 'svelte/legacy';
-
     import { fetchServers, type FetchParams, type Server } from '../../database';
     import QrCodeModal from './qr-code-modal.svelte';
     import LineUri from './line-uri.svelte';
@@ -23,7 +21,7 @@
 
     let page: number = $state(1);
 
-    run(() => {
+    $effect(() => {
         if (params) {
             page = 1;
         }
@@ -236,6 +234,7 @@
     Error:
     <pre>
         {e}
+        {console.error(e)}
     </pre>
 {/await}
 

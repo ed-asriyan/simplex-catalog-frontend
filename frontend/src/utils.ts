@@ -1,11 +1,4 @@
 export const camelToSnakeCase = (str: string) => str.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`);
-export const snakeToCamel = (str: string) =>
-    str.toLowerCase().replace(/([-_][a-z])/g, group =>
-      group
-        .toUpperCase()
-        .replace('-', '')
-        .replace('_', '')
-    );
 
 export const delay = function (callback, ms) {
   let timer = 0;

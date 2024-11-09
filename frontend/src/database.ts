@@ -1,6 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import { supabaseKey, supabaseServersQuickViewTableName, supabaseServersTableName, supabaseUrl } from './settings';
-import { snakeToCamel } from './utils';
+import type { Database } from './database.types';
 
 export interface ServerUri {
     type: 'smp' | 'xftp';
@@ -35,7 +35,7 @@ const parseUri = function (uri: string): ServerUri {
     }
 };
 
-export interface Server {
+class Server {
     uuid: string;
     uri: string;
     infoPageAvailable: boolean;
@@ -46,23 +46,25 @@ export interface Server {
     lastCheck: string;
     country: string;
     parsedUri: ServerUri;
-};
+
+    constructor(data: Database.public.Tables['servers_quick_view']['Row']) {
+        this.uuid = data.uuid;
+        this.uri = data.uri;
+        this.infoPageAvailable = data['info_page_available'];
+        this.status = data.status;
+        this.uptime7 = data.uptime7;
+        this.uptime30 = data.uptime30;
+        this.uptime90 = data.uptime90;
+        this.lastCheck = data['last_check'];
+        this.country = data.country;
+
+        this.parsedUri = parseUri(this.uri);
+    }
+}
 
 export type Column = keyof Server;
 
-const deserialize = function (data: any): Server {
-    const server = Object.entries(data).reduce((obj, [key, value]) => {
-        if (typeof value === "string") {
-            value = value.trim();
-        }
-        obj[snakeToCamel(key)] = value;
-        return obj;
-    }, {}) as Server;
-    server.parsedUri = parseUri(server.uri);
-    return server;
-};
-
-const supabase = createClient(supabaseUrl, supabaseKey);
+const supabase = createClient<Database>(supabaseUrl, supabaseKey);
 
 export interface Sort {
     column: Column;
@@ -92,17 +94,17 @@ export const fetchServers = async function (params: FetchParams): Promise<{ serv
         query = params.modifyers(query);
     }
 
-    const { data, count, error } = await query.range(params.offset, params.limit + params.offset);
+    const { data, count, error } = await query.range(params.offset, params.limit + params.offset - 1).returns<Database.public.Tables['servers_quick_view']['Row']>();
     if (error) throw error;
 
     return {
-        servers: data.map(deserialize),
+        servers: data.map(rawValue => new Server(rawValue)),
         count,
     };
 };
 
 export const fetchCountries = async function (): Promise<Set<string[]>> {
-    const { data, error } = await supabase.from(supabaseServersQuickViewTableName).select('country');
+    const { data, error } = await supabase.from(supabaseServersQuickViewTableName).select('country').returns<Database.public.Tables['servers_quick_view']['Row']>();
     if (error) throw error;
 
     return new Set(data.map(({ country }) => country));

@@ -1,5 +1,5 @@
 <script lang="ts">
-    import type { Server, ServerUri } from '../../database';
+    import type { Server } from '../../database';
 
     interface Props {
         server: Server;
