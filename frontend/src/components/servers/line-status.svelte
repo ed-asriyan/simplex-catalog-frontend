@@ -1,5 +1,9 @@
 <script lang="ts">
-    export let status: boolean;
+    interface Props {
+        status: boolean;
+    }
+
+    let { status }: Props = $props();
 </script>
 
 <span class={status ? 'uk-text-success' : 'uk-text-danger'}>

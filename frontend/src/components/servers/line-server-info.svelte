@@ -1,8 +1,12 @@
 <script lang="ts">
     import type { Server } from '../../database';
 
-    export let server: Server;
-    export let icon: boolean;
+    interface Props {
+        server: Server;
+        icon: boolean;
+    }
+
+    let { server, icon }: Props = $props();
 </script>
 
 {#if server.parsedUri.domain && server.infoPageAvailable}

@@ -1,4 +1,7 @@
 <script lang="ts">
+	import { run, self, createBubbler, stopPropagation } from 'svelte/legacy';
+
+	const bubble = createBubbler();
     import QRCode from '@castlenine/svelte-qrcode';
   	import LineUri from './line-uri.svelte';
 	import Flag from './flag.svelte';
@@ -7,19 +10,27 @@
 	import LineCountry from './line-country.svelte';
 	import LineStatus from './line-status.svelte';
 
-	export let servers: Server[];
-	let i: number = 0;
+	interface Props {
+		servers: Server[];
+	}
 
-	$: server = servers && servers[i];
-	$: if (servers) i = 0;
+	let { servers = $bindable() }: Props = $props();
+	let i: number = $state(0);
 
-	let dialog;
+	let server = $derived(servers && servers[i]);
+	run(() => {
+		if (servers) i = 0;
+	});
 
-	$: if (dialog && servers?.length) dialog.showModal();
+	let dialog = $state();
 
-	$: isTheFirst = i === 0;
-	$: isTheLast = i + 1 === servers?.length;
-	$: nextText = isTheLast ? 'Close' : 'Next →';
+	run(() => {
+		if (dialog && servers?.length) dialog.showModal();
+	});
+
+	let isTheFirst = $derived(i === 0);
+	let isTheLast = $derived(i + 1 === servers?.length);
+	let nextText = $derived(isTheLast ? 'Close' : 'Next →');
 
 	const handleNext = function () {
 		if (isTheLast) {
@@ -38,10 +49,10 @@
 
 <dialog
 	bind:this={dialog}
-	on:close={() => (servers = [])}
-	on:click|self={() => dialog.close()}
+	onclose={() => (servers = [])}
+	onclick={self(() => dialog.close())}
 >
-	<div class="uk-text-center" on:click|stopPropagation>
+	<div class="uk-text-center" onclick={stopPropagation(bubble('click'))}>
         {#if server}
 			{#if servers.length > 1}
 				<div>{ i + 1 } / { servers?.length }</div>
@@ -63,11 +74,11 @@
         <div>
 			<div class="uk-flex uk-margin-top">
 				{#if !isTheFirst}
-					<button class="uk-flex-1 uk-button uk-button-default uk-margin-right" autofocus on:click={handleBack}>← Back</button>
+					<button class="uk-flex-1 uk-button uk-button-default uk-margin-right" autofocus onclick={handleBack}>← Back</button>
 				{/if}
-				<button class="uk-flex-1 uk-button uk-button-defadult" autofocus on:click={handleNext}>{ nextText }</button>
+				<button class="uk-flex-1 uk-button uk-button-defadult" autofocus onclick={handleNext}>{ nextText }</button>
 			</div>
-			<button class="uk-margin-top uk-width-1-1 uk-button uk-button" autofocus on:click={() => { flagStore.set(server.uuid, true); handleNext() } }>
+			<button class="uk-margin-top uk-width-1-1 uk-button uk-button" autofocus onclick={() => { flagStore.set(server.uuid, true); handleNext() }}>
 				<Flag value={true} />
 				&nbsp;
 				Flag and { nextText }

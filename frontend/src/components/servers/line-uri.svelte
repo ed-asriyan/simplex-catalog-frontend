@@ -1,9 +1,13 @@
 <script lang="ts">
     import type { Server, ServerUri } from '../../database';
 
-    export let server: Server;
+    interface Props {
+        server: Server;
+    }
 
-    let copyTumbler: string = '';
+    let { server }: Props = $props();
+
+    let copyTumbler: string = $state('');
     let timeout: number;
     const copyToClipboard = function (str: string) {
         const input = document.createElement('input');
@@ -18,11 +22,11 @@
         timeout = setTimeout(() => copyTumbler = '', 4000);
     };
 
-    $: domain = server.parsedUri.domain || `...${server.uri.slice(server.uri.length - 12)}`;
-    $: maskedUri =  `${domain}`;;
+    let domain = $derived(server.parsedUri.domain || `...${server.uri.slice(server.uri.length - 12)}`);
+    let maskedUri =  $derived(`${domain}`);;
 </script>
 
-<span class="pointer uk-text-nowrap" uk-tooltip="Click to copy full URI" on:click={copyToClipboard(server.uri)}>
+<span class="pointer uk-text-nowrap" uk-tooltip="Click to copy full URI" onclick={copyToClipboard(server.uri)}>
     {#if copyTumbler === server.uri}
         Copied to clipboard
     {:else}

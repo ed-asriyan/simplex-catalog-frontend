@@ -1,9 +1,13 @@
 <script lang="ts">
     import { countryCodeToName, getFlagEmoji } from '../../utils';
 
-    export let country: string;
+    interface Props {
+        country: string;
+    }
 
-    $: name = country && countryCodeToName(country);
+    let { country }: Props = $props();
+
+    let name = $derived(country && countryCodeToName(country));
 </script>
 
 {#if country}

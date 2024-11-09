@@ -1,3 +1,4 @@
+import { mount } from 'svelte';
 import * as Sentry from '@sentry/svelte';
 import Root from './App.svelte';
 import { environment, sentryDsn, url } from './settings';
@@ -23,6 +24,6 @@ if (sentryDsn) {
     });
 }
 
-export default new Root({
+export default mount(Root, {
     target: document.getElementById('app'),
 });

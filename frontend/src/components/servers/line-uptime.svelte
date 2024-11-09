@@ -1,7 +1,11 @@
 <script lang="ts">
     import type { Server } from '../../database';
 
-    export let server: Server;
+    interface Props {
+        server: Server;
+    }
+
+    let { server }: Props = $props();
 
     const uptimeStr = function (num: number): string {
         return `${Math.round(num * 100)}%`;
@@ -9,7 +13,7 @@
 
     const uptimes: (keyof Server)[] = ['uptime7', 'uptime30', 'uptime90'];
 
-    $: same = uptimes.every((uptime) => server[uptime] === server.uptime7);
+    let same = $derived(uptimes.every((uptime) => server[uptime] === server.uptime7));
 </script>
 
 {#if same}

@@ -1,4 +1,6 @@
 <script lang="ts">
+    import { run } from 'svelte/legacy';
+
     import { fetchServers, type FetchParams, type Server } from '../../database';
     import QrCodeModal from './qr-code-modal.svelte';
     import LineUri from './line-uri.svelte';
@@ -11,21 +13,27 @@
     import LineCountry from './line-country.svelte';
     import { QueryStoreList } from '../../query-store';
 
-    export let params: FetchParams;
-
-    let pageSize: number = 10;
-
-    let page: number = 1;
-
-    $: if (params) {
-        page = 1;
+    interface Props {
+        params: FetchParams;
     }
 
-    $: localParams = {
+    let { params }: Props = $props();
+
+    let pageSize: number = $state(10);
+
+    let page: number = $state(1);
+
+    run(() => {
+        if (params) {
+            page = 1;
+        }
+    });
+
+    let localParams = $derived({
         ...params,
         limit: pageSize,
         offset: pageSize * (page - 1),
-    };
+    });
 
     const fetch = async function (params: FetchParams): Promise<{ servers: Server[], count: number, pageCount: number }> {
         if (!isFinite(pageSize) || !isFinite(page)) {
@@ -48,7 +56,7 @@
         }
     };
 
-    let qrCodeServers: Server[] = [];
+    let qrCodeServers: Server[] = $state([]);
 
     const changePage = async function (pageCount: number, newPage: number) {
         if (newPage < 1 || newPage > pageCount) {
@@ -92,9 +100,9 @@
     <div class="loader uk-flex uk-flex-center uk-flex-middle uk-flex-direction-column">
         <div uk-spinner="ratio: 3"></div>
     </div>
-{:then { servers, count, pageCount }}
+{:then {servers, count, pageCount }}
     <button class="uk-button uk-button-secondary uk-float-right uk-width-auto@m uk-width-1-1@s" 
-            on:click={() => qrCodeServers = getSelectedServers(servers)}
+            onclick={() => qrCodeServers = getSelectedServers(servers)}
             disabled={$selectedServers.length < 2}
             uk-tooltip={$selectedServers.length < 2 ? "Select 2 or more servers" : ""}
         >
@@ -108,7 +116,7 @@
                            type="checkbox"
                            uk-tooltip={$selectedServers.length ? "Unselect all" : "Select all"}
                            checked={$selectedServers.length}
-                           on:click={() => toggleAllSelectedServers(servers)}
+                           onclick={() => toggleAllSelectedServers(servers)}
                     />
                 </th>
                 <th>Flag</th>
@@ -125,7 +133,7 @@
                 {#each servers as server (server.uuid)}
                     <tr class="uk-text-small" class:flagged={$flagStore.has(server.uuid)} class:uk-text-danger={!server.status}>
                         <td>
-                            <input type="checkbox" checked={$selectedServers.includes(server.uuid)} on:click={() => toggleSelectedServer(server)} />
+                            <input type="checkbox" checked={$selectedServers.includes(server.uuid)} onclick={() => toggleSelectedServer(server)} />
                         </td>
                         <td>
                             <Flag value={$flagStore.has(server.uuid)} on:click={() => flagStore.toggle(server.uuid) } />
@@ -140,7 +148,7 @@
                             </span>
                         </td>
                         <td>
-                            <button class="uk-button uk-button-secondary uk-button-small" on:click={() => qrCodeServers = [server]}>QR</button>
+                            <button class="uk-button uk-button-secondary uk-button-small" onclick={() => qrCodeServers = [server]}>QR</button>
                         </td>
                         <td>
                             <LineStatus status={server.status} />
@@ -157,7 +165,7 @@
         </tbody>
     </table>
 
-    <div class="pointer uk-hidden@m uk-margin-xlarge-top uk-margin-small-left" on:click={() => toggleAllSelectedServers(servers)}>
+    <div class="pointer uk-hidden@m uk-margin-xlarge-top uk-margin-small-left" onclick={() => toggleAllSelectedServers(servers)}>
         <input class="pointer"
                type="checkbox"
                checked={$selectedServers.length}
@@ -170,7 +178,7 @@
                 <div uk-grid class="uk-margin-bottom-remove">
                     <div class="uk-width-expand">
                         <div class="uk-width-1-1">
-                            <input type="checkbox" checked={$selectedServers.includes(server.uuid)} on:click={() => toggleSelectedServer(server)} />
+                            <input type="checkbox" checked={$selectedServers.includes(server.uuid)} onclick={() => toggleSelectedServer(server)} />
                             &nbsp;
                             <Flag value={$flagStore.has(server.uuid)} on:click={() => flagStore.toggle(server.uuid) } />
                             &nbsp;
@@ -193,7 +201,7 @@
                             Status: 
                             <LineStatus status={server.status} />
                         </div>
-                        <button class="uk-block uk-margin-top uk-width-1-1 uk-button uk-button-secondary uk-button-small" on:click={() => qrCodeServers = [server]}>QR Code</button>
+                        <button class="uk-block uk-margin-top uk-width-1-1 uk-button uk-button-secondary uk-button-small" onclick={() => qrCodeServers = [server]}>QR Code</button>
                     </div>
                 </div>
             </li>
@@ -207,12 +215,12 @@
         {#if count}
             <div>
                 {#if page !== 1}
-                    <button class="uk-button uk-button-default" on:click={() => changePage(pageCount, page - 1)}>
+                    <button class="uk-button uk-button-default" onclick={() => changePage(pageCount, page - 1)}>
                         ← Previous page
                     </button>
                 {/if}
                 {#if page !== pageCount}
-                    <button class="uk-button uk-button-default" on:click={() => changePage(pageCount, page + 1)}>
+                    <button class="uk-button uk-button-default" onclick={() => changePage(pageCount, page + 1)}>
                         Next page →
                     </button>
                 {/if}

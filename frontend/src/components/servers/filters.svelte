@@ -1,61 +1,18 @@
 <script lang="ts">
+    import { run, preventDefault } from 'svelte/legacy';
+
     import { camelToSnakeCase, countryCodeToName, delay, getFlagEmoji } from '../../utils';
     import { type FetchParams, fetchCountries } from '../../database';
     import { get } from 'svelte/store';
     import { flagStore } from './flagged';
     import { QueryStore, QueryStoreList } from '../../query-store';
 
-    export let params: FetchParams;
+    interface Props {
+        params: FetchParams;
+    }
 
-    $: params = {
-        limit: 0,
-        offset: 0,
-        filters: function (q: any) {
-            if (this[typeFilterSymbol]) {
-                q.like('uri', this[typeFilterSymbol] === 'smp' ? 'smp://%' : 'xftp://%')
-            }
-            if (this[uriFilterSymbol]) {
-                q.like('uri', this[uriFilterSymbol]);
-            }
-            const filteredCountriesFilter = this[countriesFilterSymbol].filter(x => x);
-            if (filteredCountriesFilter.length) {
-                q.in('country', filteredCountriesFilter);
-            }
-            if (this[statusFilterSymbol] !== 'any') {
-                q.eq('status', this[statusFilterSymbol] === '1');
-            }
-            if (this[infoPageFilterSymbol] !== 'any') {
-                q.eq('info_page_available', this[infoPageFilterSymbol] === '1');
-            }
-            if (this[flagedFilterSymbol] !== 'any') {
-                const filter = this[flagedFilterSymbol] === 'flagged' ? 'in' : 'nin';
-                const flaggedServers = get(flagStore)
-                if (this[flagedFilterSymbol] === 'flagged') {
-                    q.in('uuid',flaggedServers);
-                } else {
-                    for (const uuid of flaggedServers) {
-                        q.neq('uuid', uuid);
-                    }
-                }
-                
-            }
-            return q;
-        },
-        modifyers: function (q: any) {
-            if (this[sortColumnSymbol]) {
-                q.order(camelToSnakeCase(this[sortColumnSymbol]), { ascending: this[sortDirectionSymbol] === 'asc' });
-            }
-            return q;
-        },
-        [typeFilterSymbol]: $typeFilter,
-        [uriFilterSymbol]: $uriFilter,
-        [countriesFilterSymbol]: $countriesFilter,
-        [statusFilterSymbol]: $statusFilter,
-        [infoPageFilterSymbol]: $infoPageFilter,
-        [flagedFilterSymbol]: $flagedFilter,
-        [sortColumnSymbol]: $sortColumn,
-        [sortDirectionSymbol]: $sortDirection,
-    };
+    let { params = $bindable() }: Props = $props();
+
 
     const typeFilterSymbol = Symbol();
     const typeFilter = new QueryStore('filter-type', 'smp');
@@ -82,13 +39,67 @@
     const sortDirection = new QueryStore('filter-sort-direction', 'desc');
 
 
-    $: _uriFilter = $uriFilter;
+    run(() => {
+        params = {
+            limit: 0,
+            offset: 0,
+            filters: function (q: any) {
+                if (this[typeFilterSymbol]) {
+                    q.like('uri', this[typeFilterSymbol] === 'smp' ? 'smp://%' : 'xftp://%')
+                }
+                if (this[uriFilterSymbol]) {
+                    q.like('uri', this[uriFilterSymbol]);
+                }
+                const filteredCountriesFilter = this[countriesFilterSymbol].filter(x => x);
+                if (filteredCountriesFilter.length) {
+                    q.in('country', filteredCountriesFilter);
+                }
+                if (this[statusFilterSymbol] !== 'any') {
+                    q.eq('status', this[statusFilterSymbol] === '1');
+                }
+                if (this[infoPageFilterSymbol] !== 'any') {
+                    q.eq('info_page_available', this[infoPageFilterSymbol] === '1');
+                }
+                if (this[flagedFilterSymbol] !== 'any') {
+                    const filter = this[flagedFilterSymbol] === 'flagged' ? 'in' : 'nin';
+                    const flaggedServers = get(flagStore)
+                    if (this[flagedFilterSymbol] === 'flagged') {
+                        q.in('uuid',flaggedServers);
+                    } else {
+                        for (const uuid of flaggedServers) {
+                            q.neq('uuid', uuid);
+                        }
+                    }
+                    
+                }
+                return q;
+            },
+            modifyers: function (q: any) {
+                if (this[sortColumnSymbol]) {
+                    q.order(camelToSnakeCase(this[sortColumnSymbol]), { ascending: this[sortDirectionSymbol] === 'asc' });
+                }
+                return q;
+            },
+            [typeFilterSymbol]: $typeFilter,
+            [uriFilterSymbol]: $uriFilter,
+            [countriesFilterSymbol]: $countriesFilter,
+            [statusFilterSymbol]: $statusFilter,
+            [infoPageFilterSymbol]: $infoPageFilter,
+            [flagedFilterSymbol]: $flagedFilter,
+            [sortColumnSymbol]: $sortColumn,
+            [sortDirectionSymbol]: $sortDirection,
+        };
+    });
+    let _uriFilter;
+    run(() => {
+        _uriFilter = $uriFilter;
+    });
 </script>
 
 <form class="uk-form-stacked">
     <div class="uk-margin">
-        <button class="uk-button uk-button-default" class:uk-button-secondary={$typeFilter === 'smp'} on:click|preventDefault={() => $typeFilter = 'smp'}>SMP</button>
-        <button class="uk-button uk-button-default" class:uk-button-secondary={$typeFilter === 'xftp'}  on:click|preventDefault={() => $typeFilter = 'xftp'}>XFTP</button>
+        <button class="uk-button uk-button-default" class:uk-button-secondary={$typeFilter === 'smp'} onclick={preventDefault(() => $typeFilter = 'smp')}>SMP</button>
+        <button class="uk-button uk-button-default" class:uk-button-secondary={$typeFilter === 'xftp'}  onclick={preventDefault(() => $typeFilter = 'xftp')}>XFTP</button>
     </div>
 
     <div class="uk-margin">
@@ -96,16 +107,16 @@
             URI (like <a href="https://www.postgresqltutorial.com/postgresql-tutorial/postgresql-like" target="_blank">%Postgres% syntax</a>):
         </label>
         <div class="uk-form-controls">
-            <input class="uk-input" id="form-uri" type="text" on:keyup={delay(() => $uriFilter = _uriFilter, 1500)} bind:value={_uriFilter}>
+            <input class="uk-input" id="form-uri" type="text" onkeyup={delay(() => $uriFilter = _uriFilter, 1500)} bind:value={_uriFilter}>
         </div>
     </div>
 
     <div class="uk-margin">
         <label class="uk-form-label" for="form-country">
             Countries:
-            <a class="uk-link uk-float-right" on:click={() => $countriesFilter = []}>Clear</a>
+            <a class="uk-link uk-float-right" onclick={() => $countriesFilter = []}>Clear</a>
         </label>
-        {#await fetchCountries() }
+        {#await fetchCountries()}
             <div uk-spinner></div>
         {:then countries}
             <select multiple class="uk-select" id="form-country" bind:value={$countriesFilter}>

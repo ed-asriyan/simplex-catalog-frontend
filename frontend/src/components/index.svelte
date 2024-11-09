@@ -48,7 +48,7 @@
         <div class="uk-margin-top uk-margin-bottom">
             The website is not affiliated with the SimpleX team. Content is contributed by anonymous users.
         </div>
-        <button class="uk-button uk-button-default uk-margin-left uk-margin-remove-right" on:click={addServerClick}>Add server anonymously</button>
+        <button class="uk-button uk-button-default uk-margin-left uk-margin-remove-right" onclick={addServerClick}>Add server anonymously</button>
     </div>
     <ServersTable />
     <div class="uk-section uk-section-default footer uk-text-small uk-text-muted uk-text-center">

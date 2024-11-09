@@ -4,15 +4,19 @@
     import moment from 'moment';
     import { convertUTCDateToLocalDate } from '../../utils';
 
-    export let date: string;
+    interface Props {
+        date: string;
+    }
 
-    $: dateObj = new Date(date);
+    let { date }: Props = $props();
+
+    let dateObj = $derived(new Date(date));
 
     const getMoment = function (): moment.Moment {
         return dateObj && moment(convertUTCDateToLocalDate(dateObj));
     };
  
-    let display: Readable<moment.Moment>;
+    let display: Readable<moment.Moment> = $state();
 
     onMount(() => {
         display = readable<moment.Moment>(getMoment(), set => {

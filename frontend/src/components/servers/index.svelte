@@ -4,18 +4,18 @@
     import Filters from './filters.svelte';
     import Table from './table.svelte';
 
-    let params: FetchParams;
+    let params: FetchParams = $state();
 
-    let refreshCounter: number = 0;
+    let refreshCounter: number = $state(0);
     const refresh = function () {
         ++refreshCounter;
     }
     onMount(refresh);
 
-    $: refreshedParams = {
+    let refreshedParams = $derived({
         ...params,
         [Symbol()]: refreshCounter,
-    };
+    });
 </script>
 
 <div uk-grid class="uk-width-1-1">
@@ -28,7 +28,7 @@
             <h2 class="uk-text-lead uk-width-1-3@s uk-width-expand@m">
                 Servers
                 &nbsp;
-                <span class="pointer" on:click={refresh} uk-tooltip="Refresh">
+                <span class="pointer" onclick={refresh} uk-tooltip="Refresh">
                     <img width="24" height="24" src="https://img.icons8.com/ios-filled/50/update-left-rotation.png" alt="update-left-rotation"/>
                 </span>
             </h2>
