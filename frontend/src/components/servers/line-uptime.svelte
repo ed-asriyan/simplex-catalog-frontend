@@ -17,13 +17,14 @@
 </script>
 
 {#if same}
-    <span class:uk-text-success={server.uptime7 === 1}>{ uptimeStr(server.uptime7) }</span>
+    <span class={server.uptime7 === 1 ? 'uk-text-success' : 'uk-text-danger'}>{ uptimeStr(server.uptime7) }</span>
 {:else}
     <span uk-tooltip="7 days / 30 days / 90 days">
         {#each uptimes as uptime (uptime)}
             <span class={server[uptime] === 1 ? 'uk-text-success' : 'uk-text-danger'}>
                 { uptimeStr(server[uptime]) }
             </span>
+            &nbsp;
         {/each}
     </span>
 {/if}

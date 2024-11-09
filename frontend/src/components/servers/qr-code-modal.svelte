@@ -6,6 +6,7 @@
   	import type { Server } from '../../database';
 	import LineCountry from './line-country.svelte';
 	import LineStatus from './line-status.svelte';
+    import LineUptime from './line-uptime.svelte';
 
 	interface Props {
 		servers: Server[];
@@ -30,7 +31,8 @@
 	let isTheLast = $derived(i + 1 === servers?.length);
 	let nextText = $derived(isTheLast ? 'Close' : 'Next →');
 
-	const handleNext = function () {
+	const handleNext = function (e: Event) {
+		e.preventDefault();
 		if (isTheLast) {
 			dialog.close();
 		} else {
@@ -38,7 +40,8 @@
 		}
 	};
 
-	const handleBack = function () {
+	const handleBack = function (e: Event) {
+		e.preventDefault();
 		if (!isTheFirst) {
 			--i;
 		}
@@ -48,7 +51,6 @@
 <dialog
 	bind:this={dialog}
 	onclose={() => (servers = [])}
-	onclick={(() => dialog.close())}
 >
 	<div class="uk-text-center" onclick={onclick}>
         {#if server}
@@ -63,6 +65,8 @@
 					<LineCountry country={server.country} />
 				</span>
 				<LineStatus status={server.status} />
+				&nbsp;
+				<LineUptime server={server} />
 			</div>
 
 			<div class="uk-margin-small-top">
@@ -72,14 +76,14 @@
         <div>
 			<div class="uk-flex uk-margin-top">
 				{#if !isTheFirst}
-					<button class="uk-flex-1 uk-button uk-button-default uk-margin-right" autofocus onclick={handleBack}>← Back</button>
+					<button class="uk-flex-1 uk-button uk-button-default uk-margin-right" onclick={handleBack}>← Back</button>
 				{/if}
-				<button class="uk-flex-1 uk-button uk-button-defadult" autofocus onclick={handleNext}>{ nextText }</button>
+				<button class="uk-flex-1 uk-button uk-button-defadult" onclick={handleNext}>{ nextText }</button>
 			</div>
-			<button class="uk-margin-top uk-width-1-1 uk-button uk-button" autofocus onclick={() => { flagStore.set(server.uuid, true); handleNext() }}>
+			<button class="uk-margin-top uk-width-1-1 uk-button uk-button" onclick={e => { flagStore.set(server.uuid, true); handleNext(e) }}>
 				<Flag value={true} />
 				&nbsp;
-				Flag and { nextText }
+				Mark as added and { nextText }
 			</button>
         </div>
 	</div>

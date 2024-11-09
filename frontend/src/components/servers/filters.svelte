@@ -156,12 +156,12 @@
     </div>
 
     <div class="uk-margin">
-        <label class="uk-form-label" for="form-flag">Flag</label>
+        <label class="uk-form-label" for="form-flag">Added to your SimpleX</label>
         <div class="uk-form-controls">
             <select class="uk-select" id="form-flag" bind:value={$flagedFilter}>
                 <option value="any">All</option>
-                <option value="flagged">Show flagged only</option>
-                <option value="unflagged">Show unflagged only</option>
+                <option value="flagged">Show added only</option>
+                <option value="unflagged">Show not added only</option>
             </select>
         </div>
     </div>

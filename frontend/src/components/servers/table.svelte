@@ -117,7 +117,7 @@
                            onclick={() => toggleAllSelectedServers(servers)}
                     />
                 </th>
-                <th>Flag</th>
+                <th></th>
                 <th>Server</th>
                 <th>Country</th>
                 <th>QR Code</th>
