@@ -25,7 +25,7 @@
         timeout = setTimeout(() => copyTumbler = '', 4000);
     };
 
-    let maskedUri: string = $derived(server.parsedUri.domain || server.uri.slice(server.uri.length - MAX_LENGTH));
+    let maskedUri: string = $derived(server.parsedUri.domain || server.uri);
 </script>
 
 <span class="pointer uk-text-nowrap" uk-tooltip="Click to copy full URI" onclick={e => copyToClipboard(e, server.uri)}>

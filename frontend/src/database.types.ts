@@ -20,7 +20,17 @@ export interface Database {
                 Insert: {
                     uri: string,
                 }
-            }
+            },
+            'servers_statuses': {
+                Row: {
+                    uuid: string,
+                    server_uuid: string,
+                    country: string,
+                    status: boolean,
+                    'info_page_available': boolean,
+                    'created_at': string,
+                }
+            },
         }
     }
 }

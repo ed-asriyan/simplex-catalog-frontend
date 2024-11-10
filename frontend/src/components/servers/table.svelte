@@ -1,6 +1,6 @@
 <script lang="ts">
     import { fetchServers, type FetchParams, type Server } from '../../database';
-    import QrCodeModal from './qr-code-modal.svelte';
+    import ServerModal from './server-modal/index.svelte';
     import LineUri from './line-uri.svelte';
     import LineStatus from './line-status.svelte';
     import LineDate from './line-date.svelte';
@@ -54,7 +54,7 @@
         }
     };
 
-    let qrCodeServers: Server[] = $state([]);
+    let serversModal: Server[] = $state([]);
 
     const changePage = async function (pageCount: number, newPage: number) {
         if (newPage < 1 || newPage > pageCount) {
@@ -86,7 +86,7 @@
     };
 </script>
 
-<QrCodeModal bind:servers={qrCodeServers} />
+<ServerModal bind:servers={serversModal} />
 
 <select bind:value={pageSize} class="uk-select uk-width-small@m uk-margin-small-bottom uk-width-1-1@s">
     {#each [5, 10, 20, 50] as size}
@@ -100,7 +100,7 @@
     </div>
 {:then {servers, count, pageCount }}
     <button class="uk-button uk-button-secondary uk-float-right uk-width-auto@m uk-width-1-1@s" 
-            onclick={() => qrCodeServers = getSelectedServers(servers)}
+            onclick={() => serversModal = getSelectedServers(servers)}
             disabled={$selectedServers.length < 2}
             uk-tooltip={$selectedServers.length < 2 ? "Select 2 or more servers" : ""}
         >
@@ -120,10 +120,10 @@
                 <th></th>
                 <th>Server</th>
                 <th>Country</th>
-                <th>QR Code</th>
                 <th>Status</th>
                 <th>Uptime</th>
                 <th>Last Check</th>
+                <th>QR Code</th>
             </tr>
         </thead>
         <tbody class="uk-list-striped">
@@ -146,9 +146,6 @@
                             </span>
                         </td>
                         <td>
-                            <button class="uk-button uk-button-secondary uk-button-small" onclick={() => qrCodeServers = [server]}>QR</button>
-                        </td>
-                        <td>
                             <LineStatus status={server.status} />
                         </td>
                         <td>
@@ -156,6 +153,9 @@
                         </td>
                         <td>
                             <LineDate date={server.lastCheck} />
+                        </td>
+                        <td>
+                            <button class="uk-button uk-button-secondary uk-button-small" onclick={() => serversModal = [server]}>QR & stats</button>
                         </td>
                     </tr>
                 {/each}
@@ -199,7 +199,7 @@
                             Status: 
                             <LineStatus status={server.status} />
                         </div>
-                        <button class="uk-block uk-margin-top uk-width-1-1 uk-button uk-button-secondary uk-button-small" onclick={() => qrCodeServers = [server]}>QR Code</button>
+                        <button class="uk-block uk-margin-top uk-width-1-1 uk-button uk-button-secondary uk-button-small" onclick={() => serversModal = [server]}>QR & stats</button>
                     </div>
                 </div>
             </li>

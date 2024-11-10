@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
-import { supabaseKey, supabaseServersQuickViewTableName, supabaseServersTableName, supabaseUrl } from './settings';
+import { supabaseKey, supabaseServersQuickViewTableName, supabaseServersStatusesTableName, supabaseServersTableName, supabaseUrl } from './settings';
 import type { Database } from './database.types';
 
 export interface ServerUri {
@@ -62,17 +62,35 @@ class Server {
     }
 }
 
-export type Column = keyof Server;
+export class ServerStatus {
+    uuid: string;
+    serverUuid: string;
+    country: string;
+    status: boolean;
+    infoPageAvailable: boolean;
+    createdAt: Date;
+
+    constructor(data: Database.public.Tables['servers_statuses']['Row']) {
+        this.uuid = data.uuid;
+        this.serverUuid = data.server_uuid;
+        this.country = data.country;
+        this.status = data.status;
+        this.infoPageAvailable = data['info_page_available'];
+        this.createdAt = new Date(data['created_at']);
+    }
+}
+
+export type ServerColumn = keyof Server;
 
 const supabase = createClient<Database>(supabaseUrl, supabaseKey);
 
 export interface Sort {
-    column: Column;
+    column: ServerColumn;
     direction: 'asc' | 'desc';
 }
 
 export interface Filter {
-    column: Column;
+    column: ServerColumn;
     value: string;  
 }
 
@@ -101,6 +119,18 @@ export const fetchServers = async function (params: FetchParams): Promise<{ serv
         servers: data.map(rawValue => new Server(rawValue)),
         count,
     };
+};
+
+export const fetchServerStatuses = async function (serverUuids: string[]): Promise<{ servers: ServerStatus[], count: number }> {
+    let query = supabase.from(supabaseServersStatusesTableName).select('*');
+
+    query = query.in('server_uuid', serverUuids);
+    query = query.order('created_at', { ascending: true });
+
+    const { data, error } = await query.returns<Database.public.Tables['servers_quick_view']['Row']>();
+    if (error) throw error;
+
+    return data.map(rawValue => new ServerStatus(rawValue));
 };
 
 export const fetchCountries = async function (): Promise<Set<string[]>> {
