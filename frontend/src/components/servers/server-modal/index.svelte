@@ -9,6 +9,7 @@
     import LineUptime from '../line-uptime.svelte';
     import Modal from '../../modal.svelte';
     import Stats from './stats.svelte';
+    import LineServerInfo from '../line-server-info.svelte';
 
 	interface Props {
 		servers: Server[];
@@ -66,8 +67,10 @@
 				<span class="uk-margin-small-right">
 					<LineCountry country={server.country} />
 				</span>
-				<LineStatus status={server.status} />
-				&nbsp;
+				<LineServerInfo server={server} icon={true}/>
+				<span class="uk-margin-small-right uk-margin-small-left">
+					<LineStatus status={server.status} />
+				</span>
 				<LineUptime server={server} />
 			</div>
 
