@@ -27,10 +27,21 @@
 
 <div class="uk-text-center">
 	{#await fetchServerStatuses(servers.map(({uuid}) => uuid))}
-		<div uk-spinner="ratio: 3"></div>
+		<div class="loader uk-flex uk-flex-middle uk-flex-center">
+			<div uk-spinner="ratio: 3"></div>
+		</div>
 	{:then allStatuses}
 		{#each groupStatusesByServer(allStatuses) as server (server.uuid)}
 			<Plot statuses={server.statuses} />
 		{/each}
 	{/await}
 </div>
+
+<style>
+	.loader {
+		height: 16rem;
+		align-items: center;
+		justify-content: center;
+	}
+</style>
+	 
