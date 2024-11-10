@@ -9,27 +9,20 @@
 
     let { server }: Props = $props();
 
-    let copyTumbler: string = $state('');
-    let timeout: number;
-    const copyToClipboard = function (e: Event, str: string) {
-        e.preventDefault();
-        const input = document.createElement('input');
-        input.setAttribute('value', str);
-        document.body.appendChild(input);
-        input.select();
-        document.execCommand('copy');
-        document.body.removeChild(input);
-
-        copyTumbler = str;
-        if (timeout) clearTimeout(timeout);
-        timeout = setTimeout(() => copyTumbler = '', 4000);
+    let copyTimeout: number = $state(NaN);
+    const copyToClipboard = function (str: string) {
+        navigator.clipboard.writeText(str);
+        copyTimeout && clearTimeout(copyTimeout);
+        copyTimeout = setTimeout(() => {
+            copyTimeout = NaN;
+        }, 4000);
     };
 
     let maskedUri: string = $derived(server.parsedUri.domain || server.uri);
 </script>
 
-<span class="pointer uk-text-nowrap" uk-tooltip="Click to copy full URI" onclick={e => copyToClipboard(e, server.uri)}>
-    {#if copyTumbler === server.uri}
+<span class="pointer uk-text-nowrap" uk-tooltip="Click to copy full URI" onclick={() => copyToClipboard(server.uri)}>
+    {#if isFinite(copyTimeout)}
         Copied to clipboard
     {:else}
         <a>
