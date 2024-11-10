@@ -25,17 +25,20 @@
         style:width={width}
         style:height={height}
     >
+		<img class="close pointer" src="https://img.icons8.com/fluency-systems-regular/50/delete-sign--v1.png" alt="close" onclick={() => open = false}/>
         {@render children?.()}
     </dialog>
 {/if}
 
 <style lang="scss">
+	$padding: 1rem;
+
 	dialog {
 		border-radius: 0.2em;
         max-height: 90vh;
         overflow: scroll;
 		border: none;
-		padding: 1rem;
+		padding: $padding;
 
 		&::backdrop {
 			background: rgba(0, 0, 0, 0.3);
@@ -68,6 +71,21 @@
 			opacity: 0;
 		}
 		to {
+			opacity: 1;
+		}
+	}
+
+	.close {
+		position: absolute;
+		top: $padding;
+		right: $padding;
+		height: 1.5rem;
+		width: 1.5rem;
+		opacity: 0.5;
+
+		transition: opacity 0.2s ease-out;
+
+		&:hover {
 			opacity: 1;
 		}
 	}
