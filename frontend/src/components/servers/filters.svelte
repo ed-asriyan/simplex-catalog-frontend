@@ -17,7 +17,7 @@
     const statusFilter = new QueryStore('filter-status', '1', ['0', '1', 'any']);
     const infoPageFilter = new QueryStore('filter-info-page', 'any', ['0', '1', 'any']);
     const flagedFilter = new QueryStore('filter-flagged', 'any', ['flagged', 'unflagged', 'any']);
-    const sortColumn = new QueryStore('filter-sort-column', 'lastCheck', ['uri', 'status', 'lastCheck', 'uptime7', 'uptime30', 'uptime90']);
+    const sortColumn = new QueryStore('filter-sort-column', 'last_check', ['uri', 'status', 'last_check', 'uptime7', 'uptime30', 'uptime90']);
     const sortDirection = new QueryStore('filter-sort-direction', 'desc', ['asc', 'desc']);
 
 
