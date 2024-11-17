@@ -11,14 +11,14 @@
 
     let { params = $bindable() }: Props = $props();
 
-    const typeFilter = new QueryStore('filter-type', 'smp');
+    const typeFilter = new QueryStore('filter-type', 'smp', ['smp', 'xftp']);
     const uriFilter = new QueryStore('filter-uri', '');
     const countriesFilter = new QueryStoreList('filter-country', []);
-    const statusFilter = new QueryStore('filter-status', '1');
-    const infoPageFilter = new QueryStore('filter-info-page', 'any');
-    const flagedFilter = new QueryStore('filter-flagged', 'any');
-    const sortColumn = new QueryStore('filter-sort-column', 'lastCheck');
-    const sortDirection = new QueryStore('filter-sort-direction', 'desc');
+    const statusFilter = new QueryStore('filter-status', '1', ['0', '1', 'any']);
+    const infoPageFilter = new QueryStore('filter-info-page', 'any', ['0', '1', 'any']);
+    const flagedFilter = new QueryStore('filter-flagged', 'any', ['flagged', 'unflagged', 'any']);
+    const sortColumn = new QueryStore('filter-sort-column', 'lastCheck', ['uri', 'status', 'lastCheck', 'uptime7', 'uptime30', 'uptime90']);
+    const sortDirection = new QueryStore('filter-sort-direction', 'desc', ['asc', 'desc']);
 
 
     const createFilter = function(params: {

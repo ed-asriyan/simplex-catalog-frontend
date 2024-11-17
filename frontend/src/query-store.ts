@@ -32,14 +32,23 @@ export class QueryStore implements Writable<string> {
     readonly key: string;
     readonly defaultValue: string;
     private readonly store: Writable<string>;
+    readonly permittedValues: string[];
 
-    constructor (key: string, defaultValue: string) {
+    constructor (key: string, defaultValue: string, permittedValues: string[] = []) {
         this.key = key;
         this.defaultValue = defaultValue;
-        this.store = writable<string>(getQueryParamsFromHash(this.key) || this.defaultValue);
+        this.permittedValues = permittedValues;
+        let value = getQueryParamsFromHash(this.key) || this.defaultValue;
+        if (this.permittedValues.length > 0 && !this.permittedValues.includes(value)) {
+            value = this.defaultValue;
+        }
+        this.store = writable<string>(value);
     }
 
     set(value: string): void {
+        if (this.permittedValues.length > 0 && !this.permittedValues.includes(value)) {
+            value = this.defaultValue;
+        }
         setQueryParamInHash(this.key, value);
         this.store.set(value);
     }
