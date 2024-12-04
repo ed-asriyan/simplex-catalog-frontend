@@ -1,0 +1,29 @@
+name: CI (PR)
+
+on:
+  pull_request_target:
+    branches:
+      - master
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+
+      - name: Save .env file
+        env:
+          ENV_FILE_CONTENT: ${{ secrets.ENV_FILE_CONTENT }}
+        shell: bash
+        run: |
+          echo "$ENV_FILE_CONTENT" > .env
+
+      - name: Append DRY=1 to .env file
+        run: echo -e "\nDRY=1" >> .env
+
+      - name: Run validation
+        run: make validate

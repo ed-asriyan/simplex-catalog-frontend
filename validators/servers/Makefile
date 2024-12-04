@@ -1,3 +1,3 @@
 validate:
-	docker compose up validator
+	docker compose run validator
 	docker compose stop

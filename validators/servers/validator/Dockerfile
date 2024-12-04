@@ -23,6 +23,7 @@ ENV SUPABASE_KEY=
 ENV SMP_CLIENT_URI=
 ENV SUPABASE_SERVERS_TABLE_NAME=
 ENV SUPABASE_SERVERS_STATUS_TABLE_NAME=
+ENV DRY=
 
 CMD sleep 3 && ./validate \
     --maxmind-db-path GeoLite2-Country.mmdb \
@@ -30,4 +31,5 @@ CMD sleep 3 && ./validate \
     --supabase-key $SUPABASE_KEY \
     --smp-client-ws-url $SMP_CLIENT_URI \
     --supabase-servers-table-name $SUPABASE_SERVERS_TABLE_NAME \
-    --supabase-servers-status-table-name $SUPABASE_SERVERS_STATUS_TABLE_NAME
+    --supabase-servers-status-table-name $SUPABASE_SERVERS_STATUS_TABLE_NAME \
+    $( [ -n "$DRY" ] && echo "--dry" )

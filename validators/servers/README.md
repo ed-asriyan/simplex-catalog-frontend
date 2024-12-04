@@ -5,12 +5,12 @@ Frontend repository: [simplex-directory-frontend](https://github.com/ed-asriyan/
 
 ## How to run
 The project uses [Supabase](https://supabase.com) as storage for servers and their status history. So you should setup
-Supabase project first using [the instruction below](#setup-supbase-project). When the project is up and running, you
+Supabase project first using [the instruction below](#setup-supabase-project). When the project is up and running, you
 should setup a validator which will go through servers list in the database and write status history by schedule. There
 are two ways to do that: [run locally](#run-locally) (e.g. if you want to self-host it); or
 [run on GitHub Acions](#run-on-github-actions).
 
-## Setup Supbase project
+## Setup Supabase project
 1. Setup [Supabase](https://supabase.com) account, create project
 2. Run [init_db.sql](./init_db.sql) in `public` schema (e.g using SQL editor page in Supabase project)
 
