@@ -17,7 +17,7 @@ jobs:
         id: cache-docker
         with:
           path: /tmp/docker
-          key: ${{ runner.os }}-docker-${{ github.sha }}
+          key: docker-${{ github.sha }}
 
       - name: Load Docker images
         run: |
