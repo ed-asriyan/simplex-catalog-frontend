@@ -21,7 +21,7 @@ pub fn parse_uri(uri: &str) -> Result<Server, Box<dyn std::error::Error>> {
         return Err("Invalid SMP/XFTP URI".into())
     };
 
-    if uri.ends_with(".onion") {
+    if uri.contains(".onion") {
         if uri.contains(',') {
             Ok(Server {
                 domain_type: ServerDomainType::Onion,
