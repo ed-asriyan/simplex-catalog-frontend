@@ -48,6 +48,10 @@ impl GeoIp {
     }
 
     pub fn get_country(&self, ip_or_domain: &str) -> Result<String, Box<dyn Error>> {
+        if ip_or_domain.ends_with(".onion") {
+            return Ok("TOR".to_string());
+        }
+
         let ip: IpAddr = if is_ip_address(&ip_or_domain) {
             str_to_ip(&ip_or_domain)?  
         } else {

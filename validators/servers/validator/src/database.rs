@@ -13,10 +13,10 @@ pub struct Server {
 
 #[derive(Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
-pub struct ServerStatus {
-    pub server_uuid: String,
+pub struct ServerStatus<'a> {
+    pub server_uuid: &'a str,
     pub status: bool,
-    pub country: Option<String>,
+    pub countries: &'a str,
     pub info_page_available: bool,
 }
 
@@ -56,7 +56,7 @@ impl<'a> Database<'a> {
         Ok(serde_json::from_str(&response)?)
     }
 
-    pub async fn server_statuses_add(&self, status: &ServerStatus) -> Result<(), Box<dyn Error>> {
+    pub async fn server_statuses_add(&self, status: &ServerStatus<'_>) -> Result<(), Box<dyn Error>> {
         self.client
             .from(self.servers_status_table_name)
             .insert(serde_json::to_string(&[status])?)

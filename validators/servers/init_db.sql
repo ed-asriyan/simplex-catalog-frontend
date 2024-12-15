@@ -29,7 +29,7 @@ CREATE TABLE servers_statuses (
     uuid UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     server_uuid UUID NOT NULL,
     info_page_available BOOLEAN,
-    country TEXT,
+    countries TEXT,
     status BOOLEAN,
     created_at TIMESTAMP DEFAULT NOW(),
     FOREIGN KEY (server_uuid) REFERENCES servers (uuid) ON DELETE CASCADE
@@ -50,7 +50,7 @@ CREATE VIEW servers_quick_view AS
     WITH latest_status AS (
         SELECT 
             server_uuid,
-            country,
+            countries,
             status,
             created_at,
             info_page_available,
@@ -98,7 +98,7 @@ CREATE VIEW servers_quick_view AS
     SELECT 
         servers.uuid AS uuid,
         servers.uri AS uri,
-        latest_status.country AS country,
+        latest_status.countries AS countries,
         latest_status.status AS status,
         latest_status.created_at AS last_check,
         latest_status.info_page_available as info_page_available,

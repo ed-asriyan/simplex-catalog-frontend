@@ -6,6 +6,7 @@ use clap::{Arg, ArgAction, parser::ValueSource};
 use log::{info, error};
 use rand::thread_rng;
 use rand::seq::SliceRandom;
+use itertools::Itertools;
 
 use validator::{
     create_command,
@@ -21,7 +22,6 @@ use validator::{
     uri_parser::{
         parse_uri,
         is_server_official,
-        ServerDomainType,
     },
     smp::{
         test_server,
@@ -50,55 +50,47 @@ async fn handle_server(
         info!("Done");
         return Ok(());
     }
-
-    let parsed_uri = parse_uri(&server.uri);
-    if let Err(_) = parsed_uri {
-        return Err(format!("Invalid URI: {}", server.uri).into());
-    }
-    let parsed_uri = parsed_uri.unwrap();
     
     info!("Testing {}...", server.uri);
     let status = test_server(&server.uri, args.smp_server_uri).await?;
     info!("Done: {}", status);
+
+    let addresses = parse_uri(&server.uri);
+    if let Err(_) = addresses {
+        return Err(format!("Invalid URI: {}", server.uri).into());
+    }
+    let addresses = addresses.unwrap().collect::<Vec<&str>>();
     
-    info!("Detecting country...");
-    let country: Option<String> = if let ServerDomainType::Dns = parsed_uri.domain_type {
-        if let Some(domain) = parsed_uri.info_page_domain {
-            match args.geoip.get_country(domain) {
-                Ok(country) => {
-                    info!("Done: {}", country);
-                    Some(country)
-                }
-                Err(e) => {
-                    error!("Error: {}", e);
-                    None
-                }
+    let countries = addresses.iter().map(|address| {
+        let domain = address.split(':').next().unwrap();
+
+        match args.geoip.get_country(domain) {
+            Ok(country) => {
+                Some(country)
             }
-        } else {
-            info!("No info page domain found. Skipping country detection.");
-            None
+            Err(e) => {
+                None
+            }
         }
-    } else {
-        info!("Onion domain detected. Skipping country detection.");
-        Some("TOR".to_string())
-    };
+    }).filter(|country| country.is_some()).map(|country| country.unwrap()).join(",");
+    info!("Done: {}", countries);
 
     info!("Checking info page availability...");
-    let info_page_available = if let Some(domain) = parsed_uri.info_page_domain {
-        let result = is_info_page_available(domain).await;
-        info!("Done: {}", result);
-        result
-    } else {
-        info!("No info page domain found. Skipping info page availability detection.");
-        false
-    };
-
+    let mut info_page_available = false;
+    for address in addresses {
+        if is_info_page_available(address).await {
+            info_page_available = true;
+            break;
+        }
+    }
+    info!("Done: {}", info_page_available);
+    
     info!("Adding server status...");
     if !args.dry {
         args.database.server_statuses_add(&ServerStatus {
-            server_uuid: server.uuid.clone(),
+            server_uuid: &server.uuid,
             status,
-            country,
+            countries: &countries,
             info_page_available,
         }).await?;
     } else {
