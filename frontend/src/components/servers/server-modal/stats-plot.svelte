@@ -58,12 +58,12 @@
         for (let i = 0; i < data.length; i++) {
             const start = data[i].createdAt;
             const end = (i < data.length - 1) ? data[i + 1].createdAt : now;
-            const country = data[i].country;
+            const countries = data[i].countries;
 
             const segmentWidth = timeScale(end) - timeScale(start);
             const segmentCenter = timeScale(start) + segmentWidth / 2;
 
-            // Draw country segments
+            // Draw countries segments
             svg.append("rect")
                 .attr("class", "canvas")
                 .attr("x", timeScale(start))
@@ -72,14 +72,14 @@
                 .attr("height", height)
                 .attr("fill", "lightgray");
 
-            // Add country label only if it doesn't overlap with the last label
+            // Add ies label only if it doesn't overlap with the last label
             if (segmentCenter - lastLabelPosition > minLabelSpacing) {
                 svg.append("text")
                     .attr("x", segmentCenter)
                     .attr("y", height + lineSpacing + height / 2)
                     .attr("dy", ".25em")
                     .attr("text-anchor", "middle")
-                    .text(getFlagEmoji(country))
+                    .text(countries.map(country => getFlagEmoji(country)).join(''))
                     .style("fill", "black")
                     .style("font-size", "12px");
 
@@ -133,7 +133,10 @@
                 <tr class="uk-text-left" class:uk-text-danger={!status.status} class:uk-text-success={status.status}>
                     <td>{status.createdAt.toLocaleString()}</td>
                     <td><LineStatus status={status.status} /></td>
-                    <td><LineCountry country={status.country} /></td>
+                    <td>
+                        {#each status.countries as country}
+                            <LineCountry country={country} />
+                        {/each}
                     <td>{status.infoPageAvailable ? 'Yes' : 'No'}</td>
                 </tr>
             {/each}

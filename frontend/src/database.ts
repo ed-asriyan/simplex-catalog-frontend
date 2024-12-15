@@ -44,7 +44,7 @@ class Server {
     uptime30: number;
     uptime90: number;
     lastCheck: string;
-    country: string;
+    countries: string[];
     parsedUri: ServerUri;
 
     constructor(data: Database.public.Tables['servers_quick_view']['Row']) {
@@ -56,7 +56,7 @@ class Server {
         this.uptime30 = data.uptime30;
         this.uptime90 = data.uptime90;
         this.lastCheck = data['last_check'];
-        this.country = data.country;
+        this.countries = data.countries?.split(',') || [];
 
         this.parsedUri = parseUri(this.uri);
     }
@@ -65,7 +65,7 @@ class Server {
 export class ServerStatus {
     uuid: string;
     serverUuid: string;
-    country: string;
+    countries: string[];
     status: boolean;
     infoPageAvailable: boolean;
     createdAt: Date;
@@ -73,7 +73,7 @@ export class ServerStatus {
     constructor(data: Database.public.Tables['servers_statuses']['Row']) {
         this.uuid = data.uuid;
         this.serverUuid = data.server_uuid;
-        this.country = data.country;
+        this.countries = data.countries?.split(',') || [];
         this.status = data.status;
         this.infoPageAvailable = data['info_page_available'];
         this.createdAt = new Date(data['created_at']);
@@ -134,10 +134,13 @@ export const fetchServerStatuses = async function (serverUuids: string[]): Promi
 };
 
 export const fetchCountries = async function (): Promise<Set<string[]>> {
-    const { data, error } = await supabase.from(supabaseServersQuickViewTableName).select('country').returns<Database.public.Tables['servers_quick_view']['Row']>();
+    const { data, error } = await supabase.from(supabaseServersQuickViewTableName).select('countries').returns<Database.public.Tables['servers_quick_view']['Row']>();
     if (error) throw error;
 
-    return new Set(data.map(({ country }) => country));
+    return new Set(data.reduce((list, { countries }) => {
+        if (!countries) return list;
+        return [...list, ...countries.split(',')];
+    }, []));
 };
 
 export const doesServerExist = async function (uri: string): Promise<boolean> {

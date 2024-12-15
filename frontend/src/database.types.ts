@@ -7,7 +7,7 @@ export interface Database {
                 Row: {
                     uuid: string,
                     uri: string,
-                    country: string,
+                    countries: string,
                     status: boolean,
                     uptime7: number,
                     uptime30: number,
@@ -25,7 +25,7 @@ export interface Database {
                 Row: {
                     uuid: string,
                     server_uuid: string,
-                    country: string,
+                    countries: string,
                     status: boolean,
                     'info_page_available': boolean,
                     'created_at': string,

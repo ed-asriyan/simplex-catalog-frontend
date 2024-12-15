@@ -38,7 +38,9 @@
             }
             const filteredCountriesFilter = params.countries?.filter(x => x);
             if (filteredCountriesFilter?.length) {
-                q.in('country', filteredCountriesFilter);
+                for (const country of filteredCountriesFilter) {
+                    q.like('countries', `%${country}%`);
+                }
             }
             if (params.status !== undefined) {
                 q.eq('status', params.status);
