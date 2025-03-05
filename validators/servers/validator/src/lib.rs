@@ -11,7 +11,6 @@ use std::io::Write;
 pub mod database;
 pub mod geoip;
 pub mod smp;
-pub mod uri_parser;
 
 pub fn init_logger() {
     Builder::new()

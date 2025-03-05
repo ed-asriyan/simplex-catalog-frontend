@@ -19,10 +19,6 @@ use validator::{
     geoip::{
         GeoIp,
     },
-    uri_parser::{
-        parse_uri,
-        is_server_official,
-    },
     smp::{
         test_server,
         is_info_page_available,
@@ -40,49 +36,29 @@ async fn handle_server(
     args: &Args<'_>,
     server: &Server,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    if is_server_official(&server.uri) {
-        info!("Server is official. Deleting...");
-        if !args.dry {
-            args.database.servers_delete(&server.uuid).await?;
-        } else {
-            info!("Running in dry mode. Skipping deletion.");
-        }
-        info!("Done");
-        return Ok(());
-    }
-    
-    info!("Testing {}...", server.uri);
-    let status = test_server(&server.uri, args.smp_server_uri).await?;
+    let uri = server.uri();
+
+    info!("Testing {}...", uri);
+    let status = test_server(&uri, args.smp_server_uri).await?;
     info!("Done: {}", status);
-
-    let addresses = parse_uri(&server.uri);
-    if let Err(_) = addresses {
-        return Err(format!("Invalid URI: {}", server.uri).into());
-    }
-    let addresses = addresses.unwrap().collect::<Vec<&str>>();
     
-    let countries = addresses.iter().map(|address| {
-        let domain = address.split(':').next().unwrap();
-
-        match args.geoip.get_country(domain) {
-            Ok(country) => {
-                Some(country)
-            }
-            Err(e) => {
-                None
-            }
+    let domain = if let Some(pos) = server.host.find(':') {
+        &server.host[..pos]
+    } else {
+        &server.host
+    };
+    let country = match args.geoip.get_country(&domain) {
+        Ok(country) => {
+            Some(country)
         }
-    }).filter(|country| country.is_some()).map(|country| country.unwrap()).join(",");
-    info!("Done: {}", countries);
+        Err(e) => {
+            None
+        }
+    };
+    info!("Done: {:?}", country);
 
     info!("Checking info page availability...");
-    let mut info_page_available = false;
-    for address in addresses {
-        if is_info_page_available(address).await {
-            info_page_available = true;
-            break;
-        }
-    }
+    let mut info_page_available = is_info_page_available(&domain).await;
     info!("Done: {}", info_page_available);
     
     info!("Adding server status...");
@@ -90,7 +66,7 @@ async fn handle_server(
         args.database.server_statuses_add(&ServerStatus {
             server_uuid: &server.uuid,
             status,
-            countries: &countries,
+            country: country.as_deref(),
             info_page_available,
         }).await?;
     } else {

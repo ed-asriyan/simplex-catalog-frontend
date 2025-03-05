@@ -8,7 +8,20 @@ pub type DatabaseClient = Postgrest;
 #[serde(rename_all = "camelCase")]
 pub struct Server {
     pub uuid: String,
-    pub uri: String,
+    pub protocol: i64,
+    pub identity: String,
+    pub host: String,
+}
+
+impl Server {
+    pub fn uri(&self) -> String {
+        let protocol = match self.protocol {
+            1 => "smp",
+            2 => "xftp",
+            _ => "unknown",
+        };
+        format!("{}://{}@{}", protocol, self.identity, self.host)
+    }
 }
 
 #[derive(Serialize, Deserialize)]
@@ -16,7 +29,7 @@ pub struct Server {
 pub struct ServerStatus<'a> {
     pub server_uuid: &'a str,
     pub status: bool,
-    pub countries: &'a str,
+    pub country: Option<&'a str>,
     pub info_page_available: bool,
 }
 
@@ -60,16 +73,6 @@ impl<'a> Database<'a> {
         self.client
             .from(self.servers_status_table_name)
             .insert(serde_json::to_string(&[status])?)
-            .execute()
-            .await?;
-        Ok(())
-    }
-
-    pub async fn servers_delete(&self, uuid: &str) -> Result<(), Box<dyn Error>> {
-        self.client
-            .from(self.servers_table_name)
-            .delete()
-            .eq("uuid", uuid)
             .execute()
             .await?;
         Ok(())
