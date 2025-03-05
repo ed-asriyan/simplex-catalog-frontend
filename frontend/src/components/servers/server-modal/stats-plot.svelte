@@ -58,7 +58,7 @@
         for (let i = 0; i < data.length; i++) {
             const start = data[i].createdAt;
             const end = (i < data.length - 1) ? data[i + 1].createdAt : now;
-            const countries = data[i].countries;
+            const country = data[i].country;
 
             const segmentWidth = timeScale(end) - timeScale(start);
             const segmentCenter = timeScale(start) + segmentWidth / 2;
@@ -79,7 +79,7 @@
                     .attr("y", height + lineSpacing + height / 2)
                     .attr("dy", ".25em")
                     .attr("text-anchor", "middle")
-                    .text(countries.map(country => getFlagEmoji(country)).join(''))
+                    .text(getFlagEmoji(country))
                     .style("fill", "black")
                     .style("font-size", "12px");
 
@@ -134,9 +134,8 @@
                     <td>{status.createdAt.toLocaleString()}</td>
                     <td><LineStatus status={status.status} /></td>
                     <td>
-                        {#each status.countries as country}
-                            <LineCountry country={country} />
-                        {/each}
+                        <LineCountry country={status.country} />
+                    </td>
                     <td>{status.infoPageAvailable ? 'Yes' : 'No'}</td>
                 </tr>
             {/each}

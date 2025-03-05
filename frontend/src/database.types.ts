@@ -3,11 +3,13 @@ export type Json = string | number | boolean | null | { [key: string]: Json | un
 export interface Database {
     public: {
         Tables: {
-            'servers_quick_view': {
+            'servers_all': {
                 Row: {
                     uuid: string,
-                    uri: string,
-                    countries: string,
+                    host: string,
+                    protocol: number,
+                    identity: string,
+                    country: string,
                     status: boolean,
                     uptime7: number,
                     uptime30: number,
@@ -16,16 +18,16 @@ export interface Database {
                     'info_page_available': boolean,
                 }
             },
-            'servers': {
+            'parse_queue': {
                 Insert: {
                     uri: string,
                 }
             },
-            'servers_statuses': {
+            'server_status': {
                 Row: {
                     uuid: string,
                     server_uuid: string,
-                    countries: string,
+                    country: string,
                     status: boolean,
                     'info_page_available': boolean,
                     'created_at': string,

@@ -11,8 +11,8 @@
 
     let { params = $bindable() }: Props = $props();
 
-    const typeFilter = new QueryStore('filter-type', 'smp', ['smp', 'xftp']);
-    const uriFilter = new QueryStore('filter-uri', '');
+    const protocolFilter = new QueryStore('filter-protocol', 'smp', ['smp', 'xftp']);
+    const hostFilter = new QueryStore('filter-host', '');
     const countriesFilter = new QueryStoreList('filter-country', []);
     const statusFilter = new QueryStore('filter-status', '1', ['0', '1', 'any']);
     const infoPageFilter = new QueryStore('filter-info-page', 'any', ['0', '1', 'any']);
@@ -22,24 +22,24 @@
 
 
     const createFilter = function(params: {
-        type?: string,
-        uri?: string,
+        protocol?: 'smp' | 'xftp',
+        host?: string,
         countries?: string[],
         status?: boolean,
         infoPage?: boolean,
         flaged?: boolean,
     }) {
         return (q: any) => {
-            if (params.type) {
-                q.like('uri', params.type === 'smp' ? 'smp://%' : 'xftp://%')
+            if (params.protocol) {
+                q.eq('protocol', params.protocol === 'smp' ? 1 : 2)
             }
-            if (params.uri) {
-                q.like('uri', params.uri);
+            if (params.host) {
+                q.like('host', `%${params.host}%`);
             }
             const filteredCountriesFilter = params.countries?.filter(x => x);
             if (filteredCountriesFilter?.length) {
                 for (const country of filteredCountriesFilter) {
-                    q.like('countries', `%${country}%`);
+                    q.eq('country', country);
                 }
             }
             if (params.status !== undefined) {
@@ -79,8 +79,8 @@
             limit: 0,
             offset: 0,
             filters: createFilter({
-                type: $typeFilter,
-                uri: $uriFilter,
+                protocol: $protocolFilter,
+                host: $hostFilter,
                 countries: $countriesFilter,
                 status: $statusFilter === '1' ? true : $statusFilter === '0' ? false : undefined,
                 infoPage: $infoPageFilter === '1' ? true : $infoPageFilter === '0' ? false : undefined,
@@ -93,24 +93,24 @@
         };
     });
 
-    let _uriFilter;
+    let _hostFilter;
     $effect(() => {
-        _uriFilter = $uriFilter;
+        _hostFilter = $hostFilter;
     });
 </script>
 
 <form class="uk-form-stacked">
     <div class="uk-margin">
-        <button class="uk-button uk-button-default" class:uk-button-secondary={$typeFilter === 'smp'} onclick={e => { e.preventDefault(); $typeFilter = 'smp'}}>SMP</button>
-        <button class="uk-button uk-button-default" class:uk-button-secondary={$typeFilter === 'xftp'}  onclick={e => {e.preventDefault(); $typeFilter = 'xftp'}}>XFTP</button>
+        <button class="uk-button uk-button-default" class:uk-button-secondary={$protocolFilter === 'smp'} onclick={e => { e.preventDefault(); $protocolFilter = 'smp'}}>SMP</button>
+        <button class="uk-button uk-button-default" class:uk-button-secondary={$protocolFilter === 'xftp'}  onclick={e => {e.preventDefault(); $protocolFilter = 'xftp'}}>XFTP</button>
     </div>
 
     <div class="uk-margin">
         <label class="uk-form-label" for="form-uri">
-            URI (like <a href="https://www.postgresqltutorial.com/postgresql-tutorial/postgresql-like" target="_blank">%Postgres% syntax</a>):
+            Server domain:
         </label>
         <div class="uk-form-controls">
-            <input class="uk-input" id="form-uri" type="text" onkeyup={delay(() => $uriFilter = _uriFilter, 1500)} bind:value={_uriFilter}>
+            <input class="uk-input" id="form-uri" type="text" onkeyup={delay(() => $hostFilter = _hostFilter, 1500)} bind:value={_hostFilter}>
         </div>
     </div>
 

@@ -1,32 +1,22 @@
 <script lang="ts">
     import GithubCorner from './github-corner.svelte';
     import ServersTable from './servers/index.svelte';
-    import { addServer, doesServerExist, } from '../database';
-
-    const isServerOfficial = function (uri: string): boolean {
-        return uri.includes('simplex.im');
-    };
+    import { addServer, } from '../database';
 
     const addServerClick = async function () {
-        let input = prompt('Enter SMP or XFTP server URI:');
-        input = input?.trim();
+        const input = prompt('Enter SMP or XFTP server URI:')?.trim();
         if (!input) return;
 
-        if (isServerOfficial(input)) {
-            alert('You entered official SimpleX server. Please add only unofficial SimpleX servers');
-            return;
-        }
-
         try {
-            if (await doesServerExist(input)) {
-                alert('Server already added to the directory');
-                return;
-            }
             await addServer(input.trim());
-            alert('The server is added to the database. If the server is available, it will apper in the table for everyone soon');
+            alert('The server is added to the database. If the server is available, it will soon appear in the table for everyone.');
         } catch (e) {
             if (e.message.includes('violates check constraint')) {
                 alert('Invalid URI. Please verify that you entered it correctly.')
+            } else if (e.message.includes('duplicate key value')) {
+                alert('The server is already in the database');
+            } else {
+                alert('Error :( Open dev console for more details');
             }
             throw e;
         }

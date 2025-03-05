@@ -2,70 +2,47 @@ import { createClient } from '@supabase/supabase-js';
 import { supabaseKey, supabaseServersQuickViewTableName, supabaseServersStatusesTableName, supabaseServersTableName, supabaseUrl } from './settings';
 import type { Database } from './database.types';
 
-export interface ServerUri {
-    type: 'smp' | 'xftp';
-    domain: string;
-};
-
-const domainPattern = /(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}/g;
-const extractDomain = function (inputString: string): string | null {
-    const matches = inputString.match(domainPattern);
-    return matches ? matches[0] : null;
-}
-
-const parseUri = function (uri: string): ServerUri {
-    const type = uri.split(':')[0] as 'smp' | 'xftp';
-    if (uri.endsWith('.onion')) {
-        if (uri.includes(',')){
-            return {
-                type,
-                domain: extractDomain(uri),
-            };
-        } else {
-            return {
-                type,
-                domain: null,
-            };
-        }
-    } else {
-        return {
-            type,
-            domain: extractDomain(uri),
-        }
-    }
-};
 
 class Server {
     uuid: string;
-    uri: string;
+    host: string;
+    identity: string;
+    protocol: number;
     infoPageAvailable: boolean;
     status: boolean;
     uptime7: number;
     uptime30: number;
     uptime90: number;
     lastCheck: string;
-    countries: string[];
-    parsedUri: ServerUri;
+    country: string;
 
     constructor(data: Database.public.Tables['servers_quick_view']['Row']) {
         this.uuid = data.uuid;
-        this.uri = data.uri;
+        this.host = data.host;
+        this.identity = data.identity;
+        this.protocol = data.protocol;
         this.infoPageAvailable = data['info_page_available'];
         this.status = data.status;
         this.uptime7 = data.uptime7;
         this.uptime30 = data.uptime30;
         this.uptime90 = data.uptime90;
         this.lastCheck = data['last_check'];
-        this.countries = data.countries?.split(',') || [];
+        this.country = data.country;
+    }
 
-        this.parsedUri = parseUri(this.uri);
+    get protocolString() {
+        return this.protocol === 1 ? 'smp' : 'xftp';
+    }
+
+    get uri() {
+        return `${this.protocolString}://${this.identity}@${this.host}`;
     }
 }
 
 export class ServerStatus {
     uuid: string;
     serverUuid: string;
-    countries: string[];
+    country: string;
     status: boolean;
     infoPageAvailable: boolean;
     createdAt: Date;
@@ -73,7 +50,7 @@ export class ServerStatus {
     constructor(data: Database.public.Tables['servers_statuses']['Row']) {
         this.uuid = data.uuid;
         this.serverUuid = data.server_uuid;
-        this.countries = data.countries?.split(',') || [];
+        this.country = data.country;
         this.status = data.status;
         this.infoPageAvailable = data['info_page_available'];
         this.createdAt = new Date(data['created_at']);
@@ -134,21 +111,11 @@ export const fetchServerStatuses = async function (serverUuids: string[]): Promi
 };
 
 export const fetchCountries = async function (): Promise<Set<string[]>> {
-    const { data, error } = await supabase.from(supabaseServersQuickViewTableName).select('countries').returns<Database.public.Tables['servers_quick_view']['Row']>();
+    const { data, error } = await supabase.from(supabaseServersQuickViewTableName).select('country').returns<Database.public.Tables['servers_quick_view']['Row']>();
     if (error) throw error;
 
-    return new Set(data.reduce((list, { countries }) => {
-        if (!countries) return list;
-        return [...list, ...countries.split(',')];
-    }, []));
-};
+    return new Set(data.map(({ country }) => country));
 
-export const doesServerExist = async function (uri: string): Promise<boolean> {
-    const { data, error } = await supabase.from(supabaseServersTableName)
-        .select('*')
-        .eq('uri', uri);
-    if (error) throw error;
-    return !!data.length;
 };
 
 export const addServer = async function (uri: string) {

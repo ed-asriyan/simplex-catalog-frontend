@@ -65,9 +65,7 @@
 			{/key}
 			<div>
 				<span class="uk-margin-small-right">
-					{#each server.countries as country}
-						<LineCountry country={country} />
-					{/each}
+					<LineCountry country={server.country} />
 				</span>
 				<LineServerInfo server={server} icon={true}/>
 				<span class="uk-margin-small-right uk-margin-small-left">

@@ -18,7 +18,7 @@
         }, 4000);
     };
 
-    let maskedUri: string = $derived(server.parsedUri.domain || server.uri);
+    let maskedUri: string = $derived(server.host);
 </script>
 
 <span class="pointer uk-text-nowrap" uk-tooltip="Click to copy full URI" onclick={() => copyToClipboard(server.uri)}>

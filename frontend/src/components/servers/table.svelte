@@ -140,9 +140,7 @@
                             <LineUri server={server} />
                         </td>
                         <td>
-                            {#each server.countries as country}
-                                <LineCountry country={country} />
-                            {/each}
+                            <LineCountry country={server.country} />
                             <span class="uk-margin-left">
                                 <LineServerInfo server={server} icon={true} />
                             </span>
@@ -182,9 +180,7 @@
                             &nbsp;
                             <Flag value={$flagStore.has(server.uuid)} on:click={() => flagStore.toggle(server.uuid) } />
                             &nbsp;
-                            {#each server.countries as country}
-                                <LineCountry country={country} />
-                            {/each}
+                            <LineCountry country={server.country} />
                             &nbsp;
                             <LineUri server={server} />
                         </div>
