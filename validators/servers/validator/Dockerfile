@@ -25,7 +25,7 @@ ENV SUPABASE_SERVERS_TABLE_NAME=
 ENV SUPABASE_SERVERS_STATUS_TABLE_NAME=
 ENV DRY=
 
-CMD sleep 3 && ./validate \
+CMD echo "Sleeping 10 seconds to let TOR start..." && sleep 10 && ./validate \
     --maxmind-db-path GeoLite2-Country.mmdb \
     --supabase-url $SUPABASE_URL \
     --supabase-key $SUPABASE_KEY \

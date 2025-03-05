@@ -1,6 +1,12 @@
 services:
+  tor:
+    image: dperson/torproxy
+    command: -n
+
   smp-client:
     build: smp-client
+    depends_on:
+      - tor
 
   validator:
     build:
