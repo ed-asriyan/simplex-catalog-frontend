@@ -1,53 +1,60 @@
 <script lang="ts">
-    import { fetchServers, type FetchParams, type Server } from '../../database';
+    import { fetchServers, type Server, type Filter, type Sort, fetchCountries, } from '../../database';
     import ServerModal from './server-modal/index.svelte';
     import LineUri from './line-uri.svelte';
     import LineStatus from './line-status.svelte';
     import LineDate from './line-date.svelte';
-    import { flagStore } from './flagged';
-    import Flag from './flag.svelte';
+    import Labels from './labels.svelte';
     import LineServerInfo from './line-server-info.svelte';
     import LineUptime from './line-uptime.svelte';
     import LineCountry from './line-country.svelte';
-    import { QueryStoreList } from '../../query-store';
+    import { QueryStore, QueryStoreList } from '../../query-store';
+    import TableHeader from './table-header.svelte';
 
-    interface Props {
-        params: FetchParams;
-    }
-
-    let { params }: Props = $props();
+    let servers = $state<Server[]>([]);
 
     let pageSize: number = $state(10);
+    let pageNumber: number = $state(1);
 
-    let page: number = $state(1);
+    let refreshRand: number = $state(0);
+
+    let filter: Filter = $state({
+        uuids: null,
+        protocol: 'smp',
+        infoPageAvailable: null,
+        identity: null,
+        host: '',
+        countries: null,
+        status: true,
+        infoPage: 'any',
+        type: 'any',
+        uptime7: null,
+        uptime30: null,
+        uptime90: null,
+    });
+    let sort: Sort = $state({ column: 'lastCheck', direction: 'desc' });
 
     $effect(() => {
-        if (params) {
-            page = 1;
+        if (filter) {
+            pageNumber = 1;
         }
-    });
+    })
 
-    let localParams = $derived({
-        ...params,
-        limit: pageSize,
-        offset: pageSize * (page - 1),
-    });
-
-    const fetch = async function (params: FetchParams): Promise<{ servers: Server[], count: number, pageCount: number }> {
-        if (!isFinite(pageSize) || !isFinite(page)) {
+    const fetch = async function (filter: Filter, sort: Sort, pageSize: number, pageNumber: number): Promise<{ servers: Server[], count: number, pageCount: number }> {
+        if (!isFinite(pageSize)) {
             pageSize = 10;
-            page = 1;
+        }
+        if (!isFinite(pageNumber)) {
+            pageNumber = 1;
         }
         try {
-            const data = await fetchServers({
-                ...params,
-                limit: pageSize,
-                offset: pageSize * (page - 1),
-            });
+            const data = await fetchServers(filter, sort, pageSize, pageNumber);
+            servers = data.servers;
             return {
-                ...data,
-                pageCount: Math.ceil(data.count / pageSize)
-            }
+                servers: data.servers,
+                count: data.count,
+                pageCount: Math.ceil(data.count / pageSize),
+            };
         } catch (e) {
             alert('Error :( Open dev console for more details');
             throw e;
@@ -60,195 +67,179 @@
         if (newPage < 1 || newPage > pageCount) {
             return;
         }
-        page = newPage;
+        pageNumber = newPage;
     };
 
-    const selectedServers = new QueryStoreList('selected-servers', []);
+    const selectedServersUuid = new QueryStoreList('selected-servers', []);
 
     const toggleSelectedServer = function (server: Server) {
-        if ($selectedServers.includes(server.uuid)) {
-            $selectedServers = $selectedServers.filter((uuid: string) => server.uuid !== uuid);
+        if ($selectedServersUuid.includes(server.uuid)) {
+            $selectedServersUuid = $selectedServersUuid.filter((uuid: string) => server.uuid !== uuid);
         } else {
-            $selectedServers = [...$selectedServers, server.uuid];
-        }
-    };
-
-    const toggleAllSelectedServers = function (servers: Server[]) {
-        if ($selectedServers.length) {
-            $selectedServers = [];
-        } else {
-            $selectedServers = servers.map(({ uuid }) => uuid);
+            $selectedServersUuid = [...$selectedServersUuid, server.uuid];
         }
     };
 
     const getSelectedServers = function (servers: Server[]) {
-        return servers.filter(({ uuid }) => $selectedServers.includes(uuid));
+        return servers.filter(({ uuid }) => $selectedServersUuid.includes(uuid));
     };
+
+    const sortColumn = new QueryStore('filter-sort-column', 'last_check', ['protocol', 'status', 'last_check', 'uptime7', 'uptime30', 'uptime90', 'info_page_available']);
+    const sortDirection = new QueryStore('filter-sort-direction', 'desc', ['asc', 'desc']);
+
+    $effect(() => {
+        sort = {
+            column: $sortColumn,
+            direction: $sortDirection,
+        };
+    });
 </script>
 
 <ServerModal bind:servers={serversModal} />
 
-<select bind:value={pageSize} class="uk-select uk-width-small@m uk-margin-small-bottom uk-width-1-1@s">
-    {#each [5, 10, 20, 50] as size}
+<span class="uk-text-large pointer uk-float-left uk-margin-left uk-margin-right uk-width-auto@m uk-width-1-1 uk-text-center" onclick={() => ++refreshRand} uk-tooltip="Refresh">
+    🔄
+</span>
+<div class="uk-margin-small uk-width-1-1 uk-width-auto@m uk-inline-block"></div>
+<button class="uk-button uk-button-secondary uk-float-right uk-width-auto@m uk-width-1-1" 
+        onclick={() => serversModal = getSelectedServers(servers)}
+        disabled={$selectedServersUuid.length < 2}
+        uk-tooltip={$selectedServersUuid.length < 2 ? "Select 2 or more servers" : ""}
+    >
+    Bulk mode ({ $selectedServersUuid.length })
+</button>
+<div class="uk-margin-small uk-width-1-1 uk-width-auto@m uk-inline-block"></div>
+<select bind:value={pageSize} class="uk-select uk-float-left uk-width-small@m uk-margin-small-bottom uk-width-1-1@s">
+    {#each [5, 10, 20, 50, 100] as size}
         <option value={size}>Page size: { size }</option>
     {/each}
 </select>
+<div class="uk-margin-small uk-width-1-1 uk-width-auto@m uk-inline-block"></div>
+<select class="uk-select uk-width-1-1 uk-width-auto@m" bind:value={$sortColumn}>
+    <option value="protocol">Sort by: Type</option>
+    <option value="status">Sort by: Status</option>
+    <option value="last_check">Sort by: Last check</option>
+    <option value="info_page_available">Sort by: Info page</option>
+    <option value="uptime7">Sort by: Uptime 7d</option>
+    <option value="uptime30">Sort by: Uptime 30d</option>
+    <option value="uptime90">Sort by: Uptime 90d</option>
+</select>
+<div class="uk-margin-small uk-width-1-1 uk-width-auto@m uk-inline-block"></div>
+<select class="uk-select uk-width-1-1 uk-width-auto@m" bind:value={$sortDirection}>
+    <option value="asc">Sort direction: Ascending</option>
+    <option value="desc">Sort direction: Descending</option>
+</select>
 
-{#await fetch(localParams)}
-    <div class="loader uk-flex uk-flex-center uk-flex-middle uk-flex-direction-column">
-        <div uk-spinner="ratio: 3"></div>
-    </div>
-{:then {servers, count, pageCount }}
-    <button class="uk-button uk-button-secondary uk-float-right uk-width-auto@m uk-width-1-1@s" 
-            onclick={() => serversModal = getSelectedServers(servers)}
-            disabled={$selectedServers.length < 2}
-            uk-tooltip={$selectedServers.length < 2 ? "Select 2 or more servers" : ""}
-        >
-        Bulk mode ({ $selectedServers.length })
-    </button>
-    <table class="table uk-table uk-table-divider uk-table-hover uk-visible@m uk-margin-remove-top">
-        <thead>
-            <tr>
-                <th>
-                    <input class="pointer"
-                           type="checkbox"
-                           uk-tooltip={$selectedServers.length ? "Unselect all" : "Select all"}
-                           checked={$selectedServers.length}
-                           onclick={() => toggleAllSelectedServers(servers)}
-                    />
-                </th>
-                <th></th>
-                <th>Server</th>
-                <th>Country</th>
-                <th>Status</th>
-                <th>Uptime</th>
-                <th>Last Check</th>
-                <th>QR Code</th>
-            </tr>
-        </thead>
-        <tbody class="uk-list-striped">
-            {#if servers.length > 0}
-                {#each servers as server (server.uuid)}
-                    <tr class="uk-text-small" class:flagged={$flagStore.has(server.uuid)} class:uk-text-danger={!server.status}>
-                        <td>
-                            <input type="checkbox" checked={$selectedServers.includes(server.uuid)} onclick={() => toggleSelectedServer(server)} />
-                        </td>
-                        <td>
-                            <Flag value={$flagStore.has(server.uuid)} on:click={() => flagStore.toggle(server.uuid) } />
-                        </td>
-                        <td>
-                            <LineUri server={server} />
-                        </td>
-                        <td>
-                            <LineCountry country={server.country} />
-                            <span class="uk-margin-left">
-                                <LineServerInfo server={server} icon={true} />
-                            </span>
-                        </td>
-                        <td>
-                            <LineStatus status={server.status} />
-                        </td>
-                        <td>
-                            <LineUptime server={server} />
-                        </td>
-                        <td>
-                            <LineDate date={server.lastCheck} />
-                        </td>
-                        <td>
-                            <button class="uk-button uk-button-secondary uk-button-small" onclick={() => serversModal = [server]}>QR & stats</button>
-                        </td>
-                    </tr>
-                {/each}
-            {/if}
-        </tbody>
-    </table>
-
-    <div class="pointer uk-hidden@m uk-margin-xlarge-top uk-margin-small-left" onclick={() => toggleAllSelectedServers(servers)}>
-        <input class="pointer"
-               type="checkbox"
-               checked={$selectedServers.length}
-        />
-        {$selectedServers.length ? "Unselect all" : "Select all"}
-    </div>
-    <ul class="uk-hidden@m uk-list uk-list-divider uk-list-striped">
-        {#each servers as server (server.uuid)}
-            <li class="uk-padding-small" class:flagged={$flagStore.has(server.uuid)} >
-                <div uk-grid class="uk-margin-bottom-remove">
-                    <div class="uk-width-expand">
-                        <div class="uk-width-1-1">
-                            <input type="checkbox" checked={$selectedServers.includes(server.uuid)} onclick={() => toggleSelectedServer(server)} />
-                            &nbsp;
-                            <Flag value={$flagStore.has(server.uuid)} on:click={() => flagStore.toggle(server.uuid) } />
-                            &nbsp;
-                            <LineCountry country={server.country} />
-                            &nbsp;
-                            <LineUri server={server} />
-                        </div>
-                        <div class="uk-width-1-1">
-                            Uptime: <LineUptime server={server} />
-                        </div>
-                        <div class="uk-width-1-1 uk-margin-remove-top">
-                            Last check: <LineDate date={server.lastCheck} />
-                        </div>
-                        <div class="uk-width-1-1 uk-margin-remove-top">
-                            <LineServerInfo server={server} icon={false} />
-                        </div>
-                    </div>
-                    <div class="uk-width-1-3 uk-text-center">
-                        <div>
-                            Status: 
-                            <LineStatus status={server.status} />
-                        </div>
-                        <button class="uk-block uk-margin-top uk-width-1-1 uk-button uk-button-secondary uk-button-small" onclick={() => serversModal = [server]}>QR & stats</button>
-                    </div>
-                </div>
-            </li>
-        {/each}
-    </ul>
-
-    <div class="uk-flex uk-flex-middle uk-flex-center uk-margin-top uk-margin-bottom uk-flex-column uk-text-center">
-        <div class="uk-margin-left uk-margin-right uk-margin-bottom">
-            Total servers matching filters: {count}
-        </div>
-        {#if count}
-            <div>
-                {#if page !== 1}
-                    <button class="uk-button uk-button-default" onclick={() => changePage(pageCount, page - 1)}>
-                        ← Previous page
-                    </button>
-                {/if}
-                {#if page !== pageCount}
-                    <button class="uk-button uk-button-default" onclick={() => changePage(pageCount, page + 1)}>
-                        Next page →
-                    </button>
-                {/if}
+<div class="uk-overflow-auto uk-width-1-1">
+    <table class="table uk-table uk-table-divider uk-table-small">
+        {#await fetchCountries()}
+            <div class="loader uk-flex uk-flex-center uk-flex-middle uk-flex-direction-column">
+                <div uk-spinner="ratio: 3"></div>
             </div>
-            {#if pageCount > 1}
-                <div class="uk-margin-top">
-                    Page {page} of {pageCount}
-                </div>
+        {:then countries}
+                <TableHeader
+                    bind:filter={filter}
+                    onAllServerSelected={value => $selectedServersUuid = value ? servers.map(({ uuid }) => uuid) : []}
+                    countries={countries}
+                />
+        {/await}
+        {#await refreshRand, fetch(filter, sort, pageSize, pageNumber)}
+            <div class="loader uk-flex uk-flex-center uk-flex-middle uk-flex-direction-column">
+                <div uk-spinner="ratio: 3"></div>
+            </div>
+        {:then { servers, count, pageCount }}
+            {#if servers.length > 0}
+                <tbody class="uk-list-striped uk-table-hover">
+                    {#each servers as server (server.uuid)}
+                        <tr class="uk-text-small" class:uk-text-danger={!server.status}>
+                            <td>
+                                <input type="checkbox" checked={$selectedServersUuid.includes(server.uuid)} onclick={() => toggleSelectedServer(server)} />
+                            </td>
+                            <td>
+                                <Labels uuid={server.uuid} />
+                            </td>
+                            <td>
+                                {#if server.protocol === 1}
+                                    <span class="uk-label uk-label-default">SMP</span>
+                                {:else}
+                                    <span class="uk-label uk-label-warning">XFTP</span>
+                                {/if}
+                            </td>
+                            <td>
+                                <LineUri server={server} />
+                            </td>
+                            <td>
+                                <LineCountry country={server.country} />
+                            </td>
+                            <td>
+                                <LineServerInfo server={server} icon={true} />
+                            </td>
+                            <td>
+                                <LineStatus status={server.status} />
+                            </td>
+                            <td>
+                                <LineUptime server={server} />
+                            </td>
+                            <td>
+                                <LineDate date={server.lastCheck} />
+                            </td>
+                            <td>
+                                <button class="uk-button uk-button-secondary uk-button-small" onclick={() => serversModal = [server]}>QR & stats</button>
+                            </td>
+                        </tr>
+                    {/each}
+                </tbody>
             {/if}
-        {/if}
-    </div>
-{:catch e}
-    Error:
-    <pre>
-        {e}
-        {console.error(e)}
-    </pre>
-{/await}
+            <tbody>
+                <tr>
+                    <td colspan="100">
+                        <div class="uk-flex uk-flex-middle uk-flex-center uk-margin-top uk-margin-bottom uk-flex-column uk-text-center pages">
+                            <div class="uk-margin-left uk-margin-right uk-margin-bottom">
+                                Total servers matching filters: {count}
+                            </div>
+                            {#if count}
+                                <div>
+                                    <div class="uk-margin-bottom">
+                                        {#each Array.from({ length: pageCount }, (_, i) => i + 1) as page}
+                                            <button class="uk-button uk-button-default uk-button-small uk-margin-small-right" class:uk-button-secondary={page === pageNumber} onclick={() => changePage(pageCount, page)}>
+                                                {page}
+                                            </button>
+                                        {/each}
+                                    </div>
+                                    {#if pageNumber !== 1}
+                                        <button class="uk-button uk-button-default" onclick={() => changePage(pageCount, pageNumber - 1)}>
+                                            ← Previous page
+                                        </button>
+                                    {/if}
+                                    {#if pageNumber !== pageCount}
+                                        <button class="uk-button uk-button-default" onclick={() => changePage(pageCount, pageNumber + 1)}>
+                                            Next page →
+                                        </button>
+                                    {/if}
+                                </div>
+                    
+                            {/if}
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        {:catch e}
+            <!-- Error: -->
+            <pre>
+                {e}
+                {console.error(e)}
+            </pre>
+        {/await}
+    </table>
+</div>
 
 <style lang="scss">
     .loader {
         height: 70vh;
     }
 
-    .flagged {
-        opacity: 0.6;
-        text-decoration: line-through;
-    }
-
-    .flag:checked {
-        background-color: #222222 !important;
+    .pages {
+        width: 100%;
+        max-width: 100vw;;
     }
 </style>

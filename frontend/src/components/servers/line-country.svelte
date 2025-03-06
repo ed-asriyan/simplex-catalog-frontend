@@ -3,19 +3,23 @@
 
     interface Props {
         country: string;
+        largeFlag?: boolean;
     }
 
-    let { country }: Props = $props();
+    let { country, largeFlag = true }: Props = $props();
 
-    let name = $derived(country && countryCodeToName(country));
+    let name = $derived(country === 'TOR' ? 'TOR' : country && countryCodeToName(country));
 </script>
 
 {#if country}
-    <span uk-tooltip={name} class="uk-text-large">
+    <span>
         {#if country === 'TOR'}
             <img width="22" height="22" src="https://img.icons8.com/nolan/64/tor-browser.png" alt="tor-browser"/>
         {:else}
-            {getFlagEmoji(country)}
+            <span class:uk-text-large={largeFlag}>
+                {getFlagEmoji(country)}
+            </span>
         {/if}
+        <span class="uk-text-small ">{name}</span>
     </span>
 {/if}

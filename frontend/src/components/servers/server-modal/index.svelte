@@ -1,8 +1,7 @@
 <script lang="ts">
     import QRCode from '@castlenine/svelte-qrcode';
   	import LineUri from '../line-uri.svelte';
-	import Flag from '../flag.svelte';
-  	import { flagStore } from '../flagged';
+  	import { labelsStore } from '../labels-store';
   	import type { Server } from '../../../database';
 	import LineCountry from '../line-country.svelte';
 	import LineStatus from '../line-status.svelte';
@@ -85,9 +84,7 @@
 				{/if}
 				<button class="uk-flex-1 uk-button uk-button-defadult" onclick={handleNext}>{ nextText }</button>
 			</div>
-			<button class="uk-margin-top uk-width-1-1 uk-button uk-button" onclick={e => { flagStore.set(server.uuid, true); handleNext(e) }}>
-				<Flag value={true} />
-				&nbsp;
+			<button class="uk-margin-top uk-width-1-1 uk-button uk-button" onclick={e => { labelsStore.include(server.uuid, 'added'); handleNext(e) }}>
 				Mark as added and { nextText }
 			</button>
         </div>

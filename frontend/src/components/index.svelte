@@ -33,10 +33,13 @@
         <div>
             Discover and share community-run <a href="https://simplex.chat/docs/server.html#overview" target="_blank">SMP</a> and <a href="https://simplex.chat/docs/xftp-server.html#overview" target="_blank">XFTP</a> servers.
             <br/>
-            Here anyone can anonymously add servers to the public list. The availability of each server is periodically checked.
+            Here anyone can anonymously add servers to the public list. The availability of each server is checked periodically.
         </div>
         <div class="uk-margin-top uk-margin-bottom">
             The website is not affiliated with the SimpleX team. Content is contributed by anonymous users.
+        </div>
+        <div class="uk-margin-top uk-margin-bottom">
+            Servers that have been inactive for 90 days or more may be removed from the directory.
         </div>
         <button class="uk-button uk-button-default uk-margin-left uk-margin-remove-right" onclick={addServerClick}>Add server anonymously</button>
     </div>

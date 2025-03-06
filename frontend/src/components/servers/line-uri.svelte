@@ -1,7 +1,7 @@
 <script lang="ts">
     import type { Server } from '../../database';
 
-    const MAX_LENGTH = 20;
+    const MAX_LENGTH = 30;
 
     interface Props {
         server: Server;

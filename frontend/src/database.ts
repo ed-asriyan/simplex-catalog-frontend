@@ -2,8 +2,30 @@ import { createClient } from '@supabase/supabase-js';
 import { supabaseKey, supabaseServersQuickViewTableName, supabaseServersStatusesTableName, supabaseServersTableName, supabaseUrl } from './settings';
 import type { Database } from './database.types';
 
+export interface FilterArray {
+    inclusive: boolean;
+    values: string[];
+}
 
-class Server {
+export interface Filter {
+    status: boolean | 'unknown' | null;
+    countries: FilterArray | null;
+    identity: string | null;
+    infoPageAvailable: boolean | null;
+    host: string | null;
+    protocol: 'smp' | 'xftp' | null;
+    uptime7: number | null;
+    uptime30: number | null;
+    uptime90: number | null;
+    uuids: FilterArray | null;
+}
+
+export interface Sort {
+    field: 'status' | 'host' | 'identity' | 'country' | 'type' | 'uptime7' | 'uptime30' | 'uptime90' | 'lastCheck';
+    order: 'asc' | 'desc';
+}
+
+export class Server {
     uuid: string;
     host: string;
     identity: string;
@@ -78,18 +100,75 @@ export interface FetchParams {
     modifyers?: (a: any) => any;
 }
 
-export const fetchServers = async function (params: FetchParams): Promise<{ servers: Server[], count: number }> {
+export const fetchServers = async function (filter: Filter, sort: Sort, pageSize: number, pageNumber: number): Promise<{ servers: Server[], count: number }> {
     let query = supabase.from(supabaseServersQuickViewTableName).select('*', { count: 'exact' });
 
-    if (params.filters) {
-        query = params.filters(query);
+    if (filter.status !== null) {
+        if (filter.status === 'unknown') {
+            query = query.is('status', null);
+        } else {
+            query = query.eq('status', filter.status);
+        }
     }
 
-    if (params.modifyers) {
-        query = params.modifyers(query);
+    if (filter.uuids) {
+        if (filter.uuids.inclusive) {
+            query = query.in('uuid', filter.uuids.values);
+        } else {
+            for (const uuid of filter.uuids.values) {
+                query.neq('uuid', uuid);
+            }
+        }
     }
 
-    const { data, count, error } = await query.range(params.offset, params.limit + params.offset - 1).returns<Database.public.Tables['servers_quick_view']['Row']>();
+    if (filter.identity) {
+        query = query.like('identity', `%${filter.identity}%`);
+    }
+
+    if (filter.host) {
+        query = query.like('host', `%${filter.host}%`);
+    }
+
+    if (filter.countries?.length) {
+        query = query.in('country', filter.countries);
+    }
+
+    if (filter.countries) {
+        if (filter.countries.inclusive) {
+            query = query.in('country', filter.countries.values);
+        } else {
+            for (const uuid of filter.countries.values) {
+                query.neq('country', uuid);
+            }
+        }
+    }
+
+    if (filter.protocol) {
+        query = query.eq('protocol', filter.protocol === 'smp' ? 1 : 2);
+    }
+
+    if (filter.infoPageAvailable !== null) {
+        query = query.eq('info_page_available', filter.infoPageAvailable);
+    }
+
+    if (filter.uptime7) {
+        query = query.gte('uptime7', filter.uptime7);
+    }
+
+    if (filter.uptime30) {
+        query = query.gte('uptime30', filter.uptime30);
+    }
+
+    if (filter.uptime90) {
+        query = query.gte('uptime90', filter.uptime90);
+    }
+
+    let column: string = sort.column;
+    if (column === 'lastCheck') column = 'last_check';
+    query = query.order(column, { ascending: sort.direction === 'asc' });
+
+    const start = pageSize * (pageNumber - 1);
+    const { data, count, error } = await query.range(start, start + pageSize - 1).returns<Database.public.Tables['servers_quick_view']['Row']>();
     if (error) throw error;
 
     return {
@@ -110,7 +189,7 @@ export const fetchServerStatuses = async function (serverUuids: string[]): Promi
     return data.map(rawValue => new ServerStatus(rawValue));
 };
 
-export const fetchCountries = async function (): Promise<Set<string[]>> {
+export const fetchCountries = async function (): Promise<Set<string>> {
     const { data, error } = await supabase.from(supabaseServersQuickViewTableName).select('country').returns<Database.public.Tables['servers_quick_view']['Row']>();
     if (error) throw error;
 

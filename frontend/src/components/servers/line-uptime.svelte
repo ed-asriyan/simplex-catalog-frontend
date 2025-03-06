@@ -15,16 +15,16 @@
 
     let same = $derived(uptimes.every((uptime) => server[uptime] === server.uptime7));
 </script>
-
+<!-- 
 {#if same}
     <span class={server.uptime7 === 1 ? 'uk-text-success' : 'uk-text-danger'}>{ uptimeStr(server.uptime7) }</span>
-{:else}
+{:else} -->
     <span uk-tooltip="7 days / 30 days / 90 days">
         {#each uptimes as uptime (uptime)}
             <span class={server[uptime] === 1 ? 'uk-text-success' : 'uk-text-danger'}>
                 { uptimeStr(server[uptime]) }
             </span>
-            &nbsp;
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
         {/each}
     </span>
-{/if}
+<!-- {/if} -->

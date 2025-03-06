@@ -11,3 +11,14 @@
 .pointer {
     cursor: pointer;
 }
+
+.uk-label-muted {
+    opacity: 0.5;
+    &:hover {
+        opacity: 1;
+    }
+}
+
+.cursor {
+    cursor: pointer;
+}
