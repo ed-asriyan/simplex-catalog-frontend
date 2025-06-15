@@ -12,7 +12,7 @@ pub async fn test_server(uri: &str, smp_client_ws_uri:&str) -> Result<bool, Box<
         "cmd": format!("/_server test 1 {}", uri.trim())
     });
 
-    socket.write_message(Message::Text(message.to_string()))?;
+    socket.write_message(Message::Text(message.to_string().into()))?;
 
     while let Ok(msg) = socket.read_message() {
         if let Message::Text(text) = msg {
