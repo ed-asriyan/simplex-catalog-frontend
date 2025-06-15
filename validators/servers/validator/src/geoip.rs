@@ -53,16 +53,18 @@ impl GeoIp {
         }
 
         let ip: IpAddr = if is_ip_address(&ip_or_domain) {
-            str_to_ip(&ip_or_domain)?  
+            str_to_ip(&ip_or_domain)?
         } else {
             resolve(&ip_or_domain)?
         };
-    
-        let country: maxminddb::geoip2::Country = self.reader.lookup(ip)?;
+
+        let country: maxminddb::geoip2::Country = self.reader.lookup(ip)?
+            .ok_or("Country information could not be found")?;
+
         if let Some(country) = country.country {
             match country.iso_code {
                 Some(code) => return Ok(code.to_string()),
-                None => return Err("No country code found".into())
+                None => return Err("No country code found".into()),
             }
         } else {
             Err("No country found".into())
