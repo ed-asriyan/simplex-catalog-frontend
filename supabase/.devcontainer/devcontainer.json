@@ -1,0 +1,22 @@
+
+{
+	"name": "Supabase CLI",
+	"image": "mcr.microsoft.com/devcontainers/base:bookworm",
+	"features": {
+		"ghcr.io/devcontainers-extra/features/supabase-cli:1": {},
+		"ghcr.io/devcontainers/features/docker-in-docker:2": {}
+	},
+	"forwardPorts": [
+		54321,
+		54323
+	],
+	"portsAttributes": {
+    "54321": {
+      "label": "Supabase API & Functions"
+    },
+	"54323": {
+      "label": "Supabase Studio"
+    }
+  },
+  "postStartCommand": "supabase start && (supabase functions serve &)"
+}
