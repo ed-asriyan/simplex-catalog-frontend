@@ -39,20 +39,6 @@ CREATE TABLE server_status (
 );
 
 
-CREATE VIEW servers_all AS
-SELECT 
-    server.uuid AS uuid,
-    server.protocol AS protocol,
-    server_host.host AS host,
-    server_identity.identity AS identity
-FROM 
-    server
-JOIN 
-    server_host ON server.host_uuid = server_host.uuid
-JOIN 
-    server_identity ON server.identity_uuid = server_identity.uuid;
-
-
 CREATE POLICY "[server] Enable read access for all users"
 ON server
 AS PERMISSIVE
@@ -99,8 +85,22 @@ WITH CHECK (
 );
 
 -- all servers with the latest status. 1 row per server with its the latest status
-CREATE VIEW servers_view AS
-    WITH latest_status AS (
+CREATE VIEW servers_view WITH (security_invoker = ON) AS
+    WITH servers_all AS (
+        SELECT 
+            server.uuid AS uuid,
+            server.protocol AS protocol,
+            server_host.host AS host,
+            server_identity.identity AS identity,
+            server_identity.created_at AS created_at
+        FROM 
+            server
+        JOIN 
+            server_host ON server.host_uuid = server_host.uuid
+        JOIN 
+            server_identity ON server.identity_uuid = server_identity.uuid
+    ),
+    latest_status AS (
         SELECT 
             server_uuid,
             country,
@@ -153,6 +153,7 @@ CREATE VIEW servers_view AS
         servers_all.protocol AS protocol,
         servers_all.host AS host,
         servers_all.identity AS identity,
+        servers_all.created_at AS created_at,
         latest_status.country AS country,
         latest_status.status AS status,
         latest_status.created_at AS last_check,
