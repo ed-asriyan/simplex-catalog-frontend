@@ -8,6 +8,12 @@ const supabase = createClient(
 
 const regex = /^(smp|xftp):\/\/([A-Za-z0-9\-\–_+=:]+)@([A-Za-z0-9.-]+(:\d{1,5})?(,[A-Za-z0-9.-]+(:\d{1,5})?)*)$/i;
 
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization, apikey, x-client-info',
+};
+
 const parseUri = function (uri: string) {
   const match = uri.match(regex);
   if (!match) return null;
@@ -19,10 +25,18 @@ const parseUri = function (uri: string) {
 };
 
 const createResponse = function(status: number, obj: any = null): Response {
-  return new Response(obj && JSON.stringify(obj), { status });
-}
+  return new Response(obj && JSON.stringify(obj), { status, headers: corsHeaders });
+};
 
 Deno.serve(async (req) => {
+  if (req.method === 'OPTIONS') {
+    return createResponse(204);
+  }
+
+  if (req.method !== 'POST') {
+    return createResponse(405, { error: 'Method Not Allowed' });
+  }
+
   if (req.method !== 'POST') {
     return createResponse(405, { error: 'Method Not Allowed' });
   }
@@ -31,6 +45,10 @@ Deno.serve(async (req) => {
     body = await req.json();
   } catch {
     return createResponse(400, { error: 'Invalid JSON' });
+  }
+
+  if (req.method !== 'POST') {
+    return createResponse(405, { error: 'Method Not Allowed' });
   }
   const { uri } = body;
 
