@@ -198,8 +198,13 @@ export const fetchCountries = async function (): Promise<Set<string>> {
 };
 
 export const addServer = async function (uri: string) {
-    const { error } = await supabase
-        .from(supabaseServersTableName)
-        .insert({ uri });
-    if (error) throw error;
+    const { data, error: err } = await supabase.functions.invoke('add-server', {
+        method: 'POST',
+        body: { uri }
+    });
+    
+    if (err) {
+        const { error } = await err.context.json();
+        throw new Error(error || 'Failed to add server');
+    }
 };

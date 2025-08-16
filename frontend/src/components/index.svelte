@@ -11,13 +11,7 @@
             await addServer(input.trim());
             alert('The server is added to the database. If the server is available, it will soon appear in the table for everyone.');
         } catch (e) {
-            if (e.message.includes('violates check constraint')) {
-                alert('Invalid URI. Please verify that you entered it correctly.')
-            } else if (e.message.includes('duplicate key value')) {
-                alert('The server is already in the database');
-            } else {
-                alert('Error :( Open dev console for more details');
-            }
+            alert(e.message);
             throw e;
         }
     };
