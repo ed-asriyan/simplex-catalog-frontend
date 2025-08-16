@@ -1,16 +1,16 @@
 import { get, writable, type Updater, type Writable } from "svelte/store";
 
-const getQueryParamsFromHash = function (key: string): string | null {
+const getQueryParamsFromHash = function<T extends string>(key: string): T | null {
     const hash = window.location.hash.substring(1);
 
     for (const param of hash.split('&')) {
         const [realKey, value] = param.split('=');
         if (realKey === key) {
-            return decodeURIComponent(value);
+            return decodeURIComponent(value) as T;
         }
     }
-    
-    return localStorage.getItem(key);
+
+    return localStorage.getItem(key) as T | null;
 };
   
 const setQueryParamInHash = function (key: string, value: string | null) {
@@ -28,31 +28,31 @@ const setQueryParamInHash = function (key: string, value: string | null) {
     window.location.hash = params.toString();
 };
 
-export class QueryStore implements Writable<string> {
+export class QueryStore<T extends string> implements Writable<T> {
     readonly key: string;
-    readonly defaultValue: string;
-    private readonly store: Writable<string>;
-    readonly permittedValues: string[];
+    readonly defaultValue: T;
+    private readonly store: Writable<T>;
+    readonly permittedValues: T[];
 
-    constructor (key: string, defaultValue: string, permittedValues: string[] = []) {
+    constructor (key: string, defaultValue: T, permittedValues: T[] = []) {
         this.key = key;
         this.defaultValue = defaultValue;
         this.permittedValues = permittedValues;
-        let value = getQueryParamsFromHash(this.key) || this.defaultValue;
+        let value = getQueryParamsFromHash<T>(this.key) || this.defaultValue;
         if (this.permittedValues.length > 0 && !this.permittedValues.includes(value)) {
             value = this.defaultValue;
         }
-        this.store = writable<string>(value);
+        this.store = writable<T>(value);
     }
 
-    set(value: string): void {
+    set(value: T): void {
         if (this.permittedValues.length > 0 && !this.permittedValues.includes(value)) {
             value = this.defaultValue;
         }
         setQueryParamInHash(this.key, value);
         this.store.set(value);
     }
-    update(updater: Updater<string>): void {
+    update(updater: Updater<T>): void {
         const newValue = updater(get(this.store));
         this.set(newValue);
     }
@@ -61,8 +61,8 @@ export class QueryStore implements Writable<string> {
     }
 }
 
-export class QueryStoreList implements Writable<string[]> {
-    private readonly store: QueryStore;
+export class QueryStoreList<T extends string> implements Writable<T[]> {
+    private readonly store: QueryStore<string>;
 
     private static serialize(value: string[]): string {
         return value.join(',');
@@ -73,19 +73,19 @@ export class QueryStoreList implements Writable<string[]> {
     }
 
     constructor (key: string, defaultValue: string[]) {
-        this.store = new QueryStore(key, QueryStoreList.serialize(defaultValue));
+        this.store = new QueryStore<string>(key, QueryStoreList.serialize(defaultValue));
     }
 
-    set(value: string[]): void {
+    set(value: T[]): void {
         return this.store.set(QueryStoreList.serialize(value));
     }
-    update(updater: Updater<string[]>): void {
+    update(updater: Updater<T[]>): void {
         const newValue = updater(get(this));
         this.set(newValue);
     }
     subscribe(callback: any) {
         return this.store.subscribe(value => {
-            return callback(QueryStoreList.deserialize(value));
+            return callback(QueryStoreList.deserialize(value) as T[]);
         });
     }
 };

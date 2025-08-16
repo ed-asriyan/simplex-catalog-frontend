@@ -2,7 +2,7 @@
     import { onMount } from 'svelte';
     import { readable, type Readable } from 'svelte/store';
     import moment from 'moment';
-    import { convertUTCDateToLocalDate } from '../../utils';
+    import { convertUTCDateToLocalDate } from '../../../utils';
 
     interface Props {
         date: string;

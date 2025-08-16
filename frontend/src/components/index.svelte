@@ -1,14 +1,38 @@
 <script lang="ts">
+    import { onMount } from 'svelte';
     import GithubCorner from './github-corner.svelte';
     import ServersTable from './servers/index.svelte';
-    import { addServer, } from '../database';
+    import { createClient } from '@supabase/supabase-js';
+    import { supabaseKey, supabaseUrl } from '../settings';
+    import { ServersStore } from '../store/servers-store';
+    import { ServersService } from '../store/servers-service';
+    import { CountriesStore } from '../store/countries-store';
+    import { CountriesService } from '../store/countries-service';
+    import { ServerStatusesService } from '../store/server-statuses-service';
+    import { ServerStatusesStore } from '../store/server-statuses-store';
+
+    const supabase = createClient(supabaseUrl, supabaseKey);
+    const serversStore = new ServersStore();
+    const serversService = new ServersService(supabase, serversStore);
+
+    const countriesStore = new CountriesStore();
+    const countriesService = new CountriesService(supabase, countriesStore);
+
+    const serverStatusesStore = new ServerStatusesStore();
+    const serverStatusesService = new ServerStatusesService(supabase, serverStatusesStore);
+
+    let servers = $derived(serversStore.items);
+
+    onMount(() => {
+        countriesService.fetchCountries();
+    })
 
     const addServerClick = async function () {
         const input = prompt('Enter SMP or XFTP server URI:')?.trim();
         if (!input) return;
 
         try {
-            await addServer(input.trim());
+            await serversService.addServer(input.trim());
             alert('The server is added to the database. If the server is available, it will soon appear in the table for everyone.');
         } catch (e) {
             alert(e.message);
@@ -37,7 +61,7 @@
         </div>
         <button class="uk-button uk-button-default uk-margin-left uk-margin-remove-right" onclick={addServerClick}>Add server anonymously</button>
     </div>
-    <ServersTable />
+    <ServersTable {serversService} {serversStore} {countriesStore} {serverStatusesStore} {serverStatusesService} />
     <div class="uk-section uk-section-default footer uk-text-small uk-text-muted uk-text-center">
         <div class="uk-margin-top">
             <span>Powered by</span>

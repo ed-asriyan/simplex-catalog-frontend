@@ -1,14 +1,14 @@
 <script lang="ts">
-    import { countryCodeToName, delay, getFlagEmoji } from '../../utils';
-    import type { Filter, Sort } from '../../database';
+    import { countryCodeToName, delay } from '../../utils';
     import { QueryStore, QueryStoreList } from '../../query-store';
     import { labelsStore, labels } from './labels-store';
-    import LineCountry from './line-country.svelte';
+    import LineCountry from './fields/line-country.svelte';
+    import type { Filter } from '../../store/servers-service';
 
     interface Props {
         filter: Filter,
         onAllServerSelected: (value: boolean) => void,
-        countries: Set<string>,
+        countries: string[],
     }
 
     let { filter = $bindable(), onAllServerSelected, countries }: Props = $props();

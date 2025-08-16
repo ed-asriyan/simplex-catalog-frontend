@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { countryCodeToName, getFlagEmoji } from '../../utils';
+    import { countryCodeToName, getFlagEmoji } from '../../../utils';
 
     interface Props {
         country: string;

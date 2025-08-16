@@ -1,38 +1,26 @@
 <script lang="ts">
-  	import { fetchServerStatuses, ServerStatus, type Server } from '../../../database';
+  	import type { ServerStatusesService } from '../../../store/server-statuses-service';
+  	import type { ServerStatusesStore } from '../../../store/server-statuses-store';
+  	import type { Server } from '../../../store/servers-store';
     import Plot from './stats-plot.svelte';
 
 	interface Props {
 		servers: Server[];
+		serverStatusesStore: ServerStatusesStore;
+		serverStatusesService: ServerStatusesService;
 	}
 
-	let { servers }: Props = $props();
-
-	const groupStatusesByServer = function (statuses: ServerStatus[]): { uuid: string; statuses: ServerStatus[] }[] {
-		const grouped: { [key: string]: ServerStatus[] } = {};
-
-		for (const status of statuses) {
-			if (!grouped[status.serverUuid]) {
-				grouped[status.serverUuid] = [];
-			}
-			grouped[status.serverUuid].push(status);
-		}
-
-		return Object.keys(grouped).map(uuid => ({
-			uuid,
-			statuses: grouped[uuid],
-		}));
-	}
+	let { servers, serverStatusesService, serverStatusesStore }: Props = $props();
 </script>
 
 <div class="uk-text-center">
-	{#await fetchServerStatuses(servers.map(({uuid}) => uuid))}
+	{#await serverStatusesService.fetch(servers.map(({uuid}) => uuid))}
 		<div class="loader uk-flex uk-flex-middle uk-flex-center">
 			<div uk-spinner="ratio: 3"></div>
 		</div>
-	{:then allStatuses}
-		{#each groupStatusesByServer(allStatuses) as server (server.uuid)}
-			<Plot statuses={server.statuses} />
+	{:then}
+		{#each servers as server (server.uuid)}
+			<Plot server={server} {serverStatusesStore} />
 		{/each}
 	{/await}
 </div>

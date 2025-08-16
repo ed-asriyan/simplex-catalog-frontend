@@ -1,19 +1,23 @@
 <script lang="ts">
     import * as d3 from 'd3';
-    import type { ServerStatus } from '../../../database';
     import { getFlagEmoji } from '../../../utils';
-    import LineCountry from '../line-country.svelte';
-    import LineStatus from '../line-status.svelte';
+    import LineCountry from '../fields/line-country.svelte';
+    import LineStatus from '../fields/line-status.svelte';
+    import type { ServerStatus, ServerStatusesStore } from '../../../store/server-statuses-store';
+    import type { Server } from '../../../store/servers-store';
 
     interface Props {
-        statuses: ServerStatus[];
+        server: Server;
+        serverStatusesStore: ServerStatusesStore;
     }
 
-    let { statuses }: Props = $props();
+    let { server, serverStatusesStore }: Props = $props();
+
+    let statuses = $derived(serverStatusesStore.getByIndex('serverUuid', server.uuid));
 
     let outagesOnly: boolean = $state(true);
 
-    let listView: ServerStatus[] = $derived(outagesOnly ? statuses.filter(status => !status.status) : statuses);
+    let listView = $derived(outagesOnly ? $statuses.filter(status => !status.status) : $statuses);
 
     const now = new Date();
 
@@ -39,7 +43,7 @@
             .attr("transform", `translate(${margin.left},${margin.top})`);
 
         // Draw the availability line (top line)
-        for (let i = 0; i < statuses.length; i++) {
+        for (let i = 0; i < data.length; i++) {
             const start = data[i].createdAt;
             const end = (i < data.length - 1) ? data[i + 1].createdAt : now;
             const status = data[i].status;
@@ -104,7 +108,7 @@
 </script>
 
 <div class="container">
-    <svg class="plot" use:draw={statuses}></svg>
+    <svg class="plot" use:draw={$statuses}></svg>
 </div>
 
 <div class="pointer">

@@ -1,5 +1,5 @@
 <script lang="ts">
-    import type { Server } from '../../database';
+    import type { Server } from '../../store/servers-store';
 
     const MAX_LENGTH = 30;
 
@@ -9,12 +9,12 @@
 
     let { server }: Props = $props();
 
-    let copyTimeout: number = $state(NaN);
+    let copyTimeout: ReturnType<typeof setTimeout> | null = $state(null);
     const copyToClipboard = function (str: string) {
         navigator.clipboard.writeText(str);
         copyTimeout && clearTimeout(copyTimeout);
         copyTimeout = setTimeout(() => {
-            copyTimeout = NaN;
+            copyTimeout = null;
         }, 4000);
     };
 
@@ -22,7 +22,7 @@
 </script>
 
 <span class="pointer uk-text-nowrap" uk-tooltip="Click to copy full URI" onclick={() => copyToClipboard(server.uri)}>
-    {#if isFinite(copyTimeout)}
+    {#if copyTimeout !== null}
         Copied to clipboard
     {:else}
         <a>

@@ -1,21 +1,25 @@
 <script lang="ts">
     import QRCode from '@castlenine/svelte-qrcode';
-  	import LineUri from '../line-uri.svelte';
-  	import { labelsStore } from '../labels-store';
-  	import type { Server } from '../../../database';
-	import LineCountry from '../line-country.svelte';
-	import LineStatus from '../line-status.svelte';
-    import LineUptime from '../line-uptime.svelte';
-    import Modal from '../../modal.svelte';
+  	import { getServerUri, type Server } from '../../../store/servers-store';
+	import type { ServerStatusesService } from '../../../store/server-statuses-service';
+	import type { ServerStatusesStore } from '../../../store/server-statuses-store';
     import Stats from './stats.svelte';
-    import LineServerInfo from '../line-server-info.svelte';
+	import Modal from '../../modal.svelte';
+	import { labelsStore } from '../labels-store';
+  	import LineUri from '../fields/line-uri.svelte';
+	import LineCountry from '../fields/line-country.svelte';
+	import LineStatus from '../fields/line-status.svelte';
+    import LineUptime from '../fields/line-uptime.svelte';
+	import LineServerInfo from '../fields/line-server-info.svelte';
 
 	interface Props {
 		servers: Server[];
+		serverStatusesStore: ServerStatusesStore;
+		serverStatusesService: ServerStatusesService;
 		onclick: (server: Server) => void;
 	}
 
-	let { servers = $bindable(), onclick }: Props = $props();
+	let { servers = $bindable(), onclick, serverStatusesService, serverStatusesStore }: Props = $props();
 
 	let open: boolean = $state(false);
 
@@ -60,7 +64,7 @@
 				<div>{ i + 1 } / { servers?.length }</div>
 			{/if}
 			{#key server.uri}
-		    	<QRCode data={server.uri} />
+		    	<QRCode data={getServerUri(server)} />
 			{/key}
 			<div>
 				<span class="uk-margin-small-right">
@@ -89,7 +93,7 @@
 			</button>
         </div>
 		<div>
-			<Stats servers={[server]} />
+			<Stats servers={[server]} {serverStatusesStore} {serverStatusesService} />
 		</div>
 	</div>
 </Modal>
