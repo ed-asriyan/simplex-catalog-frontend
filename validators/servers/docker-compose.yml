@@ -16,7 +16,7 @@ services:
       - .env
     environment:
       - SMP_CLIENT_URI=ws://smp-client:80
-      - SUPABASE_SERVERS_TABLE_NAME=servers_all
+      - SUPABASE_SERVERS_TABLE_NAME=servers_view
       - SUPABASE_SERVERS_STATUS_TABLE_NAME=server_status
       # - SUPABASE_URL=<to be filled in .env>
       # - SUPABASE_KEY=<to be filled in .env>
