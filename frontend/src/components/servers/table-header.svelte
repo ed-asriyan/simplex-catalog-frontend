@@ -1,14 +1,14 @@
 <script lang="ts">
     import { countryCodeToName, delay } from '../../utils';
     import { QueryStore, QueryStoreList } from '../../query-store';
-    import { labelsStore, labels } from './labels-store';
+    import { labelsStore, labels } from '../../store/labels-store';
     import LineCountry from './fields/line-country.svelte';
     import type { Filter } from '../../store/servers-service';
 
     interface Props {
         filter: Filter,
         onAllServerSelected: (value: boolean) => void,
-        countries: string[],
+        countries: readonly string[],
     }
 
     let { filter = $bindable(), onAllServerSelected, countries }: Props = $props();

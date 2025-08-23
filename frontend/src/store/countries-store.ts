@@ -7,7 +7,10 @@ export class CountriesStore {
 
     addCountry(...countries: string[]) {
         const currentCountries = this.store.get();
-        countries.forEach(country => currentCountries.add(country));
-        this.store.set(currentCountries);
+        const result = new Set(currentCountries);
+        for (const country of countries) {
+            result.add(country);
+        }
+        this.store.set(result);
     }
 }

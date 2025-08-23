@@ -5,7 +5,7 @@
 	import type { ServerStatusesStore } from '../../../store/server-statuses-store';
     import Stats from './stats.svelte';
 	import Modal from '../../modal.svelte';
-	import { labelsStore } from '../labels-store';
+	import { labelsStore } from '../../../store/labels-store';
   	import LineUri from '../fields/line-uri.svelte';
 	import LineCountry from '../fields/line-country.svelte';
 	import LineStatus from '../fields/line-status.svelte';

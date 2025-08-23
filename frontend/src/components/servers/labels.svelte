@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { labelsStore, labels, type Label } from './labels-store';
+    import { labelsStore, labels, type Label } from '../../store/labels-store';
 
     interface Props {
         uuid: string;

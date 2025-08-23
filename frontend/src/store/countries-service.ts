@@ -14,6 +14,6 @@ export class CountriesService {
         const { data, error } = await this.client.from('servers_view').select('country');
         if (error) throw error;
 
-        this.store.addCountry(...data.map(({ country }) => country));
+        this.store.addCountry(...data.map(({ country }) => country).filter(Boolean));
     }
 }

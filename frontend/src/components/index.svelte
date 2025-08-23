@@ -21,8 +21,6 @@
     const serverStatusesStore = new ServerStatusesStore();
     const serverStatusesService = new ServerStatusesService(supabase, serverStatusesStore);
 
-    let servers = $derived(serversStore.items);
-
     onMount(() => {
         countriesService.fetchCountries();
     })

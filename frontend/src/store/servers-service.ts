@@ -54,7 +54,7 @@ export class ServersService {
         this.store = store;
     }
     
-    async fetchServers (filter: Filter, sort: Sort, pageSize: number, pageNumber: number) {
+    async fetch (filter: Filter, sort: Sort, pageSize: number, pageNumber: number) {
         let query = this.client.from('servers_view').select('*', { count: 'exact' });
 
         if (filter.status !== null) {
