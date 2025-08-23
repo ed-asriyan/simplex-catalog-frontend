@@ -54,24 +54,24 @@
         onAllServerSelected(allServersSelected);
     });
 
-    let _hostFilter;
+    let _hostFilter: string = $state('');
     $effect(() => {
         _hostFilter = $hostFilter;
     });
 
-    let _uptime7Filter;
+    let _uptime7Filter: string = $state('');
     $effect(() => {
         _uptime7Filter = $uptime7Filter;
     });
 
-    let _uptime30Filter;
+    let _uptime30Filter: string = $state('');
     $effect(() => {
-        _uptime7Filter = $uptime7Filter;
+        _uptime30Filter = $uptime30Filter;
     });
 
-    let _uptime90Filter;
+    let _uptime90Filter: string = $state('');
     $effect(() => {
-        _uptime7Filter = $uptime7Filter;
+        _uptime90Filter = $uptime90Filter;
     });
 
     const onCountriesListChanges = function (country: string) {

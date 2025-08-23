@@ -83,10 +83,6 @@ export class ServersService {
             query = query.like('host', `%${filter.host}%`);
         }
     
-        if (filter.countries?.values.length) {
-            query = query.in('country', filter.countries.values);
-        }
-    
         if (filter.countries) {
             if (filter.countries.inclusive) {
                 query = query.in('country', filter.countries.values);
