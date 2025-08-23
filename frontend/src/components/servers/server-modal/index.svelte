@@ -63,7 +63,7 @@
 			{#if servers.length > 1}
 				<div>{ i + 1 } / { servers?.length }</div>
 			{/if}
-			{#key server.uri}
+			{#key server.uuid}
 		    	<QRCode data={getServerUri(server)} />
 			{/key}
 			<div>
