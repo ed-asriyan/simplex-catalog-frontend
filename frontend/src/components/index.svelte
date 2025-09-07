@@ -1,6 +1,7 @@
 <script lang="ts">
     import { onMount } from 'svelte';
     import GithubCorner from './github-corner.svelte';
+    import Sponsors from './sponsors.svelte';
     import ServersTable from './servers/index.svelte';
     import { createClient } from '@supabase/supabase-js';
     import { supabaseKey, supabaseUrl } from '../settings';
@@ -42,7 +43,10 @@
 <GithubCorner />
 
 <div class="uk-container uk-container-xlarge">
-    <div class="uk-section uk-section-default uk-text-center uk-padding-remove-bottom">
+    <div class="uk-section uk-section-default uk-section-xsmall uk-text-center">
+        <Sponsors />
+    </div>
+    <div class="uk-section uk-section-default uk-text-center uk-padding-remove-bottom uk-section-xsmall">
         <h1 class="uk-heading-small">Unofficial <a href="https://simplex.chat" target="_blank">SimpleX</a> Directory</h1>
     </div>
     <div class="uk-section uk-section-xsmall uk-text-center uk-margin-bottom">
