@@ -1,6 +1,5 @@
 <script lang="ts">
-    import type { Server } from '../../store/servers-store';
-
+    import { type Server, getServerUri } from '../../../store/servers-store';
     const MAX_LENGTH = 30;
 
     interface Props {
@@ -21,7 +20,7 @@
     let maskedUri: string = $derived(server.host);
 </script>
 
-<span class="pointer uk-text-nowrap" uk-tooltip="Click to copy full URI" onclick={() => copyToClipboard(server.uri)}>
+<span class="pointer uk-text-nowrap" uk-tooltip="Click to copy full URI" onclick={() => copyToClipboard(getServerUri(server))}>
     {#if copyTimeout !== null}
         Copied to clipboard
     {:else}
