@@ -15,6 +15,8 @@
     import type { CountriesStore } from '../../store/countries-store';
     import type { ServerStatusesStore } from '../../store/server-statuses-store';
     import type { ServerStatusesService } from '../../store/server-statuses-service';
+    import { labelsStore } from '../../store/labels-store';
+    import { exportFile, importFile } from '../../utils';
 
     interface Props {
         serversStore: ServersStore;
@@ -99,10 +101,36 @@
             $selectedServersUuid = [...$selectedServersUuid, server.uuid];
         }
     };
+
+    const exportLabels = function () {
+        const labels = Object.entries($labelsStore).reduce((acc, [label, uuids]) => {
+            acc[label] = Array.from(uuids);
+            return acc;
+        }, {} as Record<string, string[]>);
+        exportFile(JSON.stringify(labels), `${location.hostname}_labels_${new Date().toISOString()}.json`, 'application/json');
+    };
+
+    const importLabels = async function () {
+        const data = await importFile('application/json');
+        const labels = JSON.parse(data) as Record<string, string[]>;
+
+        const list = Object.entries(labels).map(([label, uuids]) => `Label "${label}": ${uuids.length} servers`).join('\n');
+        if (confirm(`The current labels in this browser will be replaced by the import:\n\n${list}\n\nContinue?`)) {
+            labelsStore.importFromJson(labels);
+        }
+    };
 </script>
 
 <ServerModal bind:servers={serversModal} {serverStatusesStore} {serverStatusesService} />
 
+<div class="uk-margin-small-bottom">
+    <button class="uk-button uk-button-default uk-margin-small-right uk-width-auto@m uk-width-1-1" onclick={importLabels}>
+        Import labels
+    </button>
+    <button class="uk-button uk-button-default uk-width-auto@m uk-width-1-1" onclick={exportLabels}>
+        Export labels
+    </button>
+</div>
 <div class="uk-overflow-auto uk-width-1-1">
     <div class="uk-float-left uk-margin-left uk-margin-right uk-width-auto@m uk-width-1-1 uk-text-center">
         {#await serversPromise}

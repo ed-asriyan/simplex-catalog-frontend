@@ -64,6 +64,15 @@ export class LabelsStore implements Readable<LabeledStoreRecord> {
             return { ...values };
         });
     }
+
+    importFromJson(labels: Record<string, string[]>) {
+        const newValues: LabeledStoreRecord = Object.entries(labels).reduce((acc, [label, uuids]) => {
+            acc[label] = new Set(uuids);
+            return acc;
+        }, {} as LabeledStoreRecord);
+        this.store.set(newValues);
+        saveToLocalStorage(newValues);
+    }
 }
 
 export const labelsStore = new LabelsStore();
