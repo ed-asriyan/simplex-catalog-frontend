@@ -15,29 +15,13 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  build:
+    uses: ./.github/workflows/build.yml
+    with:
+      env_file_content: ${{ vars.ENV_FILE_CONTENT }}
+
   deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v5
-
-      - name: Save .env file
-        env:
-          ENV_FILE_CONTENT: ${{ vars.ENV_FILE_CONTENT }}
-        shell: bash
-        run: |
-          echo "$ENV_FILE_CONTENT" > .env
-
-      - name: Build the app
-        run: make prod_build_bundle
-
-      - name: Upload static files as artifact
-        uses: actions/upload-pages-artifact@v4
-        with:
-          path: dist
-
       - name: Deploy to GitHub Pages
         uses: actions/deploy-pages@v4
