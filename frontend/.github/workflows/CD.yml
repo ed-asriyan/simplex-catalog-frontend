@@ -21,6 +21,7 @@ jobs:
       env_file_content: ${{ vars.ENV_FILE_CONTENT }}
 
   deploy:
+    needs: build
     runs-on: ubuntu-latest
     steps:
       - name: Deploy to GitHub Pages
