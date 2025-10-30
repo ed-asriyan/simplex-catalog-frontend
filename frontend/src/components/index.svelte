@@ -42,14 +42,18 @@
 
 <GithubCorner />
 
-<div class="uk-container uk-container-xlarge">
-    <div class="uk-section uk-section-default uk-section-xsmall uk-text-center">
+<div class="uk-section uk-section-secondary uk-section-xsmall uk-text-center">
+    <div class="uk-container uk-container-expand">
         <Sponsors />
     </div>
-    <div class="uk-section uk-section-default uk-text-center uk-padding-remove-bottom uk-section-xsmall">
+</div>
+
+<div class="uk-section uk-section-secondary">
+    <div class="uk-container uk-text-center">
         <h1 class="uk-heading-small">Unofficial <a href="https://simplex.chat" target="_blank">SimpleX</a> Directory</h1>
     </div>
-    <div class="uk-section uk-section-xsmall uk-text-center uk-margin-bottom">
+
+    <div class="uk-container uk-text-center">
         <div>
             Discover and share community-run <a href="https://simplex.chat/docs/server.html#overview" target="_blank">SMP</a> and <a href="https://simplex.chat/docs/xftp-server.html#overview" target="_blank">XFTP</a> servers.
             <br/>
@@ -63,18 +67,25 @@
         </div>
         <button class="uk-button uk-button-default uk-margin-left uk-margin-remove-right" onclick={addServerClick}>Add server anonymously</button>
     </div>
-    <ServersTable {serversService} {serversStore} {countriesStore} {serverStatusesStore} {serverStatusesService} />
-    <div class="uk-section uk-section-default footer uk-text-small uk-text-muted uk-text-center">
-        <div class="uk-margin-top">
-            <span>Powered by</span>
-            · <a class="uk-text-muted" href="https://simplex.chat" target="_blank">SimpleX</a>
-            · <a class="uk-text-muted" href="https://svelte.dev" target="_blank">Svelte</a>
-            · <a class="uk-text-muted" href="https://supabase.com" target="_blank">Supabase</a>
-            · <a class="uk-text-muted" href="https://getuikit.com" target="_blank">UIkit</a>
-            · <a class="uk-text-muted" href="https://icons8.com" target="_blank">Icons8</a>
-        </div>
-        <div>
-            <a class="uk-text-muted" href="https://asriyan.me" target="_blank">Ed Asriyan</a>
-        </div>
+</div>
+
+<div class="uk-section uk-section-default">
+    <div class="uk-container uk-container-expand">
+        <ServersTable {serversService} {serversStore} {countriesStore} {serverStatusesStore} {serverStatusesService} />
     </div>
 </div>
+
+<div class="uk-section uk-section-secondary footer uk-text-small uk-text-muted uk-text-center">
+    <div>
+        <span>Powered by</span>
+        · <a class="uk-text-muted" href="https://simplex.chat" target="_blank">SimpleX</a>
+        · <a class="uk-text-muted" href="https://svelte.dev" target="_blank">Svelte</a>
+        · <a class="uk-text-muted" href="https://supabase.com" target="_blank">Supabase</a>
+        · <a class="uk-text-muted" href="https://getuikit.com" target="_blank">UIkit</a>
+        · <a class="uk-text-muted" href="https://icons8.com" target="_blank">Icons8</a>
+    </div>
+    <div>
+        <a class="uk-text-muted" href="https://asriyan.me" target="_blank">Ed Asriyan</a>
+    </div>
+</div>
+
