@@ -33,7 +33,7 @@
     let totalCountStore: Readable<number> = $derived(serversStore.totalCount);
     let totalCount: number = $derived($totalCountStore);
 
-    let pageSize: number = $state(10);
+    let pageSize: number = $state(50);
     let pageNumber: number = $state(1);
     let pageCount: number = $derived(Math.ceil(totalCount / pageSize));
 
