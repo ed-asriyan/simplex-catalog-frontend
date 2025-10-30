@@ -54,7 +54,7 @@ export class ServersService {
         this.store = store;
     }
     
-    async fetch (filter: Filter, sort: Sort, pageSize: number, pageNumber: number) {
+    async fetch (filter: Filter, sort: Sort, pageSize: number, pageNumber: number): Promise<string[]> {
         let query = this.client.from('servers_view').select('*', { count: 'exact' });
 
         if (filter.status !== null) {
@@ -121,9 +121,12 @@ export class ServersService {
         const { data, count, error } = await query.range(start, start + pageSize - 1);
         if (error) throw error;
 
-        this.store.clear();
-        this.store.addOrUpdate(...data.map(parseServer));
+        const servers = data.map(parseServer);
+
+        this.store.addOrUpdate(...servers);
         count && this.store.totalCount.set(count);
+
+        return servers.map(({ uuid }) => uuid);
     }
 
     async addServer (uri: string) {

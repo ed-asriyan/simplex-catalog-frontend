@@ -3,14 +3,8 @@
     import type { ServersService, Filter, Sort, SortField, SortOrder } from '../../store/servers-service';
     import type { Server, ServersStore } from '../../store/servers-store';
     import ServerModal from './server-modal/index.svelte';
-    import LineUri from './fields/line-uri.svelte';
     import TableHeader from './table-header.svelte';
-    import LineStatus from './fields/line-status.svelte';
-    import LineDate from './fields/line-date.svelte';
-    import Labels from './labels.svelte';
-    import LineServerInfo from './fields/line-server-info.svelte';
-    import LineUptime from './fields/line-uptime.svelte';
-    import LineCountry from './fields/line-country.svelte';
+    import TableRow from './table-row.svelte';
     import { QueryStore, QueryStoreList } from '../../query-store';
     import type { CountriesStore } from '../../store/countries-store';
     import type { ServerStatusesStore } from '../../store/server-statuses-store';
@@ -29,8 +23,9 @@
     let { serversStore, serversService, countriesStore, serverStatusesStore, serverStatusesService }: Props = $props();
 
     let allServers = $derived(serversStore.items);
-    let currentServers = $derived(
-        $allServers
+    let currentPageServersUuids: string[] = $state([]);
+    let currentPageServers: Server[] = $derived(
+        currentPageServersUuids.map(uuid => serversStore.getBy("uuid", uuid).get()).filter(x => !!x)
     );
 
     let countries = $derived(countriesStore.items);
@@ -71,7 +66,9 @@
         if (!isFinite(pageNumber)) {
             pageNumber = 1;
         }
-        serversPromise = serversService.fetch(filter, sort, pageSize, pageNumber);
+        serversPromise = serversService
+            .fetch(filter, sort, pageSize, pageNumber)
+            .then(uuids => { currentPageServersUuids = uuids; });
     };
 
     $effect(() => refresh());
@@ -174,50 +171,19 @@
     <table class="table uk-table uk-table-divider uk-table-small">
         <TableHeader
             bind:filter={filter}
-            onAllServerSelected={value => $selectedServersUuid = value ? currentServers.map(({ uuid }) => uuid) : []}
+            onAllServerSelected={value => $selectedServersUuid = value ? currentPageServersUuids : []}
             countries={$countries}
         />
 
         <tbody class="uk-list-striped uk-table-hover">
-            {#each currentServers as server (server.uuid)}
-                <tr class="uk-text-small" class:uk-text-danger={!server.status}>
-                    <td>
-                        <input type="checkbox" checked={$selectedServersUuid.includes(server.uuid)} onclick={() => toggleSelectedServer(server)} />
-                    </td>
-                    <td>
-                        <Labels uuid={server.uuid} />
-                    </td>
-                    <td>
-                        <span
-                            class="uk-label"
-                            class:uk-label-default={server.protocol === 'smp'}
-                            class:uk-label-warning={server.protocol === 'xftp'}
-                        >
-                            {server.protocol.toUpperCase()}
-                        </span>
-                    </td>
-                    <td>
-                        <LineUri server={server} />
-                    </td>
-                    <td>
-                        <LineCountry country={server.country} />
-                    </td>
-                    <td>
-                        <LineServerInfo server={server} icon={true} />
-                    </td>
-                    <td>
-                        <LineStatus status={server.status} />
-                    </td>
-                    <td>
-                        <LineUptime server={server} />
-                    </td>
-                    <td>
-                        <LineDate date={server.lastCheck} />
-                    </td>
-                    <td>
-                        <button class="uk-button uk-button-secondary uk-button-small" onclick={() => serversModal = [server]}>QR & stats</button>
-                    </td>
-                </tr>
+            {#each currentPageServers as server (server.uuid)}
+                <TableRow 
+                    {server}
+                    selected={$selectedServersUuid.includes(server.uuid)}
+                    onSelect={() => toggleSelectedServer(server)}
+                    {serverStatusesService}
+                    {serverStatusesStore}
+                />
             {/each}
         </tbody>
         <tbody>

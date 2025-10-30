@@ -16,7 +16,7 @@
 		servers: Server[];
 		serverStatusesStore: ServerStatusesStore;
 		serverStatusesService: ServerStatusesService;
-		onclick: (server: Server) => void;
+		onclick?: (server: Server) => void;
 	}
 
 	let { servers = $bindable(), onclick, serverStatusesService, serverStatusesStore }: Props = $props();
