@@ -25,7 +25,7 @@
         style:width={width}
         style:height={height}
     >
-		<img class="close pointer" src="https://img.icons8.com/fluency-systems-regular/50/delete-sign--v1.png" alt="close" onclick={() => open = false}/>
+		<button class="close" type="button" aria-label="Close" uk-close onclick={() => open = false}></button>
         {@render children?.()}
     </dialog>
 {/if}
@@ -79,14 +79,5 @@
 		position: absolute;
 		top: $padding;
 		right: $padding;
-		height: 1.5rem;
-		width: 1.5rem;
-		opacity: 0.5;
-
-		transition: opacity 0.2s ease-out;
-
-		&:hover {
-			opacity: 1;
-		}
 	}
 </style>
