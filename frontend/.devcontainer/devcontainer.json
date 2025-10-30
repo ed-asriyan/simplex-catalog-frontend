@@ -1,6 +1,10 @@
 {
   "name": "Svelte App",
-  "image": "mcr.microsoft.com/devcontainers/javascript-node:24",
+  "build": {
+    "dockerfile": "../Dockerfile",
+    "target": "dev",
+    "context": ".."
+  },
   "customizations": {
     "vscode": {
       "extensions": [
