@@ -12,3 +12,5 @@ export const environment = import.meta.env['MODE'];
 export const isProduction = import.meta.env['PROD'] && environment === 'production';
 
 export const analyticsMeasurementId = import.meta.env['VITE_ANALYTICS_MEASHUREMENT_ID']?.trim();
+
+export const simplexGroupLink = import.meta.env['VITE_SIMPLEX_GROUP_LINK']?.trim();

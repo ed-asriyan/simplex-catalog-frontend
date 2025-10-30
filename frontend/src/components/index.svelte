@@ -1,5 +1,6 @@
 <script lang="ts">
     import { onMount } from 'svelte';
+    import { simplexGroupLink } from '../settings';
     import GithubCorner from './github-corner.svelte';
     import Sponsors from './sponsors.svelte';
     import Stats from './stats.svelte';
@@ -49,7 +50,7 @@
     </div>
 </div>
 
-<div class="uk-section uk-section-secondary">
+<div class="uk-section uk-section-secondary uk-padding-remove-bottom">
     <div class="uk-container uk-text-center">
         <h1 class="uk-heading-small">Unofficial <a href="https://simplex.chat" target="_blank" class="uk-link-text">SimpleX</a> Directory</h1>
     </div>
@@ -60,7 +61,6 @@
             <br/>
             Here anyone can anonymously add servers to the public list. The availability of each server is checked periodically.
         </div>
-
     </div>
 
     <div class="uk-container uk-text-center uk-margin-top">
@@ -70,6 +70,10 @@
     <div class="uk-container uk-margin-medium-top">
         <Stats {countriesStore} />
     </div>
+
+    <p class="uk-text-muted uk-text-center uk-margin-bottom">
+        <u><a href={simplexGroupLink} target="_blank" class="uk-link-text uk-text-muted">Join the SimpleX group chat</a></u>
+    </p>
 </div>
 
 <div class="uk-section uk-section-default">
