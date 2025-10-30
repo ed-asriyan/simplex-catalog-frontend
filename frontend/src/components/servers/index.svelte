@@ -5,6 +5,7 @@
     import ServerModal from './server-modal/index.svelte';
     import TableHeader from './table-header.svelte';
     import TableRow from './table-row.svelte';
+    import Icon from '../icon.svelte';
     import { QueryStore, QueryStoreList } from '../../query-store';
     import type { CountriesStore } from '../../store/countries-store';
     import type { ServerStatusesStore } from '../../store/server-statuses-store';
@@ -28,7 +29,7 @@
         currentPageServersUuids.map(uuid => serversStore.getBy("uuid", uuid).get()).filter(x => !!x)
     );
 
-    let countries = $derived(countriesStore.items);
+    let countries = $derived(countriesStore.allCountries);
 
     let totalCountStore: Readable<number> = $derived(serversStore.totalCount);
     let totalCount: number = $derived($totalCountStore);
@@ -134,7 +135,7 @@
             <span uk-spinner="ratio: 1.2"></span>
         {:then}
             <button class="uk-text-large pointer" onclick={refresh} uk-tooltip="Refresh">
-                🔄
+                <Icon icon="🔄" />
             </button>
         {/await}
     </div>

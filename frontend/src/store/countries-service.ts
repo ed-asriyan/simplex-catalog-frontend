@@ -1,5 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
-import type { CountriesStore } from './countries-store';
+import type { CountriesStore, Country } from './countries-store';
 
 export class CountriesService {
     private readonly store: CountriesStore;
@@ -10,10 +10,32 @@ export class CountriesService {
         this.client = client;
     }
 
-    async fetchCountries() {
-        const { data, error } = await this.client.from('servers_view').select('country');
-        if (error) throw error;
+    private async fetchCountriesData(): Promise<any[]> {
+        const { data, error } = await this.client
+            .from('servers_view')
+            .select('country,status,count:country.count()');
 
-        this.store.addCountry(...data.map(({ country }) => country).filter(Boolean));
+        if (error) throw error;
+        return data;
+    }
+
+    async fetchCountries() {
+        const items = await this.fetchCountriesData();
+
+        const data: Record<string, Country> = items
+            .filter(({ status, count, country }) => typeof status === 'boolean' && typeof count === 'number' && typeof country === 'string')
+            .reduce((acc, item) => {
+                if (!acc[item.country]) {
+                    acc[item.country] = {
+                        country: item.country,
+                        active: 0,
+                        inactive: 0
+                    };
+                }
+                acc[item.country][item.status ? 'active' : 'inactive'] += item.count;
+                return acc;
+            }, {});
+
+        this.store.addOrUpdate(...Object.values(data));
     }
 }

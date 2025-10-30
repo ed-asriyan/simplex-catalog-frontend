@@ -1,4 +1,5 @@
 <script lang="ts">
+    import Icon from '../../icon.svelte';
     import type { Server } from '../../store/servers-store';
 
     interface Props {
@@ -12,7 +13,9 @@
 {#if server.infoPageAvailable}
     <a href="https://{server.host.split(':')[0]}" target="_blank">
         {#if icon}
-            <img width="20" height="20" src="https://img.icons8.com/ios/50/link--v1.png" alt="link--v1" uk-tooltip="Click to open server info page"/>
+            <span uk-tooltip="Click to open server info page">
+                <Icon icon="link" />
+            </span>
         {:else}
             Info page
         {/if}

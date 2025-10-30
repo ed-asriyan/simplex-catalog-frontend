@@ -2,6 +2,7 @@
     import { onMount } from 'svelte';
     import GithubCorner from './github-corner.svelte';
     import Sponsors from './sponsors.svelte';
+    import Stats from './stats.svelte';
     import ServersTable from './servers/index.svelte';
     import { createClient } from '@supabase/supabase-js';
     import { supabaseKey, supabaseUrl } from '../settings';
@@ -50,22 +51,24 @@
 
 <div class="uk-section uk-section-secondary">
     <div class="uk-container uk-text-center">
-        <h1 class="uk-heading-small">Unofficial <a href="https://simplex.chat" target="_blank">SimpleX</a> Directory</h1>
+        <h1 class="uk-heading-small">Unofficial <a href="https://simplex.chat" target="_blank" class="uk-link-text">SimpleX</a> Directory</h1>
     </div>
 
-    <div class="uk-container uk-text-center">
+    <div class="uk-container uk-text-center uk-margin-top">
         <div>
             Discover and share community-run <a href="https://simplex.chat/docs/server.html#overview" target="_blank">SMP</a> and <a href="https://simplex.chat/docs/xftp-server.html#overview" target="_blank">XFTP</a> servers.
             <br/>
             Here anyone can anonymously add servers to the public list. The availability of each server is checked periodically.
         </div>
-        <div class="uk-margin-top uk-margin-bottom">
-            The website is not affiliated with the SimpleX team. Content is contributed by anonymous users.
-        </div>
-        <div class="uk-margin-top uk-margin-bottom">
-            Servers that have been inactive for 90 days or more may be removed from the directory.
-        </div>
+
+    </div>
+
+    <div class="uk-container uk-text-center uk-margin-top">
         <button class="uk-button uk-button-default uk-margin-left uk-margin-remove-right" onclick={addServerClick}>Add server anonymously</button>
+    </div>
+
+    <div class="uk-container uk-margin-medium-top">
+        <Stats {countriesStore} />
     </div>
 </div>
 
@@ -75,8 +78,13 @@
     </div>
 </div>
 
-<div class="uk-section uk-section-secondary footer uk-text-small uk-text-muted uk-text-center">
-    <div>
+<div class="uk-section uk-section-secondary uk-text-small uk-text-muted uk-text-center">
+    <div class="uk-margin-top">
+        The website is not affiliated with the SimpleX team. Content is contributed by anonymous users.
+        <br />
+        Servers that have been inactive for 90 days or more may be removed from the directory.
+    </div>
+    <div class="uk-margin-top">
         <span>Powered by</span>
         · <a class="uk-text-muted" href="https://simplex.chat" target="_blank">SimpleX</a>
         · <a class="uk-text-muted" href="https://svelte.dev" target="_blank">Svelte</a>
@@ -84,7 +92,7 @@
         · <a class="uk-text-muted" href="https://getuikit.com" target="_blank">UIkit</a>
         · <a class="uk-text-muted" href="https://icons8.com" target="_blank">Icons8</a>
     </div>
-    <div>
+    <div class="uk-margin-top">
         <a class="uk-text-muted" href="https://asriyan.me" target="_blank">Ed Asriyan</a>
     </div>
 </div>

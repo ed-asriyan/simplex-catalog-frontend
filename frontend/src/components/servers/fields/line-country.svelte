@@ -1,5 +1,6 @@
 <script lang="ts">
     import { countryCodeToName, getFlagEmoji } from '../../../utils';
+    import Icon from '../../icon.svelte';
 
     interface Props {
         country: string;
@@ -17,7 +18,7 @@
             <img width="22" height="22" src="https://img.icons8.com/nolan/64/tor-browser.png" alt="tor-browser"/>
         {:else}
             <span class:uk-text-large={largeFlag}>
-                {getFlagEmoji(country)}
+                <Icon icon={getFlagEmoji(country)} />
             </span>
         {/if}
         <span class="uk-text-small ">{name}</span>

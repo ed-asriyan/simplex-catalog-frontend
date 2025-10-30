@@ -1,16 +1,16 @@
-import { atom, computed } from 'nanostores';
+import { computed, type ReadableAtom } from 'nanostores';
+import { AbstractStore } from './abstract-store';
 
-export class CountriesStore {
-    private readonly store = atom<Set<string>>(new Set());
+export interface Country {
+    country: string
+    active: number;
+    inactive: number;
+}
 
-    readonly items = computed(this.store, (countries) => Array.from(countries).toSorted());
+export class CountriesStore extends AbstractStore<Country, 'country', 'active' | 'inactive'> {
+    readonly allCountries: ReadableAtom<string[]> = computed(this.items, ($store) => $store.map(item => item.country));
 
-    addCountry(...countries: string[]) {
-        const currentCountries = this.store.get();
-        const result = new Set(currentCountries);
-        for (const country of countries) {
-            result.add(country);
-        }
-        this.store.set(result);
+    constructor() {
+        super(['country'], ['active', 'inactive']);
     }
 }
