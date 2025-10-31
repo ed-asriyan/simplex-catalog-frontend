@@ -13,7 +13,7 @@
     import { CountriesService } from '../store/countries-service';
     import { ServerStatusesService } from '../store/server-statuses-service';
     import { ServerStatusesStore } from '../store/server-statuses-store';
-
+    
     const supabase = createClient(supabaseUrl, supabaseKey);
     const serversStore = new ServersStore();
     const serversService = new ServersService(supabase, serversStore);
@@ -44,13 +44,13 @@
 
 <GithubCorner />
 
-<div class="uk-section uk-section-secondary uk-section-xsmall uk-text-center">
+<div class="uk-section uk-section-secondary uk-section-xsmall uk-text-center uk-padding-remove-bottom">
     <div class="uk-container uk-container-expand">
         <Sponsors />
     </div>
 </div>
 
-<div class="uk-section uk-section-secondary uk-padding-remove-bottom">
+<div class="uk-section uk-section-secondary uk-padding-remove-bottom uk-padding-remove-top">
     <div class="uk-container uk-text-center">
         <h1 class="uk-heading-small">Unofficial <a href="https://simplex.chat" target="_blank" class="uk-link-text">SimpleX</a> Directory</h1>
     </div>
