@@ -165,14 +165,21 @@
         });
     });
 
+    const getAlpha2Code = function (id: string): string | undefined {
+        return i18IsoCountries.numericToAlpha2(id);
+    };
+
     $effect(() => {
         if (!svgElement || !countriesMap) return;
 
         d3.select(svgElement)
             .selectAll(".country")
             .attr("fill", d => {
-                const alpha2Code = d?.id && i18IsoCountries.numericToAlpha2(d.id) || "";
-                return countriesMap[alpha2Code]?.color || "#FFFFFF07";
+                return countriesMap[getAlpha2Code(d?.id)]?.color || "#FFFFFF07";
+            })
+            .attr("stroke", d => {
+                const alpha2Code = getAlpha2Code(d?.id);
+                return countriesMap[alpha2Code]?.color ? "#FFFFFF1D" : null;
             })
             .on("mouseover", (event, d) => {
                 const alpha2Code = d?.id && i18IsoCountries.numericToAlpha2(d.id) || "";
