@@ -1,102 +1,3 @@
-<!-- <script lang="ts" module>
-    export interface Country {
-        code: string;
-        color: string;
-        text: string;
-    }
-
-    const worldMapUrl = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json";
-</script>
-
-<script lang="ts">
-    import * as d3 from 'd3';
-    import * as topojson from 'topojson-client';
-    import * as i18IsoCountries from 'i18n-iso-countries';
-
-    interface Props {
-        countries: Country[];
-    }
-
-    let { countries }: Props = $props();
-
-    let countriesMap = $derived(countries.reduce((acc, curr) => {
-        acc[curr.code] = curr;
-        return acc;
-    }, {} as Record<string, Country>));
-
-    const draw = function(element: SVGSVGElement, countriesMap: Record<string, Country>) {
-        alert("Drawing map...");
-
-        // 4. Setup SVG and map dimensions
-        const width = 960;
-        const height = 600;
-
-        const svg = d3.select(element);
-            // .attr("width", width)
-            // .attr("height", height);
-
-        // Select the tooltip div
-        // const tooltip = d3.select(tooltipElement);
-
-        // 5. Define map projection and path generator
-        const projection = d3.geoMercator()
-            .scale(150) // Adjust zoom level
-            .translate([width / 2, height / 1.5]); // Center the map
-
-        const path = d3.geoPath().projection(projection);
-
-        d3.json(worldMapUrl).then(worldData => {
-            // Convert TopoJSON to GeoJSON features
-            const countries = topojson.feature(worldData, worldData.objects.countries);
-
-            // Draw each country
-            svg.selectAll("path")
-                .data(countries.features)
-                .enter().append("path")
-                .attr("class", "country")
-                .attr("d", path) // 'd' attribute defines the shape
-                .attr("fill", d => {
-                    const alpha2Code = d?.id && i18IsoCountries.numericToAlpha2(d.id) || "";
-                    return countriesMap[alpha2Code]?.color || "white"; // Default color
-                })
-                .on("mouseover", (event, d) => {
-                    // // 1. Get numeric ID
-                    // const numericId = d.id;
-                    // // 2. Convert to alpha-2
-                    // const alpha2Code = countriesMapping.numericToAlpha2(numericId);
-                    // // 3. Look up the text
-                    // const text = alpha2Code ? textMap.get(alpha2Code) : "";
-                    
-                    // if (text) {
-                        // If text exists, show and position the tooltip
-                        // tooltip.style("opacity", 1)
-                        //        .html(text)
-                        //        .style("left", (event.pageX + 10) + "px")
-                        //        .style("top", (event.pageY - 28) + "px");
-                    // }
-                })
-                .on("mousemove", (event) => {
-                    // Update tooltip position on mouse move
-                    // tooltip.style("left", (event.pageX + 10) + "px")
-                    //        .style("top", (event.pageY - 28) + "px");
-                })
-                .on("mouseout", () => {
-                    // Hide the tooltip on mouse out
-                    // tooltip.style("opacity", 0);
-                });
-
-        }).catch(error => {
-            // Handle potential error loading the map data
-            console.error("Error loading map data:", error);
-            svg.append("text")
-               .attr("x", width / 2)
-               .attr("y", height / 2)
-               .attr("text-anchor", "middle")
-               .text("Error loading map data.");
-        });
-    };
-</script> -->
-
 <script lang="ts" module>
     export interface Country {
         code: string;
@@ -116,9 +17,10 @@
 
     interface Props {
         countries: Country[];
+        onCountryClick?: (country: string) => void;
     }
 
-    let { countries }: Props = $props();
+    let { countries, onCountryClick }: Props = $props();
     let svgElement: SVGSVGElement;
 
     interface Tooltip {
@@ -181,6 +83,10 @@
                 const alpha2Code = getAlpha2Code(d?.id);
                 return countriesMap[alpha2Code]?.color ? "#FFFFFF1D" : null;
             })
+            .attr("class", d => {
+                const alpha2Code = getAlpha2Code(d?.id);
+                return "country" + (countriesMap[alpha2Code] ? " cursor" : "");
+            })
             .on("mouseover", (event, d) => {
                 const alpha2Code = d?.id && i18IsoCountries.numericToAlpha2(d.id) || "";
                 const text = countriesMap[alpha2Code]?.text;
@@ -200,6 +106,13 @@
                     top: (event.pageY - 28) as number,
                     left: (event.pageX + 10) as number,
                 };
+            })
+            .on("click", (event, d) => {
+                const alpha2Code = d?.id && i18IsoCountries.numericToAlpha2(d.id);
+                const country = countriesMap[alpha2Code];
+                if (country) {
+                    onCountryClick && onCountryClick(country.code);
+                }
             })
             .on("mouseout", () => {
                 toolTip = null;

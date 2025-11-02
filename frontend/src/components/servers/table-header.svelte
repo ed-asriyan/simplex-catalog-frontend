@@ -29,24 +29,24 @@
 
     $effect(() => {
         filter = {
-            uuids: !$labelsFilter.length ? null : {
+            uuids: !$labelsFilter.length ? undefined : {
                 inclusive: $labelsInclusiveFilter === '1',
                 values: $labelsFilter.reduce((acc, label) => {
                     return [...acc, ...Array.from($labelsStore[label])];
                 }, []),
             },
-            protocol: $protocolFilter === '' ? null : ($protocolFilter === 'smp' ? 'smp' : 'xftp'),
-            identity: null,
+            protocol: $protocolFilter === '' ? undefined : ($protocolFilter === 'smp' ? 'smp' : 'xftp'),
+            identity: undefined,
             host: $hostFilter,
-            countries: !$countriesFilter.length ? null : {
+            countries: !$countriesFilter.length ? undefined : {
                 inclusive: $countriesInclusiveFilter === '1',
                 values: $countriesFilter,
             },
-            status: $statusFilter === 'any' ? null : ($statusFilter === 'unknown' ? 'unknown' : $statusFilter === '1'),
-            infoPageAvailable: $infoPageFilter === 'any' ? null : $infoPageFilter === '1',
-            uptime7: $uptime7Filter === '' ? null : $uptime7Filter / 100,
-            uptime30: $uptime30Filter === '' ? null : $uptime30Filter / 100,
-            uptime90: $uptime90Filter === '' ? null : $uptime90Filter / 100,
+            status: $statusFilter === 'any' ? undefined : ($statusFilter === 'unknown' ? 'unknown' : $statusFilter === '1'),
+            infoPageAvailable: $infoPageFilter === 'any' ? undefined : $infoPageFilter === '1',
+            uptime7: $uptime7Filter === '' ? undefined : $uptime7Filter / 100,
+            uptime30: $uptime30Filter === '' ? undefined : $uptime30Filter / 100,
+            uptime90: $uptime90Filter === '' ? undefined : $uptime90Filter / 100,
         }
     })
 

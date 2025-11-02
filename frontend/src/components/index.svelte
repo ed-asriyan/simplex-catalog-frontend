@@ -8,7 +8,7 @@
     import { createClient } from '@supabase/supabase-js';
     import { supabaseKey, supabaseUrl } from '../settings';
     import { ServersStore } from '../store/servers-store';
-    import { ServersService } from '../store/servers-service';
+    import { type Filter, ServersService } from '../store/servers-service';
     import { CountriesStore } from '../store/countries-store';
     import { CountriesService } from '../store/countries-service';
     import { ServerStatusesService } from '../store/server-statuses-service';
@@ -40,6 +40,19 @@
             throw e;
         }
     };
+
+    let filter: Filter = $state({
+        uuids: null,
+        protocol: 'smp',
+        infoPageAvailable: null,
+        identity: null,
+        host: '',
+        countries: null,
+        status: true,
+        uptime7: null,
+        uptime30: null,
+        uptime90: null,
+    });
 </script>
 
 <GithubCorner />
@@ -68,7 +81,7 @@
     </div>
 
     <div class="uk-container uk-margin-medium-top">
-        <Stats {countriesStore} />
+        <Stats {countriesStore} onFilterApply={newFilter => { filter = newFilter; }} />
     </div>
 
     <p class="uk-text-muted uk-text-center uk-margin-bottom">
@@ -78,7 +91,7 @@
 
 <div class="uk-section uk-section-default">
     <div class="uk-container uk-container-expand">
-        <ServersTable {serversService} {serversStore} {countriesStore} {serverStatusesStore} {serverStatusesService} />
+        <ServersTable {serversService} {serversStore} {countriesStore} {serverStatusesStore} {serverStatusesService} {filter} />
     </div>
 </div>
 

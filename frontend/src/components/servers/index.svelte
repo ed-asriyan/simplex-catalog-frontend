@@ -19,9 +19,10 @@
         countriesStore: CountriesStore;
         serverStatusesStore: ServerStatusesStore;
         serverStatusesService: ServerStatusesService;
+        filter: Filter;
     }
 
-    let { serversStore, serversService, countriesStore, serverStatusesStore, serverStatusesService }: Props = $props();
+    let { serversStore, serversService, countriesStore, serverStatusesStore, serverStatusesService, filter = $bindable<Filter>() }: Props = $props();
 
     let allServers = $derived(serversStore.items);
     let currentPageServersUuids: string[] = $state([]);
@@ -46,18 +47,6 @@
     let sort: Sort = $derived({
         field: $sortField || 'lastCheck',
         order: $sortOrder || 'desc',
-    });
-    let filter: Filter = $state({
-        uuids: null,
-        protocol: 'smp',
-        infoPageAvailable: null,
-        identity: null,
-        host: '',
-        countries: null,
-        status: true,
-        uptime7: null,
-        uptime30: null,
-        uptime90: null,
     });
 
     const refresh = function () {

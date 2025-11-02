@@ -9,16 +9,16 @@ export interface FilterArray {
 }
 
 export interface Filter {
-    status: boolean | 'unknown' | null;
-    countries: FilterArray | null;
-    identity: string | null;
-    infoPageAvailable: boolean | null;
-    host: string | null;
-    protocol: 'smp' | 'xftp' | null;
-    uptime7: number | null;
-    uptime30: number | null;
-    uptime90: number | null;
-    uuids: FilterArray | null;
+    status?: boolean | 'unknown' | undefined;
+    countries?: FilterArray | undefined;
+    identity?: string | undefined;
+    infoPageAvailable?: boolean | undefined;
+    host?: string | undefined;
+    protocol?: 'smp' | 'xftp' | undefined;
+    uptime7?: number | undefined;
+    uptime30?: number | undefined;
+    uptime90?: number | undefined;
+    uuids?: FilterArray | undefined;
 }
 
 export type SortField = 'status' | 'host' | 'identity' | 'country' | 'type' | 'uptime7' | 'uptime30' | 'uptime90' | 'lastCheck';
@@ -57,7 +57,7 @@ export class ServersService {
     async fetch (filter: Filter, sort: Sort, pageSize: number, pageNumber: number): Promise<string[]> {
         let query = this.client.from('servers_view').select('*', { count: 'exact' });
 
-        if (filter.status !== null) {
+        if (filter.status !== undefined) {
             if (filter.status === 'unknown') {
                 query = query.is('status', null);
             } else {
@@ -97,7 +97,7 @@ export class ServersService {
             query = query.eq('protocol', filter.protocol === 'smp' ? 1 : 2);
         }
     
-        if (filter.infoPageAvailable !== null) {
+        if (filter.infoPageAvailable !== undefined) {
             query = query.eq('info_page_available', filter.infoPageAvailable);
         }
     
