@@ -10,8 +10,10 @@
         }
     };
 
-    abstract class Event<T> {
-        abstract readonly name: string;
+    // Use a non-abstract base class to avoid leaving TS-only syntax in the compiled output.
+    export class Event<T> {
+        // definite assignment assertion keeps TS happy; removed at compile time
+        readonly name!: string;
         readonly params: T;
 
         constructor(params: T) {
