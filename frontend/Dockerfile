@@ -9,8 +9,6 @@ COPY package.json .
 COPY package-lock.json .
 
 RUN npm ci
-# https://github.com/npm/cli/issues/4828#issuecomment-1972072806
-RUN npm i --no-save -O @rollup/rollup-linux-x64-gnu @rollup/rollup-linux-arm64-gnu
 
 COPY svelte.config.js .
 COPY tsconfig.json .
