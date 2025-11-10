@@ -1,0 +1,35 @@
+services:
+  tor:
+    image: dperson/torproxy
+    command: -n
+
+  smp-client:
+    build: smp-client
+    depends_on:
+      - tor
+    healthcheck:
+      test: ["CMD", "nc", "-z", "127.0.0.1", "5225"]
+      interval: 3s
+      timeout: 2s
+      retries: 10
+      start_period: 5s
+
+  validator:
+    build:
+      context: validator
+      target: dev
+    env_file:
+      - .env
+    environment:
+      - SMP_CLIENT_URI=ws://localhost:80
+      - SUPABASE_SERVERS_TABLE_NAME=servers_view
+      - SUPABASE_SERVERS_STATUS_TABLE_NAME=server_status
+      # - SUPABASE_URL=<to be filled in .env>
+      # - SUPABASE_KEY=<to be filled in .env>
+    depends_on:
+      - smp-client
+    network_mode: "service:smp-client"
+    working_dir: /workspace
+    volumes:
+      - .:/workspace
+    command: ["sleep", "infinity"]

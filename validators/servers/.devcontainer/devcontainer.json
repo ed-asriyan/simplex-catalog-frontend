@@ -1,0 +1,22 @@
+{
+  "name": "simplex-directory-servers-validator",
+  "dockerComposeFile": [
+    "../docker-compose.dev.yml"
+  ],
+  "workspaceFolder": "/workspace",
+  "service": "validator",
+  "overrideCommand": false,
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "rust-lang.rust-analyzer"
+      ],
+      "settings": {
+        "rust-analyzer.cargo.allFeatures": true,
+        "rust-analyzer.checkOnSave.command": "clippy",
+        "editor.formatOnSave": true
+      }
+    }
+  },
+  "postCreateCommand": "rustup component add clippy rustfmt"
+}

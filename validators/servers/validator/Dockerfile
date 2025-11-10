@@ -1,7 +1,9 @@
-FROM rust:1.81-alpine as builder
+FROM rust:1.90 AS dev
+
+FROM dev AS builder
 
 # https://github.com/rust-lang/docker-rust/issues/167#issuecomment-1969549237
-RUN apk add --no-cache pkgconfig libc-dev openssl-dev openssl-libs-static
+# RUN apk add --no-cache pkgconfig libc-dev openssl-dev openssl-libs-static
 
 WORKDIR /app
 
@@ -11,7 +13,7 @@ COPY src src
 RUN cargo build --release
 
 
-FROM alpine:latest as validate
+FROM debian:bookworm AS validate
 
 WORKDIR /app
 
