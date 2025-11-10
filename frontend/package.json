@@ -28,7 +28,7 @@
 		"svelte-check": "^4.3.3",
 		"topojson-client": "^3.1.0",
 		"tslib": "^2.6.2",
-		"typescript": "^5.8.3",
+		"typescript": "^5.9.3",
 		"uikit": "^3.23.11",
 		"vite": "^6.3.5"
 	},
