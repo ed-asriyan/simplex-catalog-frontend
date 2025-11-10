@@ -26,6 +26,7 @@ ENV SMP_CLIENT_URI=
 ENV SUPABASE_SERVERS_TABLE_NAME=
 ENV SUPABASE_SERVERS_STATUS_TABLE_NAME=
 ENV DRY=
+ENV RETRY_COUNT=
 
 CMD echo "Sleeping 10 seconds to let TOR start..." && sleep 10 && ./validate \
     --maxmind-db-path GeoLite2-Country.mmdb \
@@ -34,4 +35,5 @@ CMD echo "Sleeping 10 seconds to let TOR start..." && sleep 10 && ./validate \
     --smp-client-ws-url $SMP_CLIENT_URI \
     --supabase-servers-table-name $SUPABASE_SERVERS_TABLE_NAME \
     --supabase-servers-status-table-name $SUPABASE_SERVERS_STATUS_TABLE_NAME \
+    --retry-count $RETRY_COUNT \
     $( [ -n "$DRY" ] && echo "--dry" )

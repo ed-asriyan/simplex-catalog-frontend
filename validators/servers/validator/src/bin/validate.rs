@@ -1,28 +1,19 @@
-extern crate log;
 extern crate chrono;
 extern crate env_logger;
+extern crate log;
 
-use clap::{Arg, ArgAction, parser::ValueSource};
-use log::{info, error};
-use rand::thread_rng;
-use rand::seq::SliceRandom;
+use clap::{parser::ValueSource, value_parser, Arg, ArgAction};
 use itertools::Itertools;
+use log::{error, info};
+use rand::seq::SliceRandom;
+use rand::thread_rng;
 
 use validator::{
     create_command,
+    database::{Database, Server, ServerStatus},
+    geoip::GeoIp,
     init_logger,
-    database::{
-        Database,
-        Server,
-        ServerStatus,
-    },
-    geoip::{
-        GeoIp,
-    },
-    smp::{
-        test_server,
-        is_info_page_available,
-    },
+    smp::{is_info_page_available, test_server},
 };
 
 struct Args<'a> {
@@ -30,45 +21,47 @@ struct Args<'a> {
     database: &'a Database<'a>,
     smp_server_uri: &'a str,
     dry: bool,
+    retry_count: u32,
 }
 
-async fn handle_server(
-    args: &Args<'_>,
-    server: &Server,
-) -> Result<(), Box<dyn std::error::Error>> {
+async fn handle_server(args: &Args<'_>, server: &Server) -> Result<(), Box<dyn std::error::Error>> {
     let uri = server.uri();
 
-    info!("Testing {}...", uri);
-    let status = test_server(&uri, args.smp_server_uri).await?;
+    let mut status = false;
+    for i in 0..args.retry_count {
+        info!("Testing {} (attempt {})...", uri, i + 1);
+        if test_server(&uri, args.smp_server_uri).await? {
+            status = true;
+            break;
+        }
+    }
     info!("Done: {}", status);
-    
+
     let domain = if let Some(pos) = server.host.find(':') {
         &server.host[..pos]
     } else {
         &server.host
     };
     let country = match args.geoip.get_country(&domain) {
-        Ok(country) => {
-            Some(country)
-        }
-        Err(e) => {
-            None
-        }
+        Ok(country) => Some(country),
+        Err(e) => None,
     };
     info!("Done: {:?}", country);
 
     info!("Checking info page availability...");
     let mut info_page_available = is_info_page_available(&domain).await;
     info!("Done: {}", info_page_available);
-    
+
     info!("Adding server status...");
     if !args.dry {
-        args.database.server_statuses_add(&ServerStatus {
-            server_uuid: &server.uuid,
-            status,
-            country: country.as_deref(),
-            info_page_available,
-        }).await?;
+        args.database
+            .server_statuses_add(&ServerStatus {
+                server_uuid: &server.uuid,
+                status,
+                country: country.as_deref(),
+                info_page_available,
+            })
+            .await?;
     } else {
         info!("Running in dry mode. Skipping status addition.");
     }
@@ -121,21 +114,51 @@ async fn main() {
                 .action(ArgAction::SetTrue)
                 .help("Dry run mode. No changes will be made to the database."),
         )
+        .arg(
+            Arg::new("retry-count")
+                .long("retry-count")
+                .value_name("COUNT")
+                .help("Sets the number of retry attempts")
+                .num_args(1)
+                .value_parser(value_parser!(u32))
+                .required(true),
+        )
         .get_matches();
 
-    let maxmind_db_path = command.get_one::<String>("maxmind-db-path").expect("required argument");
-    let smp_client_ws_url = command.get_one::<String>("smp-client-ws-url").expect("required argument");
-    let supabase_uri = command.get_one::<String>("supabase-url").expect("required argument");
-    let supabase_token = command.get_one::<String>("supabase-key").expect("required argument");
-    let servers_table_name = command.get_one::<String>("supabase-servers-table-name").expect("required argument");
-    let servers_status_table_name = command.get_one::<String>("supabase-servers-status-table-name").expect("required argument");
+    let maxmind_db_path = command
+        .get_one::<String>("maxmind-db-path")
+        .expect("required argument");
+    let smp_client_ws_url = command
+        .get_one::<String>("smp-client-ws-url")
+        .expect("required argument");
+    let supabase_uri = command
+        .get_one::<String>("supabase-url")
+        .expect("required argument");
+    let supabase_token = command
+        .get_one::<String>("supabase-key")
+        .expect("required argument");
+    let servers_table_name = command
+        .get_one::<String>("supabase-servers-table-name")
+        .expect("required argument");
+    let servers_status_table_name = command
+        .get_one::<String>("supabase-servers-status-table-name")
+        .expect("required argument");
     let dry = command.value_source("dry") == Some(ValueSource::CommandLine);
+    let retry_count = *command
+        .get_one::<u32>("retry-count")
+        .expect("required argument");
 
     let args = Args {
         geoip: &GeoIp::new(&maxmind_db_path).unwrap(),
-        database: &Database::new(&supabase_uri, &supabase_token, &servers_table_name, &servers_status_table_name),
+        database: &Database::new(
+            &supabase_uri,
+            &supabase_token,
+            &servers_table_name,
+            &servers_status_table_name,
+        ),
         smp_server_uri: &smp_client_ws_url,
         dry,
+        retry_count,
     };
 
     if args.dry {
