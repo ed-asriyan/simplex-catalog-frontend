@@ -2,17 +2,22 @@ services:
   tor:
     image: dperson/torproxy
     command: -n
+    healthcheck:
+      test: ["CMD", "sh", "-c", "curl --silent --fail --socks5-hostname localhost:9050 http://example.com"]
+      interval: 5s
+      timeout: 2s
+      retries: 10
 
   smp-client:
     build: smp-client
     depends_on:
-      - tor
+      tor:
+        condition: service_healthy
     healthcheck:
-      test: ["CMD", "nc", "-z", "127.0.0.1", "5225"]
-      interval: 3s
+      test: ["CMD", "nc", "-z", "127.0.0.1", "80"]
+      interval: 5s
       timeout: 2s
       retries: 10
-      start_period: 5s
 
   validator:
     build:
@@ -27,5 +32,6 @@ services:
       # - SUPABASE_URL=<to be filled in .env>
       # - SUPABASE_KEY=<to be filled in .env>
     depends_on:
-      - smp-client
+      smp-client:
+        condition: service_healthy
     network_mode: "service:smp-client"

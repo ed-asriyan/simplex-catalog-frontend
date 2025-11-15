@@ -32,7 +32,7 @@ ENV SUPABASE_SERVERS_STATUS_TABLE_NAME=
 ENV DRY=
 ENV RETRY_COUNT=
 
-CMD echo "Sleeping 10 seconds to let TOR start..." && sleep 10 && ./validate \
+CMD ./validate \
     --maxmind-db-path GeoLite2-Country.mmdb \
     --supabase-url $SUPABASE_URL \
     --supabase-key $SUPABASE_KEY \
