@@ -13,7 +13,11 @@ COPY src src
 RUN cargo build --release
 
 
-FROM debian:bookworm AS validate
+FROM debian:stable-slim as validate
+
+RUN apt-get update \
+    && apt-get install -y libssl3 \
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
