@@ -55,7 +55,7 @@ export class ServersService {
     }
     
     async fetch (filter: Filter, sort: Sort, pageSize: number, pageNumber: number): Promise<string[]> {
-        let query = this.client.from('servers_view').select('*', { count: 'exact' });
+        let query = this.client.from('v_server_summaries').select('*', { count: 'exact' });
 
         if (filter.status !== undefined) {
             if (filter.status === 'unknown') {

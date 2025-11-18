@@ -22,7 +22,7 @@ export class ServerStatusesService {
     }
 
     async fetch(serverUuids: string[]) {
-      let query = this.client.from('server_status').select('*');
+      let query = this.client.from('server_statuses').select('*');
 
       query = query.in('server_uuid', serverUuids);
       query = query.order('created_at', { ascending: true });

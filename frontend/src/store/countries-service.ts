@@ -12,7 +12,7 @@ export class CountriesService {
 
     private async fetchCountriesData(): Promise<any[]> {
         const { data, error } = await this.client
-            .from('servers_view')
+            .from('v_server_summaries')
             .select('country,status,count:country.count()');
 
         if (error) throw error;
