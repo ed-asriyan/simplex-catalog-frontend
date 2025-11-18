@@ -27,8 +27,8 @@ services:
       - .env
     environment:
       - SMP_CLIENT_URI=ws://localhost:80
-      - SUPABASE_SERVERS_TABLE_NAME=servers_view
-      - SUPABASE_SERVERS_STATUS_TABLE_NAME=server_status
+      - SUPABASE_SERVERS_TABLE_NAME=v_server_summaries
+      - SUPABASE_SERVERS_STATUS_TABLE_NAME=server_statuses
       # - SUPABASE_URL=<to be filled in .env>
       # - SUPABASE_KEY=<to be filled in .env>
     depends_on:
