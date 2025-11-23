@@ -4,9 +4,9 @@ services:
     command: -n
     healthcheck:
       test: ["CMD", "sh", "-c", "curl --silent --fail --socks5-hostname localhost:9050 http://example.com"]
-      interval: 5s
-      timeout: 2s
-      retries: 10
+      interval: 10s
+      timeout: 10s
+      retries: 30
 
   smp-client:
     build: smp-client
