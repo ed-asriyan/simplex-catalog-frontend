@@ -1,4 +1,4 @@
-FROM rust:1.90 AS dev
+FROM rust:1.91 AS dev
 
 FROM dev AS builder
 
