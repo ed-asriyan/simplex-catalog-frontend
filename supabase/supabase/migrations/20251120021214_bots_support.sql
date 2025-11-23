@@ -149,6 +149,8 @@ CREATE VIEW v_bot_summaries WITH (security_invoker = ON) AS
         bots_all.address AS address,
         bots_all.created_at AS created_at,
         bots_all.photo AS photo,
+        bots_all.name AS name,
+        bots_all.description AS description,
         latest_status.is_online AS is_online,
         latest_status.created_at AS last_check,
         COALESCE(uptime_data_7.up_statuses::float / uptime_data_7.total_statuses, 0) AS uptime7,
