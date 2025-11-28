@@ -1,5 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
-import type { ServerStatusesStore, ServerStatus } from './server-statuses-store';
+import { supabase } from '../supabase';
+import { type ServerStatusesStore, type ServerStatus, serverStatusesStore } from './server-statuses-store';
 
 const parseServerStatus = function (data: any): ServerStatus {
     return {
@@ -33,3 +34,5 @@ export class ServerStatusesService {
       this.store.addOrUpdate(...data.map(parseServerStatus));
   };
 }
+
+export const serverStatusesService = new ServerStatusesService(supabase, serverStatusesStore);

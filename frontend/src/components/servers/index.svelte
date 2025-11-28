@@ -1,219 +1,132 @@
 <script lang="ts">
-    import type { Readable } from 'svelte/store';
-    import type { ServersService, Filter, Sort, SortField, SortOrder } from '../../store/servers-service';
-    import type { Server, ServersStore } from '../../store/servers-store';
-    import ServerModal from './server-modal/index.svelte';
-    import TableHeader from './table-header.svelte';
-    import TableRow from './table-row.svelte';
-    import Icon from '../icon.svelte';
-    import { QueryStore, QueryStoreList } from '../../query-store';
-    import type { CountriesStore } from '../../store/countries-store';
-    import type { ServerStatusesStore } from '../../store/server-statuses-store';
-    import type { ServerStatusesService } from '../../store/server-statuses-service';
+    import StatsMap from './stats-map.svelte';
+    import StatsCounters from './stats-counters.svelte';
+    import ServersTable from './table/index.svelte';
+    import { type Filter, type Sort } from '../../store/servers-service';
+    import { serversService } from '../../store/servers-service';
+    import { setQueryParam } from '../../utils';
     import { labelsStore } from '../../store/labels-store';
-    import { exportFile, importFile } from '../../utils';
+    import { onMount } from 'svelte';
 
-    interface Props {
-        serversStore: ServersStore;
-        serversService: ServersService;
-        countriesStore: CountriesStore;
-        serverStatusesStore: ServerStatusesStore;
-        serverStatusesService: ServerStatusesService;
-        filter: Filter;
-    }
+    let { route } = $props();
 
-    let { serversStore, serversService, countriesStore, serverStatusesStore, serverStatusesService, filter = $bindable<Filter>() }: Props = $props();
+    let params = $derived(route.result.querystring.params);
 
-    let allServers = $derived(serversStore.items);
-    let currentPageServersUuids: string[] = $state([]);
-    let currentPageServers: Server[] = $derived(
-        currentPageServersUuids.map(uuid => serversStore.getBy("uuid", uuid).get()).filter(x => !!x)
-    );
+    const addServerClick = async function () {
+        const input = prompt('Enter SMP or XFTP server URI:')?.trim();
+        if (!input) return;
 
-    let countries = $derived(countriesStore.allCountries);
+        try {
+            await serversService.addServer(input.trim());
+            alert('The server is added to the database. If the server is available, it will soon appear in the table for everyone.');
+        } catch (e) {
+            alert(e.message);
+            throw e;
+        }
+    };
 
-    let totalCountStore: Readable<number> = $derived(serversStore.totalCount);
-    let totalCount: number = $derived($totalCountStore);
+    const generateFilter = function (params: Record<string, string>): Filter {
+        return {
+            labels: params.filterLabelsList ? {
+                inclusive: params.filterLabelsInclusive === 'true',
+                values: decodeURIComponent(params.filterLabelsList).split(','),
+            } : undefined,
+            protocol: params.filterProtocol as 'smp' | 'xftp' || undefined,
+            infoPageAvailable: params.filterInfoPage === 'true' ? true : params.filterInfoPage === 'false' ? false : undefined,
+            identity: params.filterIdentity || undefined,
+            host: params.filterHost || undefined,
+            countries: params.filterCountriesList ? {
+                inclusive: params.filterCountriesInclusive === 'true',
+                values: decodeURIComponent(params.filterCountriesList).split(','),
+            } : undefined,
+            status: params.filterStatus === 'true' ? true : params.filterStatus === 'false' ? false : undefined,
+            uptime7: +params.filterUptime7 || undefined,
+            uptime30: +params.filterUptime30 || undefined,
+            uptime90: +params.filterUptime90 || undefined,
+        };
+    };
 
-    let pageSize: number = $state(50);
-    let pageNumber: number = $state(1);
-    let pageCount: number = $derived(Math.ceil(totalCount / pageSize));
+    onMount(() => {
+        const generatedFilter = generateFilter(params);
+        if (Object.values(generatedFilter || {}).filter(x => x !== undefined).length === 0) {
+            updateFilter(JSON.parse(localStorage.getItem('serversFilter') || '{}') as Filter);
+        }
+    });
 
-    let serversPromise: Promise<void> = $state(Promise.resolve());
-
-    const sortField = new QueryStore<SortField>('filter-sort-column', 'lastCheck', ['status', 'lastCheck', 'uptime7', 'uptime30', 'uptime90']);
-    const sortOrder = new QueryStore<SortOrder>('filter-sort-direction', 'desc', ['asc', 'desc']);
+    let refreshT: number = $state(0);
+    let filter: Filter = $derived({
+        [Symbol()]: refreshT,
+        [Symbol()]: $labelsStore,
+        ...generateFilter(params),
+    });
 
     let sort: Sort = $derived({
-        field: $sortField || 'lastCheck',
-        order: $sortOrder || 'desc',
+        field: params.sortField || 'last_check',
+        order: params.sortOrder || 'desc',
     });
+
+    const updateFilter = (newFilter: Filter) => {
+        localStorage.setItem('serversFilter', JSON.stringify(newFilter));
+        setQueryParam(route, {
+            filterProtocol: newFilter.protocol === undefined ? '' : newFilter.protocol,
+            filterLabelsList: newFilter.labels ? newFilter.labels.values.join(',') : '',
+            filterLabelsInclusive: newFilter.labels ? String(newFilter.labels.inclusive) : '',
+            filterIdentity: newFilter.identity === undefined ? '' : newFilter.identity,
+            filterInfoPage: newFilter.infoPageAvailable === undefined ? '' : String(newFilter.infoPageAvailable),
+            filterHost: newFilter.host === undefined ? '' : newFilter.host,
+            filterCountriesList: newFilter.countries?.values.join(',') || '',
+            filterCountriesInclusive: newFilter.countries?.inclusive?.toString() || '',
+            filterStatus: newFilter.status === undefined ? '' : String(newFilter.status),
+            filterUptime7: newFilter.uptime7 === undefined ? '' : String(newFilter.uptime7),
+            filterUptime30: newFilter.uptime30 === undefined ? '' : String(newFilter.uptime30),
+            filterUptime90: newFilter.uptime90 === undefined ? '' : String(newFilter.uptime90),
+        });
+    }
+
+    let pageNumber: number = $derived(+params.pageNumber || 1);
+    let pageSize: number = $derived(+params.pageSize || 50);
+
+    const updateSort = (newSort: Sort) => {
+        setQueryParam(route, {
+            'sortField': newSort.field,
+            'sortOrder': newSort.order,
+        });
+    };
+
+    const updatePagination = (newPageNumber: number, newPageSize: number) => {
+        setQueryParam(route, {
+            'pageNumber': String(newPageNumber),
+            'pageSize': String(newPageSize),
+        });
+    };
 
     const refresh = function () {
-        if (!isFinite(pageSize)) {
-            pageSize = 10;
-        }
-        if (!isFinite(pageNumber)) {
-            pageNumber = 1;
-        }
-        serversPromise = serversService
-            .fetch(filter, sort, pageSize, pageNumber)
-            .then(uuids => { currentPageServersUuids = uuids; });
-    };
-
-    $effect(() => refresh());
-
-    $effect(() => {
-        if (filter) {
-            pageNumber = 1;
-        }
-    });
-
-    let serversModal: Server[] = $state([]);
-
-    const changePage = async function (pageCount: number, newPage: number) {
-        if (newPage < 1 || newPage > pageCount) {
-            return;
-        }
-        pageNumber = newPage;
-    };
-
-    const selectedServersUuid = new QueryStoreList<string>('selected-servers', []);
-    let selectedServers = $derived($selectedServersUuid.map(uuid => $allServers.find(server => server.uuid === uuid)));
-
-    const toggleSelectedServer = function (server: Server) {
-        if ($selectedServersUuid.includes(server.uuid)) {
-            $selectedServersUuid = $selectedServersUuid.filter((uuid: string) => server.uuid !== uuid);
-        } else {
-            $selectedServersUuid = [...$selectedServersUuid, server.uuid];
-        }
-    };
-
-    const exportLabels = function () {
-        const labels = Object.entries($labelsStore).reduce((acc, [label, uuids]) => {
-            acc[label] = Array.from(uuids);
-            return acc;
-        }, {} as Record<string, string[]>);
-        exportFile(JSON.stringify(labels), `${location.hostname}_labels_${new Date().toISOString()}.json`, 'application/json');
-    };
-
-    const importLabels = async function () {
-        const data = await importFile('application/json');
-        const labels = JSON.parse(data) as Record<string, string[]>;
-
-        const list = Object.entries(labels).map(([label, uuids]) => `Label "${label}": ${uuids.length} servers`).join('\n');
-        if (confirm(`The current labels in this browser will be replaced by the import:\n\n${list}\n\nContinue?`)) {
-            labelsStore.importFromJson(labels);
-        }
+        refreshT++;
     };
 </script>
 
-<ServerModal bind:servers={serversModal} {serverStatusesStore} {serverStatusesService} />
-
-<div class="uk-margin-small-bottom">
-    <button class="uk-button uk-button-default uk-margin-small-right uk-width-auto@m uk-width-1-1" onclick={importLabels}>
-        Import labels
-    </button>
-    <button class="uk-button uk-button-default uk-width-auto@m uk-width-1-1" onclick={exportLabels}>
-        Export labels
-    </button>
-</div>
-<div class="uk-overflow-auto uk-width-1-1">
-    <div class="uk-float-left uk-margin-left uk-margin-right uk-width-auto@m uk-width-1-1 uk-text-center">
-        {#await serversPromise}
-            <span uk-spinner="ratio: 1.2"></span>
-        {:then}
-            <button class="uk-text-large pointer" onclick={refresh} uk-tooltip="Refresh">
-                <Icon icon="🔄" />
-            </button>
-        {/await}
+<div class="uk-section uk-section-secondary uk-section-small">
+    <div class="uk-container">
+        <div class="uk-grid-medium uk-child-width-expand@s" uk-grid>
+            <div>
+                <h1 class="uk-heading-small">🌐 Servers Catalog</h1>
+                <div class="uk-margin-bottom">
+                    Discover and share community-run <a href="https://simplex.chat/docs/server.html#overview" target="_blank">SMP</a> and <a href="https://simplex.chat/docs/xftp-server.html#overview" target="_blank">XFTP</a> servers.
+                    <br/>
+                    Here anyone can anonymously add servers to the public list. The availability of each server is checked periodically.
+                </div>
+                <StatsCounters {updateFilter} {filter} />
+                <button class="uk-button uk-button-default uk-margin" onclick={addServerClick}>Add server anonymously</button>
+            </div>
+            <div>
+                <StatsMap {updateFilter} {filter} />
+            </div>
+        </div>
     </div>
-    <div>
-        <button class="uk-button uk-button-secondary uk-float-right uk-width-auto@m uk-width-1-1" 
-                onclick={() => serversModal = selectedServers}
-                disabled={$selectedServersUuid.length < 2}
-                uk-tooltip={$selectedServersUuid.length < 2 ? "Select 2 or more servers" : ""}
-            >
-            Bulk mode ({ $selectedServersUuid.length })
-        </button>
-        <div class="uk-margin-small uk-width-1-1 uk-width-auto@m uk-inline-block"></div>
-        <select bind:value={pageSize} class="uk-select uk-float-left uk-width-small@m uk-margin-small-bottom uk-width-1-1@s">
-            {#each [5, 10, 20, 50, 100] as size}
-                <option value={size}>Page size: { size }</option>
-            {/each}
-        </select>
-        <div class="uk-margin-small uk-width-1-1 uk-width-auto@m uk-inline-block"></div>
-        <select class="uk-select uk-width-1-1 uk-width-auto@m" bind:value={$sortField}>
-            <option value="protocol">Sort by: Type</option>
-            <option value="status">Sort by: Status</option>
-            <option value="last_check">Sort by: Last check</option>
-            <option value="info_page_available">Sort by: Info page</option>
-            <option value="uptime7">Sort by: Uptime 7d</option>
-            <option value="uptime30">Sort by: Uptime 30d</option>
-            <option value="uptime90">Sort by: Uptime 90d</option>
-        </select>
-        <div class="uk-margin-small uk-width-1-1 uk-width-auto@m uk-inline-block"></div>
-        <select class="uk-select uk-width-1-1 uk-width-auto@m" bind:value={$sortOrder}>
-            <option value="asc">Sort direction: Ascending</option>
-            <option value="desc">Sort direction: Descending</option>
-        </select>
-    </div>
-    <table class="table uk-table uk-table-divider uk-table-small">
-        <TableHeader
-            bind:filter={filter}
-            onAllServerSelected={value => $selectedServersUuid = value ? currentPageServersUuids : []}
-            countries={$countries}
-        />
-
-        <tbody class="uk-list-striped uk-table-hover">
-            {#each currentPageServers as server (server.uuid)}
-                <TableRow 
-                    {server}
-                    selected={$selectedServersUuid.includes(server.uuid)}
-                    onSelect={() => toggleSelectedServer(server)}
-                    {serverStatusesService}
-                    {serverStatusesStore}
-                />
-            {/each}
-        </tbody>
-        <tbody>
-            <tr>
-                <td colspan="100">
-                    <div class="uk-flex uk-flex-middle uk-flex-center uk-margin-top uk-margin-bottom uk-flex-column uk-text-center pages">
-                        <div class="uk-margin-left uk-margin-right uk-margin-bottom">
-                            Total servers matching filters: {totalCount}
-                        </div>
-                        {#if totalCount}
-                            <div>
-                                <div class="uk-margin-bottom">
-                                    {#each Array.from({ length: pageCount }, (_, i) => i + 1) as page}
-                                        <button class="uk-button uk-button-default uk-button-small uk-margin-small-right" class:uk-button-secondary={page === pageNumber} onclick={() => changePage(pageCount, page)}>
-                                            {page}
-                                        </button>
-                                    {/each}
-                                </div>
-                                {#if pageNumber !== 1}
-                                    <button class="uk-button uk-button-default" onclick={() => changePage(pageCount, pageNumber - 1)}>
-                                        ← Previous page
-                                    </button>
-                                {/if}
-                                {#if pageNumber !== pageCount}
-                                    <button class="uk-button uk-button-default" onclick={() => changePage(pageCount, pageNumber + 1)}>
-                                        Next page →
-                                    </button>
-                                {/if}
-                            </div>
-                        {/if}
-                    </div>
-                </td>
-            </tr>
-        </tbody>
-    </table>
 </div>
 
-<style lang="scss">
-    .pages {
-        width: 100%;
-        max-width: 100vw;;
-    }
-</style>
+<div class="uk-section uk-section-default">
+    <div class="uk-container uk-container-expand">
+        <ServersTable {updateFilter} {updatePagination} {updateSort} {filter} {sort} {pageNumber} {pageSize} {refresh} />
+    </div>
+</div>

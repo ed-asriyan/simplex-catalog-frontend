@@ -26,3 +26,5 @@ export class ServersStore extends AbstractStore<Server, 'uuid', 'protocol'> {
     super(['uuid'], ['protocol']);
   }
 }
+
+export const serversStore = new ServersStore();

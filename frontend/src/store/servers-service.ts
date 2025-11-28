@@ -1,5 +1,8 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
-import type { Server, ServersStore } from './servers-store';
+import { supabase } from '../supabase';
+import { serversStore, type Server, type ServersStore } from './servers-store';
+import { labelsStore } from './labels-store';
+import { get } from 'svelte/store';
 
 export type ServerColumn = keyof Server;
 
@@ -9,6 +12,7 @@ export interface FilterArray {
 }
 
 export interface Filter {
+    labels: FilterArray | undefined;
     status?: boolean | 'unknown' | undefined;
     countries?: FilterArray | undefined;
     identity?: string | undefined;
@@ -18,7 +22,6 @@ export interface Filter {
     uptime7?: number | undefined;
     uptime30?: number | undefined;
     uptime90?: number | undefined;
-    uuids?: FilterArray | undefined;
 }
 
 export type SortField = 'status' | 'host' | 'identity' | 'country' | 'type' | 'uptime7' | 'uptime30' | 'uptime90' | 'lastCheck';
@@ -65,11 +68,14 @@ export class ServersService {
             }
         }
     
-        if (filter.uuids) {
-            if (filter.uuids.inclusive) {
-                query = query.in('uuid', filter.uuids.values);
+        if (filter.labels) {
+            const uuids: string[] = filter.labels.values.reduce((acc, label) => {
+                return [...acc, ...Array.from(get(labelsStore)[label]) as string[]];
+            }, [] as string[]);
+            if (filter.labels.inclusive) {
+                query = query.in('uuid', uuids);
             } else {
-                for (const uuid of filter.uuids.values) {
+                for (const uuid of uuids) {
                     query.neq('uuid', uuid);
                 }
             }
@@ -141,3 +147,5 @@ export class ServersService {
         }
     }
 }
+
+export const serversService = new ServersService(supabase, serversStore);

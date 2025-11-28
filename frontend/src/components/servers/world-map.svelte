@@ -13,7 +13,7 @@
     import * as topojson from 'topojson-client';
     import * as i18IsoCountries from 'i18n-iso-countries';
     import { onMount } from 'svelte';
-    import LineCountry from './servers/fields/line-country.svelte';
+    import LineCountry from '../servers/fields/line-country.svelte';
 
     interface Props {
         countries: Country[];

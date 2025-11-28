@@ -14,3 +14,5 @@ export class ServerStatusesStore extends AbstractStore<ServerStatus, 'uuid', 'se
     super(['uuid'], ['serverUuid']);
   }
 }
+
+export const serverStatusesStore = new ServerStatusesStore();

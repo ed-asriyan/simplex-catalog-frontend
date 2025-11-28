@@ -1,30 +1,26 @@
 <script lang='ts'>
-    import type { ServerStatusesService } from '../../store/server-statuses-service';
-    import type { ServerStatusesStore } from '../../store/server-statuses-store';
-    import type { Server } from '../../store/servers-store';
-    import ServerModal from './server-modal/index.svelte';
-    import LineCountry from './fields/line-country.svelte';
-    import LineDate from './fields/line-date.svelte';
-    import LineServerInfo from './fields/line-server-info.svelte';
-    import LineStatus from './fields/line-status.svelte';
-    import LineUptime from './fields/line-uptime.svelte';
-    import LineUri from './fields/line-uri.svelte';
-    import Labels from './labels.svelte';
+    import type { Server } from '../../../store/servers-store';
+    import ServerModal from '../server-modal/index.svelte';
+    import LineCountry from '../fields/line-country.svelte';
+    import LineDate from '../fields/line-date.svelte';
+    import LineServerInfo from '../fields/line-server-info.svelte';
+    import LineStatus from '../fields/line-status.svelte';
+    import LineUri from '../fields/line-uri.svelte';
+    import Labels from '../labels.svelte';
+    import Uptime from '../../uptime.svelte';
 
     interface Props {
         server: Server;
-        serverStatusesStore: ServerStatusesStore;
-        serverStatusesService: ServerStatusesService;
         selected: boolean;
         onSelect?: () => {};
     }
 
-    let { server, selected, onSelect, serverStatusesStore, serverStatusesService }: Props = $props();
+    let { server, selected, onSelect }: Props = $props();
 
     let selectedServers: Server[] = $state([]);
 </script>
 
-<ServerModal bind:servers={selectedServers} {serverStatusesStore} {serverStatusesService} />
+<ServerModal bind:servers={selectedServers} />
 
 <tr class='uk-text-small' class:uk-text-danger={!server.status}>
     <td>
@@ -55,7 +51,7 @@
         <LineStatus status={server.status} />
     </td>
     <td>
-        <LineUptime server={server} />
+        <Uptime server={server} style="inline" />
     </td>
     <td>
         <LineDate date={server.lastCheck} />

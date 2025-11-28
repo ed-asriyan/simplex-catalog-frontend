@@ -1,26 +1,21 @@
 <script lang="ts">
     import QRCode from '@castlenine/svelte-qrcode';
   	import { getServerUri, type Server } from '../../../store/servers-store';
-	import type { ServerStatusesService } from '../../../store/server-statuses-service';
-	import type { ServerStatusesStore } from '../../../store/server-statuses-store';
     import Stats from './stats.svelte';
 	import Modal from '../../modal.svelte';
 	import { labelsStore } from '../../../store/labels-store';
   	import LineUri from '../fields/line-uri.svelte';
 	import LineCountry from '../fields/line-country.svelte';
 	import LineStatus from '../fields/line-status.svelte';
-    import LineUptime from '../fields/line-uptime.svelte';
+    import LineUptime from '../../uptime.svelte';
 	import LineServerInfo from '../fields/line-server-info.svelte';
 
 	interface Props {
 		servers: Server[];
-		serverStatusesStore: ServerStatusesStore;
-		serverStatusesService: ServerStatusesService;
 		onclick?: (server: Server) => void;
 	}
 
-	let { servers = $bindable(), onclick, serverStatusesService, serverStatusesStore }: Props = $props();
-
+	let { servers = $bindable(), onclick }: Props = $props();
 	let open: boolean = $state(false);
 
 	let i: number = $state(0);
@@ -74,7 +69,7 @@
 				<span class="uk-margin-small-right uk-margin-small-left">
 					<LineStatus status={server.status} />
 				</span>
-				<LineUptime server={server} />
+				<LineUptime server={server} style="inline" />
 			</div>
 
 			<div class="uk-margin-small-top">
@@ -93,7 +88,7 @@
 			</button>
         </div>
 		<div>
-			<Stats servers={[server]} {serverStatusesStore} {serverStatusesService} />
+			<Stats servers={[server]} />
 		</div>
 	</div>
 </Modal>

@@ -1,5 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
-import type { CountriesStore, Country } from './countries-store';
+import { supabase } from '../supabase';
+import { countriesStore, type CountriesStore, type Country } from './countries-store';
 
 export class CountriesService {
     private readonly store: CountriesStore;
@@ -39,3 +40,5 @@ export class CountriesService {
         this.store.addOrUpdate(...Object.values(data));
     }
 }
+
+export const countriesService = new CountriesService(supabase, countriesStore);

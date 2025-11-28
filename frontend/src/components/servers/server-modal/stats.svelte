@@ -1,16 +1,13 @@
 <script lang="ts">
-  	import type { ServerStatusesService } from '../../../store/server-statuses-service';
-  	import type { ServerStatusesStore } from '../../../store/server-statuses-store';
+  	import { serverStatusesService } from '../../../store/server-statuses-service';
   	import type { Server } from '../../../store/servers-store';
     import Plot from './stats-plot.svelte';
 
 	interface Props {
 		servers: Server[];
-		serverStatusesStore: ServerStatusesStore;
-		serverStatusesService: ServerStatusesService;
 	}
 
-	let { servers, serverStatusesService, serverStatusesStore }: Props = $props();
+	let { servers }: Props = $props();
 </script>
 
 <div class="uk-text-center">
@@ -20,7 +17,7 @@
 		</div>
 	{:then}
 		{#each servers as server (server.uuid)}
-			<Plot server={server} {serverStatusesStore} />
+			<Plot server={server} />
 		{/each}
 	{/await}
 </div>

@@ -14,3 +14,5 @@ export class CountriesStore extends AbstractStore<Country, 'country', 'active' |
         super(['country'], ['active', 'inactive']);
     }
 }
+
+export const countriesStore = new CountriesStore();

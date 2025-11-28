@@ -1,3 +1,5 @@
+import { replace } from "@mateothegreat/svelte5-router";
+
 export const camelToSnakeCase = (str: string) => str.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`);
 
 export const delay = function (callback, ms) {
@@ -75,4 +77,20 @@ export const importFile = async function (accept: string): Promise<string> {
         };
         input.click();
     });
+};
+
+export const copyToClipboard = function (str: string) {
+    navigator.clipboard.writeText(str);
+};
+
+export const setQueryParam = function (route: any, mass: Record<string, string>): void {
+    const path = `/#${route.route.path}`;
+    const query: Record<string, string> = { ...route.result.querystring.params, ...mass };
+
+    const queryString = Object.entries(query)
+        .filter(([_, v]) => v !== "")
+        .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`)
+        .join('&');
+
+    replace(`${path}?${queryString}`);
 };
