@@ -90,15 +90,6 @@
                     <span uk-search-icon></span>
                     <input class="uk-search-input" type="search" placeholder="Search" aria-label="Search" bind:value={_searchText} onkeyup={delay(onSearch, 1500)}>
                 </span>
-                <!-- <label class="uk-margin-small-left">
-                    <input
-                        class="uk-checkbox"
-                        type="checkbox"
-                        bind:checked={showOnlineOnly}
-                        onchange={refresh}
-                    />
-                    Show only active
-                </label> -->
             </form>
         </div>
     </div>
@@ -108,39 +99,41 @@
         {#await currentPageBots}
             <span class="uk-margin-small-right" uk-spinner="ratio: 1.2"></span>
         {:then currentPageBots}
-            {#each currentPageBots as bot}
-                <div class="uk-card uk-card-default uk-card-hover uk-width-1-3@m cursor" onclick={() => goto(`/#/bots/${bot.uuid}`)}>
-                    <div class="uk-card-header">
-                        <div class="uk-grid-small uk-flex-middle" uk-grid>
-                            <div class="uk-width-auto">
-                                {#if bot.photo}
-                                    <img class="uk-border-circle" width="40" height="40" src={bot.photo} alt="Avatar">
-                                {:else}
-                                    <div class="uk-border-circle uk-background-muted uk-flex uk-flex-center uk-flex-middle" style="width: 40px; height: 40px; font-size: 30px;">
-                                        🤖
+            <div uk-grid class="uk-grid-medium uk-grid-match">
+                {#each currentPageBots as bot}
+                    <div class="uk-width-1-3@m">
+                        <div class="uk-card uk-card-default uk-card-hover cursor uk-flex uk-flex-column" onclick={() => goto(`/#/bots/${bot.uuid}`)}>
+                            <div class="uk-card-header">
+                                <div class="uk-grid-small uk-flex-middle" uk-grid>
+                                    <div class="uk-width-auto">
+                                        {#if bot.photo}
+                                            <img class="uk-border-circle" width="40" height="40" src={bot.photo} alt="Avatar">
+                                        {:else}
+                                            <div class="uk-border-circle uk-background-muted uk-flex uk-flex-center uk-flex-middle" style="width: 40px; height: 40px; font-size: 30px;">
+                                                🤖
+                                            </div>
+                                        {/if}
                                     </div>
-                                {/if}
+                                    <div class="uk-width-expand">
+                                        <h3 class="uk-card-title uk-margin-remove-bottom uk-text-bold">{bot.name}</h3>
+                                        {#if bot.lastCheck}
+                                            <p class="uk-text-meta uk-margin-remove-top">
+                                                Last check: <time>{moment(convertUTCDateToLocalDate(bot.lastCheck)).fromNow()}</time>
+                                            </p>
+                                        {/if}
+                                    </div>
+                                </div>
                             </div>
-                            <div class="uk-width-expand">
-                                <h3 class="uk-card-title uk-margin-remove-bottom uk-text-bold">{bot.name}</h3>
-                                {#if bot.lastCheck}
-                                    <p class="uk-text-meta uk-margin-remove-top">
-                                        Last check: <time>{moment(convertUTCDateToLocalDate(bot.lastCheck)).fromNow()}</time>
-                                    </p>
-                                {/if}
+                                <div class="uk-card-body uk-flex-1">
+                                    <p>{bot.description || "No description"}</p>
+                                </div>
+                            <div class="uk-card-footer">
+                                <a href={bot.address} onclick={e => e.stopPropagation()} target="_blank" class="uk-button uk-button-text">Visit</a>
                             </div>
                         </div>
                     </div>
-                    {#if bot.description}
-                        <div class="uk-card-body">
-                            <p>{bot.description}</p>
-                        </div>
-                    {/if}
-                    <div class="uk-card-footer">
-                        <a href={bot.address} onclick={e => e.stopPropagation()} target="_blank" class="uk-button uk-button-text">Visit</a>
-                    </div>
-                </div>
-            {/each}
+                {/each}
+            </div>
             {#if currentPageBots.length === 0}
                 <p class="uk-text-center">No bots found.</p>
             {/if}
