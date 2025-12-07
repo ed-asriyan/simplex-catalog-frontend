@@ -1,6 +1,6 @@
-use std::error::Error;
-use serde::{self, Serialize, Deserialize};
 pub use postgrest::Postgrest;
+use serde::{self, Deserialize, Serialize};
+use std::error::Error;
 
 pub type DatabaseClient = Postgrest;
 
@@ -58,8 +58,8 @@ impl<'a> Database<'a> {
     }
 
     pub async fn servers_get_all(&self) -> Result<Vec<Server>, Box<dyn Error>> {
-        print!("{}", self.servers_table_name);
-        let response = self.client
+        let response = self
+            .client
             .from(self.servers_table_name)
             .select("*")
             .execute()
@@ -67,12 +67,13 @@ impl<'a> Database<'a> {
             .text()
             .await?;
 
-        println!("{:?}", response);
-
         Ok(serde_json::from_str(&response)?)
     }
 
-    pub async fn server_statuses_add(&self, status: &ServerStatus<'_>) -> Result<(), Box<dyn Error>> {
+    pub async fn server_statuses_add(
+        &self,
+        status: &ServerStatus<'_>,
+    ) -> Result<(), Box<dyn Error>> {
         self.client
             .from(self.servers_status_table_name)
             .insert(serde_json::to_string(&[status])?)
