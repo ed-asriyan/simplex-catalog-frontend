@@ -10,7 +10,7 @@ export interface FilterArray {
 }
 
 export interface Filter {
-    isOnline?: boolean | 'unknown' | undefined;
+    isOnline?: boolean | undefined;
     text?: string | undefined;
     uptime7?: number | undefined;
     uptime30?: number | undefined;
@@ -55,11 +55,7 @@ export class BotsService {
         let query = this.client.from('v_bot_summaries').select('*', { count: 'exact' });
 
         if (filter.isOnline !== undefined) {
-            if (filter.isOnline === 'unknown') {
-                query = query.is('is_online', null);
-            } else {
-                query = query.eq('is_online', filter.isOnline);
-            }
+            query = query.eq('is_online', filter.isOnline);
         }
     
         if (filter.uuids) {
