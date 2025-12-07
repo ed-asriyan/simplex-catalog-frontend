@@ -69,7 +69,7 @@ export class BotsService {
         }
     
         if (filter.text) {
-            query = query.or(`name.like.%${filter.text}%,description.like.%${filter.text}%`);
+            query = query.or(`name.ilike.%${filter.text}%,description.ilike.%${filter.text}%`);
         }
     
         if (filter.uptime7) {
