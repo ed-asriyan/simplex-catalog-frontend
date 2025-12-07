@@ -42,10 +42,10 @@
         )
     );
  
-    let _searchText = $state("");
+    let _searchText = $derived(filter.text || '');
 
-    const onSearch = function () {
-        setFilter({ ...filter, text: _searchText });
+    const onSearch = function (text: string) {
+        setFilter({ ...filter, text });
     };
 
     const refresh = function () {
@@ -98,7 +98,7 @@
             <form class="uk-width-expand uk-search uk-search-default uk-search-navbar">
                 <span>
                     <span uk-search-icon></span>
-                    <input class="uk-search-input" type="search" placeholder="Search" aria-label="Search" bind:value={_searchText} onkeyup={delay(onSearch, 1500)}>
+                    <input class="uk-search-input" type="search" placeholder="Search" aria-label="Search" value={_searchText} onkeyup={delay(e => onSearch(e.target.value), 1500)}>
                 </span>
             </form>
             <select class="uk-width-auto@m uk-width-1-1@s uk-select uk-form-width-small uk-margin-left" value={filter.isOnline?.toString() || ''} onchange={e => setFilter({ ...filter, isOnline: e.target.value === '' ? undefined : e.target.value === 'true' })}>
