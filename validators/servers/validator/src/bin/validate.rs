@@ -3,10 +3,9 @@ extern crate env_logger;
 extern crate log;
 
 use clap::{parser::ValueSource, value_parser, Arg, ArgAction};
-use itertools::Itertools;
 use log::{error, info};
+use rand::rng;
 use rand::seq::SliceRandom;
-use rand::thread_rng;
 
 use validator::{
     create_command,
@@ -42,14 +41,11 @@ async fn handle_server(args: &Args<'_>, server: &Server) -> Result<(), Box<dyn s
     } else {
         &server.host
     };
-    let country = match args.geoip.get_country(&domain) {
-        Ok(country) => Some(country),
-        Err(e) => None,
-    };
+    let country = args.geoip.get_country(domain).ok();
     info!("Done: {:?}", country);
 
     info!("Checking info page availability...");
-    let mut info_page_available = is_info_page_available(&domain).await;
+    let info_page_available = is_info_page_available(domain).await;
     info!("Done: {}", info_page_available);
 
     info!("Adding server status...");
@@ -128,7 +124,7 @@ async fn main() {
     let maxmind_db_path = command
         .get_one::<String>("maxmind-db-path")
         .expect("required argument");
-    let smp_client_ws_url = command
+    let smp_server_uri = command
         .get_one::<String>("smp-client-ws-url")
         .expect("required argument");
     let supabase_uri = command
@@ -149,14 +145,14 @@ async fn main() {
         .expect("required argument");
 
     let args = Args {
-        geoip: &GeoIp::new(&maxmind_db_path).unwrap(),
+        geoip: &GeoIp::new(maxmind_db_path).expect("Cannot initialize GeoIP"),
         database: &Database::new(
-            &supabase_uri,
-            &supabase_token,
-            &servers_table_name,
-            &servers_status_table_name,
+            supabase_uri,
+            supabase_token,
+            servers_table_name,
+            servers_status_table_name,
         ),
-        smp_server_uri: &smp_client_ws_url,
+        smp_server_uri,
         dry,
         retry_count,
     };
@@ -165,8 +161,12 @@ async fn main() {
         info!("Running in dry mode. No changes will be made to the database.");
     }
 
-    let mut servers = args.database.servers_get_all().await.unwrap();
-    servers.shuffle(&mut thread_rng());
+    let mut servers = args
+        .database
+        .servers_get_all()
+        .await
+        .expect("Cannot fetch servers");
+    servers.shuffle(&mut rng());
 
     info!("Found {} servers", servers.len());
     for server in servers {

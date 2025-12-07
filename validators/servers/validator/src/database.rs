@@ -58,6 +58,7 @@ impl<'a> Database<'a> {
     }
 
     pub async fn servers_get_all(&self) -> Result<Vec<Server>, Box<dyn Error>> {
+        print!("{}", self.servers_table_name);
         let response = self.client
             .from(self.servers_table_name)
             .select("*")
@@ -65,6 +66,8 @@ impl<'a> Database<'a> {
             .await?
             .text()
             .await?;
+
+        println!("{:?}", response);
 
         Ok(serde_json::from_str(&response)?)
     }

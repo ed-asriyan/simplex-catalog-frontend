@@ -2,9 +2,6 @@ FROM rust:1.91 AS dev
 
 FROM dev AS builder
 
-# https://github.com/rust-lang/docker-rust/issues/167#issuecomment-1969549237
-# RUN apk add --no-cache pkgconfig libc-dev openssl-dev openssl-libs-static
-
 WORKDIR /app
 
 COPY Cargo.toml Cargo.lock ./
