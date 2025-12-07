@@ -3,42 +3,10 @@ Web application built on Svelte.js and Supabase for https://simplex-directory.as
 
 # Architecture
 This repository is one of components. The entire project works on the following:
-* **Supabase** project that stores list of all added SimpleX servers and availability statuses. Code: [simplex-directory-supabase](https://github.com/ed-asriyan/simplex-directory-supabase)
+* **Supabase** project that stores list of all added SimpleX servers and bots and availability statuses. Code: [simplex-directory-supabase](https://github.com/ed-asriyan/simplex-directory-supabase)
 * **GitHub Actions Worker** running the app what validates SMP servers and updates date in Supabase. Code: [simplex-directory-servers-validator](https://github.com/ed-asriyan/simplex-directory-servers-validator)
-* **Cloudlare** serving SPA app. Code is this repository
-
-```mermaid
-sequenceDiagram
-    participant SMP as SMP or XFTP server
-    participant GitHubActions as GitHub Actions Worker
-    participant Supabase
-    participant Cloudlare as Cloudflare pages
-    participant Browser
-    actor User
-
-    rect rgb(233, 255, 255)
-        note left of Supabase: Every 12 hours
-        GitHubActions ->> Supabase: Get list of servers
-        Supabase ->> GitHubActions: List of all servers
-
-        loop for each server
-            GitHubActions ->> SMP: Opens connection
-            alt server is available
-                SMP ->> GitHubActions: Response
-            end
-        end
-    end
-
-    rect rgb(233, 255, 255)
-        note left of User: User opens webapp
-        User -->> Browser: Opens website
-        Browser ->> Cloudlare: Request SPA
-        Cloudlare ->> Browser: JS/HTML/CSS
-        Browser ->> Supabase: Filter for list of servers
-        Supabase ->> Browser: List of servers
-        Browser -->> User: Displays SPA
-    end
-```
+* **GitHub Actions Worker** running the app what validates bots and updates date in Supabase. Code: [simplex-directory-bots-validator](https://github.com/ed-asriyan/simplex-directory-bots-validator)
+* **GitHub Pages** serving SPA app. Code: this repository.
 
 # Setup
 ## Init
@@ -46,6 +14,8 @@ sequenceDiagram
 2. *(optional)* Setup [Google Analytics](https://analytics.google.com)
 3. *(optional)* Setup [Sentry](https://sentry.io) account and create Svelte project
 4. Create `ENV_FILE_CONTENT` repository variable and copy content of filled by you [.env](.env) file in it
+5. Setup [simplex-directory-servers-validator](https://github.com/ed-asriyan/simplex-directory-servers-validator)
+6. Setup [simplex-directory-bots-validator](https://github.com/ed-asriyan/simplex-directory-bots-validator)
 
 ## Local development
 1. Install docker
