@@ -30,18 +30,30 @@ pub async fn test_server(uri: &str, smp_client_ws_uri: &str) -> Result<bool, Box
     Ok(false)
 }
 
-pub async fn is_info_page_available(domain: &str) -> bool {
-    let url = format!("https://{}", domain);
+pub async fn is_info_page_available(
+    domain: &str,
+    socks5_proxy: Option<&str>,
+) -> Result<bool, Box<dyn Error>> {
+    let (client, url) = if let Some(proxy_url) = socks5_proxy {
+        (
+            reqwest::Client::builder()
+                .proxy(reqwest::Proxy::all(proxy_url)?)
+                .build()?,
+            format!("http://{}", domain),
+        )
+    } else {
+        (reqwest::Client::new(), format!("https://{}", domain))
+    };
 
-    let client = reqwest::Client::new();
     if let Ok(response) = client
         .get(&url)
         .timeout(Duration::from_secs(5))
         .send()
-        .await {
+        .await
+    {
         if let Ok(text) = response.text().await {
-            return text.to_lowercase().contains("simplex");
+            return Ok(text.to_lowercase().contains("simplex"));
         }
     }
-    false
+    Ok(false)
 }

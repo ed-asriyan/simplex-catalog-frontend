@@ -28,6 +28,7 @@ ENV SUPABASE_SERVERS_TABLE_NAME=
 ENV SUPABASE_SERVERS_STATUS_TABLE_NAME=
 ENV DRY=
 ENV RETRY_COUNT=
+ENV TOR_SOCKS5_PROXY=
 
 CMD ./validate \
     --maxmind-db-path GeoLite2-Country.mmdb \
@@ -37,4 +38,5 @@ CMD ./validate \
     --supabase-servers-table-name $SUPABASE_SERVERS_TABLE_NAME \
     --supabase-servers-status-table-name $SUPABASE_SERVERS_STATUS_TABLE_NAME \
     --retry-count $RETRY_COUNT \
+    --tor-socks5-proxy $TOR_SOCKS5_PROXY \
     $( [ -n "$DRY" ] && echo "--dry" )

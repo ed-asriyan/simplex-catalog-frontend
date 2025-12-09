@@ -29,9 +29,12 @@ services:
       - SMP_CLIENT_URI=ws://localhost:80
       - SUPABASE_SERVERS_TABLE_NAME=v_server_summaries
       - SUPABASE_SERVERS_STATUS_TABLE_NAME=server_statuses
+      - TOR_SOCKS5_PROXY=socks5h://tor:9050
       # - SUPABASE_URL=<to be filled in .env>
       # - SUPABASE_KEY=<to be filled in .env>
     depends_on:
       smp-client:
+        condition: service_healthy
+      tor:
         condition: service_healthy
     network_mode: "service:smp-client"

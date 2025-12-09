@@ -21,6 +21,7 @@ struct Args<'a> {
     smp_server_uri: &'a str,
     dry: bool,
     retry_count: u32,
+    tor_socks5_proxy: &'a str,
 }
 
 async fn handle_server(args: &Args<'_>, server: &Server) -> Result<(), Box<dyn std::error::Error>> {
@@ -45,7 +46,16 @@ async fn handle_server(args: &Args<'_>, server: &Server) -> Result<(), Box<dyn s
     info!("Done: {:?}", country);
 
     info!("Checking info page availability...");
-    let info_page_available = is_info_page_available(domain).await;
+    let info_page_available = is_info_page_available(
+        domain,
+        if country.as_deref() == Some("TOR") {
+            info!("Using Tor SOCKS5 proxy for info page check...");
+            Some(args.tor_socks5_proxy)
+        } else {
+            None
+        },
+    )
+    .await?;
     info!("Done: {}", info_page_available);
 
     info!("Adding server status...");
@@ -119,6 +129,14 @@ async fn main() {
                 .value_parser(value_parser!(u32))
                 .required(true),
         )
+        .arg(
+            Arg::new("tor-socks5-proxy")
+                .long("tor-socks5-proxy")
+                .value_name("URL")
+                .help("Sets the Tor SOCKS5 proxy. Example: socks5h://localhost:9050")
+                .num_args(1)
+                .required(true),
+        )
         .get_matches();
 
     let maxmind_db_path = command
@@ -139,6 +157,9 @@ async fn main() {
     let servers_status_table_name = command
         .get_one::<String>("supabase-servers-status-table-name")
         .expect("required argument");
+    let tor_socks5_proxy = command
+        .get_one::<String>("tor-socks5-proxy")
+        .expect("required argument");
     let dry = command.value_source("dry") == Some(ValueSource::CommandLine);
     let retry_count = *command
         .get_one::<u32>("retry-count")
@@ -155,6 +176,7 @@ async fn main() {
         smp_server_uri,
         dry,
         retry_count,
+        tor_socks5_proxy,
     };
 
     if args.dry {
