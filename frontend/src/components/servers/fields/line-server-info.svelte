@@ -8,10 +8,13 @@
     }
 
     let { server, icon }: Props = $props();
+
+    let urlSchema = $derived(server.country === 'TOR' ? 'http' : 'https');
+    let url = $derived(`${urlSchema}://${server.host.split(':')[0]}`);
 </script>
 
 {#if server.infoPageAvailable}
-    <a href="https://{server.host.split(':')[0]}" target="_blank">
+    <a href={url} target="_blank">
         {#if icon}
             <span uk-tooltip="Click to open server info page">
                 <Icon icon="link" />
