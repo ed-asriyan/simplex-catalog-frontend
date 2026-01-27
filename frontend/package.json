@@ -15,7 +15,7 @@
 	"devDependencies": {
 		"@castlenine/svelte-qrcode": "^2.2.0",
 		"@mateothegreat/svelte5-router": "^2.16.19",
-		"@sentry/svelte": "^10.27.0",
+		"@sentry/svelte": "^10.36.0",
 		"@supabase/supabase-js": "^2.89.0",
 		"@sveltejs/vite-plugin-svelte": "^6.2.1",
 		"@tsconfig/svelte": "^5.0.2",
