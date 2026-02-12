@@ -107,25 +107,25 @@ Deno.serve(async (req) => {
 
   // Find or insert identity
   const { data: identityRow, error: identitySelectError } = await supabase
-    .from('server_identity')
+    .from('server_identities')
     .select('uuid')
     .eq('identity', ctx.parsed.identity)
     .maybeSingle();
   
   if (identitySelectError) {
-    logError('Failed to query server_identity', ctx, identitySelectError);
+    logError('Failed to query server_identities', ctx, identitySelectError);
     return createResponse(500, { status: 3, error: identitySelectError.message });
   }
 
   ctx.identityUuid = identityRow?.uuid;
   if (!ctx.identityUuid) {
     const { data, error } = await supabase
-      .from('server_identity')
+      .from('server_identities')
       .insert({ identity: ctx.parsed.identity })
       .select('uuid')
       .single();
     if (error) {
-      logError('Failed to insert server_identity', ctx, error);
+      logError('Failed to insert server_identities', ctx, error);
       return createResponse(500, { status: 3, error: error.message });
     }
     ctx.identityUuid = data.uuid;
@@ -139,25 +139,25 @@ Deno.serve(async (req) => {
     
     // Find or insert host
     const { data: hostRow, error: hostSelectError } = await supabase
-      .from('server_host')
+      .from('server_hosts')
       .select('uuid')
       .eq('host', host)
       .maybeSingle();
     
     if (hostSelectError) {
-      logError('Failed to query server_host', ctx, hostSelectError);
+      logError('Failed to query server_hosts', ctx, hostSelectError);
       return createResponse(500, { status: 4, error: hostSelectError.message });
     }
 
     ctx.hostUuid = hostRow?.uuid;
     if (!ctx.hostUuid) {
       const { data, error } = await supabase
-        .from('server_host')
+        .from('server_hosts')
         .insert({ host })
         .select('uuid')
         .single();
       if (error) {
-        logError('Failed to insert server_host', ctx, error);
+        logError('Failed to insert server_hosts', ctx, error);
         return createResponse(500, { status: 4, error: error.message });
       }
       ctx.hostUuid = data.uuid;
@@ -168,7 +168,7 @@ Deno.serve(async (req) => {
 
     // Find or insert server
     const { data: serverRow, error: serverSelectError } = await supabase
-      .from('server')
+      .from('servers')
       .select('uuid')
       .eq('protocol', ctx.protocolId)
       .eq('host_uuid', ctx.hostUuid)
@@ -183,7 +183,7 @@ Deno.serve(async (req) => {
     ctx.serverUuid = serverRow?.uuid;
     if (!ctx.serverUuid) {
       const { error } = await supabase
-        .from('server')
+        .from('servers')
         .insert({ protocol: ctx.protocolId, host_uuid: ctx.hostUuid, identity_uuid: ctx.identityUuid });
       if (error) {
         logError('Failed to insert server', ctx, error);
