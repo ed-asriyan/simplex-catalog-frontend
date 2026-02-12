@@ -21,7 +21,8 @@ const BANNED_HOSTNAMES = [
 const tryToParseJson = function (input: string): any | null {
   try {
     return JSON.parse(input);
-  } catch {
+  } catch (error) {
+    console.debug('[add-bot] Failed to parse JSON:', { input: input.substring(0, 50) });
     return null;
   }
 };
@@ -29,7 +30,8 @@ const tryToParseJson = function (input: string): any | null {
 const parseUrl = function (url: string): URL | null {
   try {
     return new URL(url);
-  } catch {
+  } catch (error) {
+    console.debug('[add-bot] Failed to parse URL:', { url, error: (error as Error).message });
     return null;
   }
 };
@@ -107,7 +109,44 @@ const createResponse = function(status: number, obj: any = null): Response {
   return new Response(obj && JSON.stringify(obj), { status, headers: corsHeaders });
 };
 
+// Request context for automatic error logging
+interface RequestContext {
+  body?: any;
+  url?: string;
+  parsedUrl?: URL;
+  validationStatus?: ValidationStatus;
+}
+
+const sanitizeContext = (context: RequestContext) => ({
+  ...context,
+  parsedUrl: context.parsedUrl ? {
+    protocol: context.parsedUrl.protocol,
+    hostname: context.parsedUrl.hostname,
+    pathname: context.parsedUrl.pathname
+  } : undefined
+});
+
+const logError = (message: string, context: RequestContext, error?: any) => {
+  console.error(`[add-bot] ${message}`, {
+    ...sanitizeContext(context),
+    ...(error && {
+      error: error.message,
+      code: error.code,
+      details: error.details,
+      hint: error.hint
+    })
+  });
+};
+
+const logInfo = (message: string, context: RequestContext, extra?: Record<string, any>) => {
+  console.info(`[add-bot] ${message}`, {
+    ...sanitizeContext(context),
+    ...extra
+  });
+};
+
 Deno.serve(async (req) => {
+  const ctx: RequestContext = {};
   if (req.method === 'OPTIONS') {
     return createResponse(204);
   }
@@ -116,50 +155,57 @@ Deno.serve(async (req) => {
     return createResponse(405, { error: 'Method Not Allowed' });
   }
 
-  if (req.method !== 'POST') {
-    return createResponse(405, { error: 'Method Not Allowed' });
-  }
-  let body;
   try {
-    body = await req.json();
-  } catch {
+    ctx.body = await req.json();
+  } catch (error) {
+    logError('Failed to parse request body', ctx, error);
     return createResponse(400, { error: 'Invalid JSON' });
   }
-
-  if (req.method !== 'POST') {
-    return createResponse(405, { error: 'Method Not Allowed' });
-  }
-  const { url } = body;
-
-  if (!url) {
+  
+  ctx.url = ctx.body.url;
+  if (!ctx.url) {
+    logError('Missing url parameter in request body', ctx);
     return createResponse(400, { error: 'Missing url' });
   }
 
-  const parsedUrl = parseUrl(url);
-  if (!parsedUrl) {
+  ctx.parsedUrl = parseUrl(ctx.url);
+  if (!ctx.parsedUrl) {
+    logError('Invalid URL format', ctx);
     return createResponse(400, { status: 1, error: 'Invalid URL format' });
   }
-  const validationStatus = validateUrl(parsedUrl);
-  switch (validationStatus) {
+
+  logInfo('Validating URL', ctx);
+
+  ctx.validationStatus = validateUrl(ctx.parsedUrl);
+  switch (ctx.validationStatus) {
     case ValidationStatus.InvalidProtocol:
+      logError('Invalid protocol', ctx);
       return createResponse(400, { status: 2, error: 'URL must use HTTPS protocol' });
     case ValidationStatus.NotBotAddress:
+      logError('Not a bot address', ctx);
       return createResponse(400, { status: 3, error: 'URL is not a bot address' });
     case ValidationStatus.NotAllowedHostname:
+      logError('Hostname not allowed', ctx);
       return createResponse(400, { status: 4, error: 'Hostname is not allowed' });
     case ValidationStatus.InvalidContactData:
+      logError('Invalid contact data', ctx);
       return createResponse(400, { status: 6, error: 'Invalid contact data in URL' });
   }
 
   // never should happen, but just in case
-  if (validationStatus !== ValidationStatus.Valid) {
+  if (ctx.validationStatus !== ValidationStatus.Valid) {
+    logError('Unexpected validation status', ctx);
     return createResponse(400, { status: 1, error: 'Invalid URL format' });
   }
 
   const { error } = await supabase
     .from('bots')
-    .insert({ address: url })
-  if (error) return createResponse(500, { status: 3, error: error.message });
+    .insert({ address: ctx.url })
+  if (error) {
+    logError('Failed to insert bot', ctx, error);
+    return createResponse(500, { status: 3, error: error.message });
+  }
 
+  logInfo('Successfully added bot', ctx);
   return createResponse(204);
 });
