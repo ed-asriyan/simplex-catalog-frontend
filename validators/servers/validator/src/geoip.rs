@@ -59,18 +59,14 @@ impl GeoIp {
             resolve(ip_or_domain)?
         };
 
-        let country: maxminddb::geoip2::Country = self
-            .reader
-            .lookup(ip)?
+        let result = self.reader.lookup(ip)?;
+        let country: maxminddb::geoip2::Country = result
+            .decode()?
             .ok_or("Country information could not be found")?;
 
-        if let Some(country) = country.country {
-            match country.iso_code {
-                Some(code) => Ok(code.to_string()),
-                None => Err("No country code found".into()),
-            }
-        } else {
-            Err("No country found".into())
+        match country.country.iso_code {
+            Some(code) => Ok(code.to_string()),
+            None => Err("No country code found".into()),
         }
     }
 }
