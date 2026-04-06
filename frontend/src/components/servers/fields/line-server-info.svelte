@@ -1,6 +1,6 @@
 <script lang="ts">
     import Icon from '@/components/icon.svelte';
-    import type { Server } from '@/store/servers-store';
+    import type { Server } from '@/store/servers/servers-store';
 
     interface Props {
         server: Server;

@@ -1,6 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { supabase } from '../supabase';
-import { type ServerStatusesStore, type ServerStatus, serverStatusesStore } from './server-statuses-store';
+import { supabase } from '../../supabase';
+import { type ServerStatusesStore, type ServerStatus, serverStatusesStore } from './statuses-store';
 
 const parseServerStatus = function (data: any): ServerStatus {
     return {

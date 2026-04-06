@@ -1,6 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { supabase } from '../supabase';
-import { type BotStatus, type BotStatusesStore, botsStatusesStore } from './bots-statuses-store';
+import { supabase } from '../../supabase';
+import { type BotStatus, type BotStatusesStore, botsStatusesStore } from './statuses-store';
 
 const parseBotStatus = function (data: any): BotStatus {
     return {

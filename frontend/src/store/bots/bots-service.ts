@@ -1,5 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { supabase } from '../supabase';
+import { supabase } from '../../supabase';
 import { type Bot, type BotsStore, botsStore } from './bots-store';
 
 export type BotColumn = keyof Bot;

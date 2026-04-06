@@ -1,10 +1,10 @@
 <script lang="ts">
-    import { botsService } from '@/store/bots-service';
-    import { botsDetailsService, BotsDetailsService } from '@/store/bots-details-service';
-    import { botsStore } from '@/store/bots-store';
-    import { botsDetailsStore } from '@/store/bots-details-store';
-    import { botsStatusesStore } from '@/store/bots-statuses-store';
-    import { botsStatusesService } from '@/store/bots-statuses-service';
+    import { botsService } from '@/store/bots/bots-service';
+    import { botsDetailsService, BotsDetailsService } from '@/store/bots/details-service';
+    import { botsStore } from '@/store/bots/bots-store';
+    import { botsDetailsStore } from '@/store/bots/details-store';
+    import { botsStatusesStore } from '@/store/bots/statuses-store';
+    import { botsStatusesService } from '@/store/bots/statuses-service';
     import { convertUTCDateToLocalDate, copyToClipboard } from '@/utils';
     import moment from 'moment';
     import LineStatus from './fields/status.svelte';

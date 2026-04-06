@@ -1,4 +1,4 @@
-import { AbstractStore } from './abstract-store';
+import { AbstractStore } from '../abstract-store';
 
 export interface BotCommand {
   keyword: string;

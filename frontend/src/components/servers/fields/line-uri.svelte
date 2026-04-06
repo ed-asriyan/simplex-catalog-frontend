@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { type Server, getServerUri } from '@/store/servers-store';
+    import { type Server, getServerUri } from '@/store/servers/servers-store';
   import { copyToClipboard } from '@/utils';
   import Icon from '@/components/icon.svelte';
     const MAX_LENGTH = 30;

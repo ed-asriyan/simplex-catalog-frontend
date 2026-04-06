@@ -27,7 +27,7 @@ export interface LabeledStoreRecord {
     [x: Label]: Set<string>;
 }
 
-export class LabelsStore implements Readable<LabeledStoreRecord> {
+export class ServersLabelsStore implements Readable<LabeledStoreRecord> {
     private readonly store: Writable<LabeledStoreRecord>;
 
     constructor () {
@@ -75,4 +75,4 @@ export class LabelsStore implements Readable<LabeledStoreRecord> {
     }
 }
 
-export const labelsStore = new LabelsStore();
+export const labelsStore = new ServersLabelsStore();

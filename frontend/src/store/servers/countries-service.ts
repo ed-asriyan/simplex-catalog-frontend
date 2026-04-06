@@ -1,12 +1,12 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { supabase } from '../supabase';
-import { countriesStore, type CountriesStore, type Country } from './countries-store';
+import { supabase } from '../../supabase';
+import { countriesStore, type ServersCountriesStore, type ServersCountry } from './countries-store';
 
-export class CountriesService {
-    private readonly store: CountriesStore;
+export class ServersCountriesService {
+    private readonly store: ServersCountriesStore;
     private readonly client: SupabaseClient;
 
-    constructor(client: SupabaseClient, store: CountriesStore) {
+    constructor(client: SupabaseClient, store: ServersCountriesStore) {
         this.store = store;
         this.client = client;
     }
@@ -23,7 +23,7 @@ export class CountriesService {
     async fetchCountries() {
         const items = await this.fetchCountriesData();
 
-        const data: Record<string, Country> = items
+        const data: Record<string, ServersCountry> = items
             .filter(({ status, count, country }) => typeof status === 'boolean' && typeof count === 'number' && typeof country === 'string')
             .reduce((acc, item) => {
                 if (!acc[item.country]) {
@@ -41,4 +41,4 @@ export class CountriesService {
     }
 }
 
-export const countriesService = new CountriesService(supabase, countriesStore);
+export const countriesService = new ServersCountriesService(supabase, countriesStore);

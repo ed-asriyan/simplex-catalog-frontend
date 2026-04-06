@@ -1,9 +1,9 @@
 <script lang="ts">
     import QRCode from '@castlenine/svelte-qrcode';
-  	import { getServerUri, type Server } from '@/store/servers-store';
+  	import { getServerUri, type Server } from '@/store/servers/servers-store';
     import Stats from './stats.svelte';
 	import Modal from '@/components/modal.svelte';
-	import { labelsStore } from '@/store/labels-store';
+	import { labelsStore } from '@/store/servers/labels-store';
   	import LineUri from '../fields/line-uri.svelte';
 	import LineCountry from '../fields/line-country.svelte';
 	import LineStatus from '../fields/line-status.svelte';

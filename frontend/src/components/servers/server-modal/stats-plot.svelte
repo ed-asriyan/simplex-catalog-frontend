@@ -1,6 +1,6 @@
 <script lang="ts">
-    import { serverStatusesStore } from '@/store/server-statuses-store';
-    import type { Server } from '@/store/servers-store';
+    import { serverStatusesStore } from '@/store/servers/statuses-store';
+    import type { Server } from '@/store/servers/servers-store';
     import { getFlagEmoji } from '@/utils';
     import TimelinePlot, { type Item } from '@/components/timeline-plot.svelte';
 

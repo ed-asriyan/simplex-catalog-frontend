@@ -1,12 +1,12 @@
 <script lang="ts">
     import type { Readable } from 'svelte/store';
-    import { serversService, type Filter, type Sort } from '@/store/servers-service';
-    import { type Server, serversStore } from '@/store/servers-store';
+    import { serversService, type Filter, type Sort } from '@/store/servers/servers-service';
+    import { type Server, serversStore } from '@/store/servers/servers-store';
     import ServerModal from '../server-modal/index.svelte';
     import TableHeader from './table-header.svelte';
     import TableRow from './table-row.svelte';
     import Icon from '@/components/icon.svelte';
-    import { labelsStore } from '@/store/labels-store';
+    import { labelsStore } from '@/store/servers/labels-store';
     import { exportFile, importFile } from '@/utils';
 
     interface Props {

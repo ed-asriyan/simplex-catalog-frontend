@@ -1,13 +1,13 @@
 import { computed, type ReadableAtom } from 'nanostores';
-import { AbstractStore } from './abstract-store';
+import { AbstractStore } from '../abstract-store';
 
-export interface Country {
+export interface ServersCountry {
     country: string
     active: number;
     inactive: number;
 }
 
-export class CountriesStore extends AbstractStore<Country, 'country', 'active' | 'inactive'> {
+export class ServersCountriesStore extends AbstractStore<ServersCountry, 'country', 'active' | 'inactive'> {
     readonly allCountries: ReadableAtom<string[]> = computed(this.items, ($store) => $store.map(item => item.country));
 
     constructor() {
@@ -15,4 +15,4 @@ export class CountriesStore extends AbstractStore<Country, 'country', 'active' |
     }
 }
 
-export const countriesStore = new CountriesStore();
+export const countriesStore = new ServersCountriesStore();

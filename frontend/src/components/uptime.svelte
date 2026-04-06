@@ -1,6 +1,6 @@
 <script lang="ts">
-    import type { Server } from '@/store/servers-store';
-    import type { Bot } from '@/store/bots-store';
+    import type { Server } from '@/store/servers/servers-store';
+    import type { Bot } from '@/store/bots/bots-store';
 
     interface Props {
         style: 'inline' | 'block';

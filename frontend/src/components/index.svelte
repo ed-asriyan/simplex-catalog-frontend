@@ -5,7 +5,7 @@
     import Servers from './servers/index.svelte';
     import Bots from './bots/index.svelte';
     import { simplexGroupLink } from '@/settings';
-    import { countriesService } from '@/store/countries-service';
+    import { countriesService } from '@/store/servers/countries-service';
 
     const routes: RouteConfig[] = [
         {

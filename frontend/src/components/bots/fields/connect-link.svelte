@@ -1,5 +1,5 @@
 <script lang="ts">
-    import type { Bot } from '@/store/bots-store';
+    import type { Bot } from '@/store/bots/bots-store';
     import { copyToClipboard } from '@/utils';
     import Icon from '@/components/icon.svelte';
 

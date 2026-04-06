@@ -1,5 +1,5 @@
 <script lang='ts'>
-    import type { Server } from '@/store/servers-store';
+    import type { Server } from '@/store/servers/servers-store';
     import ServerModal from '../server-modal/index.svelte';
     import LineCountry from '../fields/line-country.svelte';
     import LineDate from '../fields/line-date.svelte';

@@ -1,5 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { supabase } from '../supabase';
+import { supabase } from '../../supabase';
 import { serversStore, type Server, type ServersStore } from './servers-store';
 import { labelsStore } from './labels-store';
 import { get } from 'svelte/store';

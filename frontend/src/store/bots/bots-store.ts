@@ -1,5 +1,5 @@
 import { atom, type WritableAtom } from 'nanostores';
-import { AbstractStore } from './abstract-store';
+import { AbstractStore } from '../abstract-store';
 
 export interface Bot {
     uuid: string;

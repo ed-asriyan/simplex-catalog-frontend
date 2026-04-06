@@ -1,6 +1,6 @@
 <script lang='ts'>
-    import { countriesStore } from '@/store/countries-store';
-    import type { Filter } from '@/store/servers-service';
+    import { countriesStore } from '@/store/servers/countries-store';
+    import type { Filter } from '@/store/servers/servers-service';
 
     interface Props {
         filter: Filter;
