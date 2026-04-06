@@ -1,13 +1,13 @@
 <script lang="ts">
     import QRCode from '@castlenine/svelte-qrcode';
-  	import { getServerUri, type Server } from '../../../store/servers-store';
+  	import { getServerUri, type Server } from '@/store/servers-store';
     import Stats from './stats.svelte';
-	import Modal from '../../modal.svelte';
-	import { labelsStore } from '../../../store/labels-store';
+	import Modal from '@/components/modal.svelte';
+	import { labelsStore } from '@/store/labels-store';
   	import LineUri from '../fields/line-uri.svelte';
 	import LineCountry from '../fields/line-country.svelte';
 	import LineStatus from '../fields/line-status.svelte';
-    import LineUptime from '../../uptime.svelte';
+    import LineUptime from '@/components/uptime.svelte';
 	import LineServerInfo from '../fields/line-server-info.svelte';
 
 	interface Props {

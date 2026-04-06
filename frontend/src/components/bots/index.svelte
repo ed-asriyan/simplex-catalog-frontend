@@ -1,7 +1,7 @@
 <script lang="ts">
     import { Router, type RouteConfig } from "@mateothegreat/svelte5-router";
-    import List from "./list.svelte";
-    import BotPage from "./bot-page.svelte";
+    import List from './list.svelte';
+    import BotPage from './bot-page.svelte';
 
     const routes: RouteConfig[] = [
         {

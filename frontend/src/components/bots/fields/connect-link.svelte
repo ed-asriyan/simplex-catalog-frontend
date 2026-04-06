@@ -1,7 +1,7 @@
 <script lang="ts">
-    import type { Bot } from '../../../store/bots-store';
-    import { copyToClipboard } from '../../../utils';
-    import Icon from '../../icon.svelte';
+    import type { Bot } from '@/store/bots-store';
+    import { copyToClipboard } from '@/utils';
+    import Icon from '@/components/icon.svelte';
 
     interface Props {
         bot: Bot;

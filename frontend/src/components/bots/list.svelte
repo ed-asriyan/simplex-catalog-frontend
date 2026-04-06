@@ -1,10 +1,10 @@
 
 <script lang="ts">
     import moment from "moment";
-    import { botsService, type Filter, type Sort } from "../../store/bots-service";
-    import { botsStore, type Bot } from "../../store/bots-store";
-    import { convertUTCDateToLocalDate, delay, setQueryParam } from "../../utils";
-    import Icon from "../icon.svelte";
+    import { botsService, type Filter, type Sort } from '@/store/bots-service';
+    import { botsStore, type Bot } from '@/store/bots-store';
+    import { convertUTCDateToLocalDate, delay, setQueryParam } from '@/utils';
+    import Icon from '@/components/icon.svelte';
     import { goto } from "@mateothegreat/svelte5-router";
     
     interface Props {

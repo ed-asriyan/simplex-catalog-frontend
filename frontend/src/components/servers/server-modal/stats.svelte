@@ -1,6 +1,6 @@
 <script lang="ts">
-  	import { serverStatusesService } from '../../../store/server-statuses-service';
-  	import type { Server } from '../../../store/servers-store';
+  	import { serverStatusesService } from '@/store/server-statuses-service';
+  	import type { Server } from '@/store/servers-store';
     import Plot from './stats-plot.svelte';
 
 	interface Props {

@@ -1,7 +1,7 @@
 <script lang='ts'>
-    import { countriesStore } from '../../store/countries-store';
+    import { countriesStore } from '@/store/countries-store';
     import WorldMap from './world-map.svelte';
-    import type { Filter } from '../../store/servers-service';
+    import type { Filter } from '@/store/servers-service';
 
     interface Props {
         filter: Filter;

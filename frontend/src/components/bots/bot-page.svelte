@@ -1,18 +1,17 @@
 <script lang="ts">
-    import { onMount } from 'svelte';
-    import { botsService } from '../../store/bots-service';
-    import { botsDetailsService, BotsDetailsService } from '../../store/bots-details-service';
-    import { botsStore } from '../../store/bots-store';
-    import { botsDetailsStore } from '../../store/bots-details-store';
-    import { botsStatusesStore } from '../../store/bots-statuses-store';
-    import { botsStatusesService } from '../../store/bots-statuses-service';
-    import { convertUTCDateToLocalDate, copyToClipboard } from '../../utils';
+    import { botsService } from '@/store/bots-service';
+    import { botsDetailsService, BotsDetailsService } from '@/store/bots-details-service';
+    import { botsStore } from '@/store/bots-store';
+    import { botsDetailsStore } from '@/store/bots-details-store';
+    import { botsStatusesStore } from '@/store/bots-statuses-store';
+    import { botsStatusesService } from '@/store/bots-statuses-service';
+    import { convertUTCDateToLocalDate, copyToClipboard } from '@/utils';
     import moment from 'moment';
     import LineStatus from './fields/status.svelte';
-    import Uptime from '../uptime.svelte';
+    import Uptime from '@/components/uptime.svelte';
     import LineMessages from './fields/messages.svelte';
-    import Icon from '../icon.svelte';
-    import TimelinePlot, { type Color, type Item } from '../timeline-plot.svelte';
+    import Icon from '@/components/icon.svelte';
+    import TimelinePlot, { type Color, type Item } from '@/components/timeline-plot.svelte';
 
     interface Props {
         route: any;

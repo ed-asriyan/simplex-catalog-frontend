@@ -1,5 +1,5 @@
 <script lang='ts'>
-    import type { Server } from '../../../store/servers-store';
+    import type { Server } from '@/store/servers-store';
     import ServerModal from '../server-modal/index.svelte';
     import LineCountry from '../fields/line-country.svelte';
     import LineDate from '../fields/line-date.svelte';
@@ -7,7 +7,7 @@
     import LineStatus from '../fields/line-status.svelte';
     import LineUri from '../fields/line-uri.svelte';
     import Labels from '../labels.svelte';
-    import Uptime from '../../uptime.svelte';
+    import Uptime from '@/components/uptime.svelte';
 
     interface Props {
         server: Server;

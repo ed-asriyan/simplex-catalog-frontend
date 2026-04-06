@@ -1,9 +1,9 @@
 <script lang="ts">
-    import { countryCodeToName, delay, setQueryParam } from '../../../utils';
+    import { countryCodeToName, delay, setQueryParam } from '@/utils';
     import LineCountry from '../fields/line-country.svelte';
-    import type { Filter } from '../../../store/servers-service';
-    import { countriesStore } from '../../../store/countries-store';
-    import { labelsStore } from '../../../store/labels-store';
+    import type { Filter } from '@/store/servers-service';
+    import { countriesStore } from '@/store/countries-store';
+    import { labelsStore } from '@/store/labels-store';
 
     interface Props {
         filter: Filter,

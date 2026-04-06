@@ -1,5 +1,5 @@
 <script lang="ts">
-    import type { BotDetails } from '../../../store/bots-details-store';
+    import type { BotDetails } from '@/store/bots-details-store';
 
     interface Props {
         botDetails: BotDetails;

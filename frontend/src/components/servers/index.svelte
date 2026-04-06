@@ -2,10 +2,10 @@
     import StatsMap from './stats-map.svelte';
     import StatsCounters from './stats-counters.svelte';
     import ServersTable from './table/index.svelte';
-    import { type Filter, type Sort } from '../../store/servers-service';
-    import { serversService } from '../../store/servers-service';
-    import { setQueryParam } from '../../utils';
-    import { labelsStore } from '../../store/labels-store';
+    import { type Filter, type Sort } from '@/store/servers-service';
+    import { serversService } from '@/store/servers-service';
+    import { setQueryParam } from '@/utils';
+    import { labelsStore } from '@/store/labels-store';
     import { onMount } from 'svelte';
 
     let { route } = $props();

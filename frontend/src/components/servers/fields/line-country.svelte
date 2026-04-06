@@ -1,6 +1,6 @@
 <script lang="ts">
-    import { countryCodeToName, getFlagEmoji } from '../../../utils';
-    import Icon from '../../icon.svelte';
+    import { countryCodeToName, getFlagEmoji } from '@/utils';
+    import Icon from '@/components/icon.svelte';
 
     interface Props {
         country: string;

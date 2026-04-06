@@ -4,8 +4,8 @@
     import Sponsors from './sponsors.svelte';
     import Servers from './servers/index.svelte';
     import Bots from './bots/index.svelte';
-    import { simplexGroupLink } from "../settings";
-  import { countriesService } from "../store/countries-service";
+    import { simplexGroupLink } from '@/settings';
+    import { countriesService } from '@/store/countries-service';
 
     const routes: RouteConfig[] = [
         {

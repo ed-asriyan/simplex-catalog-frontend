@@ -1,7 +1,7 @@
 <script lang="ts">
-    import { type Server, getServerUri } from '../../../store/servers-store';
-  import { copyToClipboard } from '../../../utils';
-  import Icon from '../../icon.svelte';
+    import { type Server, getServerUri } from '@/store/servers-store';
+  import { copyToClipboard } from '@/utils';
+  import Icon from '@/components/icon.svelte';
     const MAX_LENGTH = 30;
 
     interface Props {

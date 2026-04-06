@@ -1,8 +1,8 @@
 <script lang="ts">
-    import { serverStatusesStore } from '../../../store/server-statuses-store';
-    import type { Server } from '../../../store/servers-store';
-    import { getFlagEmoji } from '../../../utils';
-    import TimelinePlot, { type Item } from '../../timeline-plot.svelte';
+    import { serverStatusesStore } from '@/store/server-statuses-store';
+    import type { Server } from '@/store/servers-store';
+    import { getFlagEmoji } from '@/utils';
+    import TimelinePlot, { type Item } from '@/components/timeline-plot.svelte';
 
     interface Props {
         server: Server;
