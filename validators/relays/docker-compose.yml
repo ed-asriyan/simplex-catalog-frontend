@@ -1,0 +1,38 @@
+name: simplex-directory-relays-validator-prod
+services:
+  tor:
+    image: dperson/torproxy
+    command: -n
+    healthcheck:
+      test: ["CMD", "sh", "-c", "curl --silent --fail --socks5-hostname localhost:9050 http://example.com"]
+      interval: 10s
+      timeout: 10s
+      retries: 30
+
+  smp-client:
+    build: smp-client
+    depends_on:
+      tor:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "nc", "-z", "127.0.0.1", "80"]
+      interval: 5s
+      timeout: 2s
+      retries: 10
+
+  validator:
+    build:
+      context: validator
+      target: validate
+    env_file:
+      - .env
+    environment:
+      - SMP_CLIENT_URI=ws://localhost:80
+      # - SUPABASE_URL=<to be filled in .env>
+      # - SUPABASE_KEY=<to be filled in .env>
+    depends_on:
+      smp-client:
+        condition: service_healthy
+      tor:
+        condition: service_healthy
+    network_mode: "service:smp-client"
