@@ -8,9 +8,27 @@ services:
       timeout: 10s
       retries: 30
 
+  yggdrasil:
+    build: yggdrasil
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    environment:
+      # Space-separated list of Yggdrasil peer URIs, e.g. "tcp://host1:port tcp://host2:port"
+      - YGGDRASIL_PEERS=tls://ygg.jjolly.dev:3443 tls://mo.us.ygg.triplebit.org:993 tls://ygg.mnpnk.com:443
+    healthcheck:
+      test: ["CMD", "sh", "-c", "curl --silent --fail http://[21e:a51c:885b:7db0:166e:927:98cd:d186]/"] # Yggdrasil Web directory
+      interval: 5s
+      timeout: 2s
+      retries: 10
+
   smp-client:
     build: smp-client
+    network_mode: "service:yggdrasil"
     depends_on:
+      yggdrasil:
+        condition: service_healthy
       tor:
         condition: service_healthy
     healthcheck:

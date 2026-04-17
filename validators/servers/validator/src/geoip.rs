@@ -37,6 +37,14 @@ fn str_to_ip(ip: &str) -> Result<IpAddr, Box<dyn Error>> {
     }
 }
 
+fn is_tor_address(domain: &str) -> bool {
+    domain.ends_with(".onion")
+}
+
+fn is_yggdrasil_address(ip: &str) -> bool {
+    ip.starts_with("200:") || ip.starts_with("2001:")
+}
+
 pub struct GeoIp {
     reader: GeoIpClient,
 }
@@ -49,7 +57,7 @@ impl GeoIp {
     }
 
     pub fn get_country(&self, ip_or_domain: &str) -> Result<String, Box<dyn Error>> {
-        if ip_or_domain.ends_with(".onion") {
+        if is_tor_address(ip_or_domain) {
             return Ok("TOR".to_string());
         }
 
@@ -58,6 +66,10 @@ impl GeoIp {
         } else {
             resolve(ip_or_domain)?
         };
+
+        if is_yggdrasil_address(&ip.to_string()) {
+            return Ok("YGGDRASIL".to_string());
+        }
 
         let result = self.reader.lookup(ip)?;
         let country: maxminddb::geoip2::Country = result
