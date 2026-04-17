@@ -6,7 +6,7 @@ const supabase = createClient(
   Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 );
 
-const regex = /^(smp|xftp):\/\/([A-Za-z0-9\-\–_+=:]+)@([A-Za-z0-9.-]+(:\d{1,5})?(,[A-Za-z0-9.-]+(:\d{1,5})?)*)$/i;
+const regex = /^(smp|xftp):\/\/([A-Za-z0-9\-\–_+=:]+)@((?:\[[\da-fA-F:]+\](?::\d{1,5})?|[A-Za-z0-9.-]+(?::\d{1,5})?|[\da-fA-F:]+)(?:,(?:\[[\da-fA-F:]+\](?::\d{1,5})?|[A-Za-z0-9.-]+(?::\d{1,5})?|[\da-fA-F:]+))*)$/i;
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
