@@ -99,10 +99,10 @@
 
     let countries = $derived(countriesStore.allCountries);
     let countriesSorted = $derived(Array.from($countries).filter(x => x).sort((a, b) => {
-        if (a === 'TOR') {
+        if (['TOR', 'YGGDRASIL'].includes(a)) {
             return -1;
         }
-        if (b === 'TOR') {
+        if (['TOR', 'YGGDRASIL'].includes(b)) {
             return 1;
         }
         return countryCodeToName(a).localeCompare(countryCodeToName(b));

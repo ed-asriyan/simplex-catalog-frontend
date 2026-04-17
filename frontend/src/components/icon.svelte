@@ -12,6 +12,8 @@
     <img width="20" height="20" src="https://img.icons8.com/ios/50/link--v1.png" alt="link--v1"/>
 {:else if icon === 'copy'}
     <img width="15" height="15" src="https://img.icons8.com/a7a7a7/material-sharp/24/copy.png" alt="copy--v1"/>
+{:else if icon === 'yggdrasil'}
+    <img width="15" height="15" src="https://img.icons8.com/sf-ultralight-filled/25/leaf.png" alt="leaf--v1"/>
 {:else}
     {icon}
 {/if}

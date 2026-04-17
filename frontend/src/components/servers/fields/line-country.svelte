@@ -9,13 +9,25 @@
 
     let { country, largeFlag = true }: Props = $props();
 
-    let name = $derived(country === 'TOR' ? 'TOR' : country && countryCodeToName(country));
+
+    let name = $derived((() => {
+        switch (country) {
+            case 'TOR':
+                return 'TOR';
+            case 'YGGDRASIL':
+                return 'Yggdrasil';
+            default:
+                return country && countryCodeToName(country);
+        }
+    })());
 </script>
 
 {#if country}
     <span>
         {#if country === 'TOR'}
-            <img width="22" height="22" src="https://img.icons8.com/nolan/64/tor-browser.png" alt="tor-browser"/>
+            <Icon icon="tor" />
+        {:else if country === 'YGGDRASIL'}
+            <Icon icon="yggdrasil" />
         {:else}
             <span class:uk-text-large={largeFlag}>
                 <Icon icon={getFlagEmoji(country)} />
