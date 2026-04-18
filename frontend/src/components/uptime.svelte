@@ -4,17 +4,19 @@
 
     interface Props {
         style: 'inline' | 'block';
-    }
-    interface PropsA {
-        server: Server;
-    }
-    interface PropsB {
-        bot: Bot;
+        servers?: Server[];
+        bot?: Bot;
     }
 
-    let { server, bot, style }: Props & (PropsA & PropsB) = $props();
+    let { servers, bot, style }: Props = $props();
 
-    let item: Server | Bot = $derived(server || bot);
+    const avg = (vals: number[]) => vals.length > 0 ? vals.reduce((a, b) => a + b, 0) / vals.length : 0;
+
+    let item: { uptime7: number; uptime30: number; uptime90: number } = $derived(
+        servers && servers.length > 0
+            ? { uptime7: avg(servers.map(s => s.uptime7)), uptime30: avg(servers.map(s => s.uptime30)), uptime90: avg(servers.map(s => s.uptime90)) }
+            : bot as { uptime7: number; uptime30: number; uptime90: number }
+    );
 
     const uptimeStr = function (num: number): string {
         return `${Math.round(num * 100)}%`;
@@ -38,12 +40,11 @@
 
 
 {#if style === 'inline'}
-    <span uk-tooltip={uptimes.map(u => u.label).join(' / ')}>
+    <span class="uptime-inline" uk-tooltip={uptimes.map(u => u.label).join(' / ')}>
         {#each uptimes as { key } (key)}
             <span class={item[key] === 1 ? 'uk-text-success' : 'uk-text-danger'}>
                 { uptimeStr(item[key] as number) }
             </span>
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
         {/each}
     </span>
 {:else if style === 'block'}
@@ -58,3 +59,11 @@
         {/each}
     </div>
 {/if}
+
+<style>
+    .uptime-inline {
+        display: inline-flex;
+        gap: 0.5em;
+        flex-wrap: wrap;
+    }
+</style>

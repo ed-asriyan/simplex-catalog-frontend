@@ -234,6 +234,6 @@
             <input class="uk-input uk-form-small uk-width-auto" type="number" min="0" max="100" onkeyup={delay((e) => onUptime90FilterChange(e.target.value), 1500)} value={uptime90Filter}>
         </th>
         <th>Last Check</th>
-        <th>QR Code</th>
+        <th>Details</th>
     </tr>
 </thead>

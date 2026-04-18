@@ -1,14 +1,25 @@
 <script lang="ts">
-    import { type Server, getServerUri } from '@/store/servers/servers-store';
-  import { copyToClipboard } from '@/utils';
-  import Icon from '@/components/icon.svelte';
+    import { type Server } from '@/store/servers/servers-store';
+    import { copyToClipboard } from '@/utils';
+    import Icon from '@/components/icon.svelte';
     const MAX_LENGTH = 30;
 
     interface Props {
-        server: Server;
+        server?: Server;
+        servers?: Server[];
     }
 
-    let { server }: Props = $props();
+    let { server, servers }: Props = $props();
+
+    let allServers: Server[] = $derived(servers || (server ? [server] : []));
+
+    let composedUri: string = $derived(
+        allServers.length > 0
+            ? `${allServers[0].protocol}://${allServers[0].identity}@${allServers.map(s => s.host).join(',')}`
+            : ''
+    );
+
+    let displayHost: string = $derived(allServers.map(s => s.host).join(','));
 
     let copyTimeout: ReturnType<typeof setTimeout> | null = $state(null);
     const copyToClipboardClick = function (str: string) {
@@ -18,19 +29,17 @@
             copyTimeout = null;
         }, 4000);
     };
-
-    let maskedUri: string = $derived(server.host);
 </script>
 
-<span class="pointer uk-text-nowrap" uk-tooltip="Click to copy full URI" onclick={() => copyToClipboardClick(getServerUri(server))}>
+<span class="pointer uk-text-nowrap" uk-tooltip="Click to copy full URI" onclick={() => copyToClipboardClick(composedUri)}>
     {#if copyTimeout !== null}
         Copied to clipboard
     {:else}
         <a>
-            {#if maskedUri.length > MAX_LENGTH}
-                &hellip;{maskedUri.slice(maskedUri.length - MAX_LENGTH, maskedUri.length)}
+            {#if displayHost.length > MAX_LENGTH}
+                &hellip;{displayHost.slice(displayHost.length - MAX_LENGTH, displayHost.length)}
             {:else}
-                {maskedUri}
+                {displayHost}
             {/if}
         </a>
         &#8239;

@@ -16,6 +16,7 @@ export interface Filter {
     status?: boolean | 'unknown' | undefined;
     countries?: FilterArray | undefined;
     identity?: string | undefined;
+    identityExact?: string | undefined;
     infoPageAvailable?: boolean | undefined;
     host?: string | undefined;
     protocol?: 'smp' | 'xftp' | undefined;
@@ -56,10 +57,8 @@ export class ServersService {
         this.client = client;
         this.store = store;
     }
-    
-    async fetch (filter: Filter, sort: Sort, pageSize: number, pageNumber: number): Promise<string[]> {
-        let query = this.client.from('v_server_summaries').select('*', { count: 'exact' });
 
+    private applyFilters(query: any, filter: Filter, applyIdentity: boolean = true): any {
         if (filter.status !== undefined) {
             if (filter.status === 'unknown') {
                 query = query.is('status', null);
@@ -67,7 +66,7 @@ export class ServersService {
                 query = query.eq('status', filter.status);
             }
         }
-    
+
         if (filter.labels) {
             const uuids: string[] = filter.labels.values.reduce((acc, label) => {
                 return [...acc, ...Array.from(get(labelsStore)[label]) as string[]];
@@ -80,15 +79,19 @@ export class ServersService {
                 }
             }
         }
-    
-        if (filter.identity) {
-            query = query.like('identity', `%${filter.identity}%`);
+
+        if (applyIdentity) {
+            if (filter.identityExact) {
+                query = query.eq('identity', filter.identityExact);
+            } else if (filter.identity) {
+                query = query.like('identity', `%${filter.identity}%`);
+            }
         }
-    
+
         if (filter.host) {
             query = query.like('host', `%${filter.host}%`);
         }
-    
+
         if (filter.countries) {
             if (filter.countries.inclusive) {
                 query = query.in('country', filter.countries.values);
@@ -98,26 +101,34 @@ export class ServersService {
                 }
             }
         }
-    
+
         if (filter.protocol) {
             query = query.eq('protocol', filter.protocol === 'smp' ? 1 : 2);
         }
-    
+
         if (filter.infoPageAvailable !== undefined) {
             query = query.eq('info_page_available', filter.infoPageAvailable);
         }
-    
+
         if (filter.uptime7) {
             query = query.gte('uptime7', filter.uptime7);
         }
-    
+
         if (filter.uptime30) {
             query = query.gte('uptime30', filter.uptime30);
         }
-    
+
         if (filter.uptime90) {
             query = query.gte('uptime90', filter.uptime90);
         }
+
+        return query;
+    }
+    
+    async fetch (filter: Filter, sort: Sort, pageSize: number, pageNumber: number): Promise<string[]> {
+        let query = this.client.from('v_server_summaries').select('*', { count: 'exact' });
+
+        query = this.applyFilters(query, filter);
     
         let field: string = sort.field;
         if (field === 'lastCheck') field = 'last_check';
@@ -133,6 +144,30 @@ export class ServersService {
         count && this.store.totalCount.set(count);
 
         return servers.map(({ uuid }) => uuid);
+    }
+
+    async fetchSiblingsByIdentities(identities: string[], filter: Filter): Promise<Map<string, string[]>> {
+        if (identities.length === 0) return new Map();
+
+        let query = this.client.from('v_server_summaries').select('*');
+
+        query = this.applyFilters(query, filter, false);
+        query = query.in('identity', identities);
+
+        const { data, error } = await query;
+        if (error) throw error;
+
+        const servers = data.map(parseServer);
+        this.store.addOrUpdate(...servers);
+
+        const grouped = new Map<string, string[]>();
+        for (const server of servers) {
+            if (!grouped.has(server.identity)) {
+                grouped.set(server.identity, []);
+            }
+            grouped.get(server.identity)!.push(server.uuid);
+        }
+        return grouped;
     }
 
     async addServer (uri: string) {

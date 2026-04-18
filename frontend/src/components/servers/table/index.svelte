@@ -22,8 +22,6 @@
 
     let { filter, updateFilter, updateSort, updatePagination, sort, pageNumber, pageSize, refresh }: Props = $props();
 
-    let allServers = $derived(serversStore.items);
-
     let totalCountStore: Readable<number> = $derived(serversStore.totalCount);
     let totalCount: number = $derived($totalCountStore);
 
@@ -32,14 +30,40 @@
     let currentPageServersUuids: Promise<string[]> = $derived(
         serversService.fetch(filter, sort, pageSize, pageNumber)
     );
-    let currentPageServers: Promise<Server[]> = $derived(
-        currentPageServersUuids
-            .then(
-                uuids => uuids.map(uuid => serversStore.getBy("uuid", uuid).get()).filter(x => !!x)
-            )
+
+    interface IdentityGroup {
+        identity: string;
+        servers: Server[];
+    }
+
+    let identityGroups: Promise<IdentityGroup[]> = $derived(
+        currentPageServersUuids.then(async (uuids) => {
+            const pageServers = uuids.map(uuid => serversStore.getBy("uuid", uuid).get()).filter(Boolean) as Server[];
+            if (pageServers.length === 0) return [];
+
+            const uniqueIdentities = [...new Set(pageServers.map(s => s.identity))];
+            const siblingMap = await serversService.fetchSiblingsByIdentities(uniqueIdentities, filter);
+
+            const seen = new Set<string>();
+            const groups: IdentityGroup[] = [];
+
+            for (const server of pageServers) {
+                if (seen.has(server.identity)) continue;
+                seen.add(server.identity);
+
+                const serverUuids = siblingMap.get(server.identity) || [server.uuid];
+                const groupServers = serverUuids
+                    .map(uuid => serversStore.getBy("uuid", uuid).get())
+                    .filter(Boolean) as Server[];
+
+                groups.push({ identity: server.identity, servers: groupServers });
+            }
+
+            return groups;
+        })
     );
 
-    let serversModal: Server[] = $state([]);
+    let serverGroupsModal: Server[][] = $state([]);
 
     const changePage = async function (pageCount: number, newPage: number) {
         if (newPage < 1 || newPage > pageCount) {
@@ -48,15 +72,24 @@
         updatePagination(newPage, pageSize);
     };
 
-    let selectedServersUuid = $state<string[]>([]);
-    let selectedServers = $derived(selectedServersUuid.map(uuid => $allServers.find(server => server.uuid === uuid)));
+    let selectedIdentities = $state<Set<string>>(new Set());
+    let selectedGroupCount = $derived(selectedIdentities.size);
 
-    const toggleSelectedServer = function (server: Server) {
-        if (selectedServersUuid.includes(server.uuid)) {
-            selectedServersUuid = selectedServersUuid.filter((uuid: string) => server.uuid !== uuid);
+    const toggleGroup = function (servers: Server[]) {
+        const identity = servers[0]?.identity;
+        if (!identity) return;
+        const next = new Set(selectedIdentities);
+        if (next.has(identity)) {
+            next.delete(identity);
         } else {
-            selectedServersUuid = [...selectedServersUuid, server.uuid];
+            next.add(identity);
         }
+        selectedIdentities = next;
+    };
+
+    const getSelectedGroups = async (): Promise<Server[][]> => {
+        const groups = await identityGroups;
+        return groups.filter(g => selectedIdentities.has(g.identity)).map(g => g.servers);
     };
 
     const exportLabels = function () {
@@ -78,7 +111,7 @@
     };
 </script>
 
-<ServerModal bind:servers={serversModal} />
+<ServerModal bind:serverGroups={serverGroupsModal} />
 
 <div class="uk-margin-small-bottom">
     <button class="uk-button uk-button-default uk-margin-small-right uk-width-auto@m uk-width-1-1" onclick={importLabels}>
@@ -90,7 +123,7 @@
 </div>
 <div class="uk-width-1-1">
     <div class="uk-float-left uk-margin-left uk-margin-right uk-width-auto@m uk-width-1-1 uk-text-center">
-        {#await currentPageServers}
+        {#await identityGroups}
             <span uk-spinner="ratio: 1.2"></span>
         {:then}
             <button class="uk-text-large pointer" onclick={refresh} uk-tooltip="Refresh">
@@ -100,11 +133,11 @@
     </div>
     <div>
         <button class="uk-button uk-button-secondary uk-float-right uk-width-auto@m uk-width-1-1" 
-                onclick={() => serversModal = selectedServers}
-                disabled={selectedServersUuid.length < 2}
-                uk-tooltip={selectedServersUuid.length < 2 ? "Select 2 or more servers" : ""}
+                onclick={async () => serverGroupsModal = await getSelectedGroups()}
+                disabled={selectedGroupCount < 2}
+                uk-tooltip={selectedGroupCount < 2 ? "Select 2 or more rows" : ""}
             >
-            Bulk mode ({ selectedServersUuid.length })
+            Bulk mode ({ selectedGroupCount })
         </button>
         <div class="uk-margin-small uk-width-1-1 uk-width-auto@m uk-inline-block"></div>
         <select bind:value={pageSize} class="uk-select uk-float-left uk-width-small@m uk-margin-small-bottom uk-width-1-1@s">
@@ -134,18 +167,25 @@
             <TableHeader
                 {updateFilter}
                 {filter}
-                onAllServerSelected={async yes => { console.log(yes); selectedServersUuid = yes ? await currentPageServersUuids : []}}
+                onAllServerSelected={async yes => {
+                    if (yes) {
+                        const groups = await identityGroups;
+                        selectedIdentities = new Set(groups.map(g => g.identity));
+                    } else {
+                        selectedIdentities = new Set();
+                    }
+                }}
             />
 
             <tbody class="uk-list-striped uk-table-hover">
-                {#await currentPageServers}
+                {#await identityGroups}
                     <span uk-spinner="ratio: 1.2"></span>
-                {:then currentPageServers} 
-                    {#each currentPageServers as server (server.uuid)}
+                {:then groups} 
+                    {#each groups as group (group.identity)}
                         <TableRow 
-                            {server}
-                            selected={selectedServersUuid.includes(server.uuid)}
-                            onSelect={() => toggleSelectedServer(server)}
+                            servers={group.servers}
+                            selected={selectedIdentities.has(group.identity)}
+                            onSelect={() => toggleGroup(group.servers)}
                         />
                     {/each}
                 {/await}
