@@ -182,7 +182,7 @@
         </th>
         <th>
             <buttons class="uk-button uk-button-small uk-button-default uk-width-auto" type="button">
-                Country
+                Location
                 {#if (countriesFilterValues.length || 0) > 0}
                     <span class="uk-badge">{countriesFilterValues.length}</span>
                 {/if}

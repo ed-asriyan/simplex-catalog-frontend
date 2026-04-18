@@ -2,14 +2,14 @@
     import { type Server } from '@/store/servers/servers-store';
     import { copyToClipboard } from '@/utils';
     import Icon from '@/components/icon.svelte';
-    const MAX_LENGTH = 30;
 
     interface Props {
         server?: Server;
         servers?: Server[];
+        maxLength?: number;
     }
 
-    let { server, servers }: Props = $props();
+    let { server, servers, maxLength = 30 }: Props = $props();
 
     let allServers: Server[] = $derived(servers || (server ? [server] : []));
 
@@ -36,8 +36,8 @@
         Copied to clipboard
     {:else}
         <a>
-            {#if displayHost.length > MAX_LENGTH}
-                &hellip;{displayHost.slice(displayHost.length - MAX_LENGTH, displayHost.length)}
+            {#if displayHost.length > maxLength}
+                &hellip;{displayHost.slice(displayHost.length - maxLength, displayHost.length)}
             {:else}
                 {displayHost}
             {/if}

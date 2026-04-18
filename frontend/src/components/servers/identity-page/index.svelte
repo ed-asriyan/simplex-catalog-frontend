@@ -129,7 +129,7 @@
                                         <tr>
                                             <th class="uk-table-shrink"></th>
                                             <th>Host</th>
-                                            <th>Country</th>
+                                            <th>Location</th>
                                             <th>Status</th>
                                             <th>Uptime</th>
                                             <th>Info</th>
@@ -148,7 +148,7 @@
                                                     />
                                                 </td>
                                                 <td>
-                                                    <LineUri servers={[server]} />
+                                                    <LineUri servers={[server]} maxLength={16} />
                                                 </td>
                                                 <td><LineCountry country={server.country} largeFlag={false} /></td>
                                                 <td><LineStatus status={server.status} /></td>
