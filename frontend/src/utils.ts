@@ -37,6 +37,9 @@ export const getFlagEmoji = function (countryCode: string): string {
     if (countryCode === 'TOR') {
         return '🧅';
     }
+    if (countryCode === 'YGGDRASIL') {
+        return '🌿';
+    }
     const codePoints = countryCode
       .toUpperCase()
       .split('')
