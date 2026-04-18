@@ -38,7 +38,7 @@
             series: {
                 "Is Online": {
                     color: (status.isOnline ? 'green' : 'red') as Color,
-                    context: "",
+                    context: status.isOnline ? "Online" : "Offline",
                 },
             }
         }) as Item)

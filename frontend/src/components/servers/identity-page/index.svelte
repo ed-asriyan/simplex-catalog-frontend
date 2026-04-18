@@ -80,14 +80,14 @@
         return statuses.get().map(status => ({
             timestamp: status.createdAt,
             series: {
-                "Is Online": {
+                "Status": {
                     color: status.status ? 'green' : 'red',
-                    context: status.status ? getFlagEmoji(status.country) : "No",
+                    context: status.status ? `Online ${getFlagEmoji(status.country)}` : "Offline",
                     tooltip: `Server is ${status.status ? "Online" : "Offline"} and detected in ${status.country}`
                 },
-                "Is Info Page Available": {
+                "Is Info Page": {
                     color: status.infoPageAvailable ? 'green' : 'red',
-                    context: status.infoPageAvailable ? "" : "",
+                    context: status.infoPageAvailable ? "Available" : "Not Available",
                     tooltip: `Info page is ${status.infoPageAvailable ? "available" : "not available"}`
                 }
             }
@@ -174,7 +174,7 @@
                             <div class="uk-margin-medium-bottom">
                                 <h5 class="uk-margin-small-bottom">
                                     <span class="uk-margin-small-right"><LineProtocol protocol={server.protocol} /></span>
-                                    <span uk-tooltip={server.host}>{truncateHost(server.host)}</span>
+                                    <LineUri servers={[server]} maxLength={30} />
                                     <span class="uk-margin-small-left">
                                         <LineCountry country={server.country} largeFlag={false} />
                                     </span>
