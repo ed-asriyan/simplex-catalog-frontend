@@ -7,11 +7,11 @@
     import { botsStatusesService } from '@/store/bots/statuses-service';
     import { convertUTCDateToLocalDate, copyToClipboard } from '@/utils';
     import moment from 'moment';
-    import LineStatus from './fields/status.svelte';
     import Uptime from '@/components/uptime.svelte';
     import LineMessages from './fields/messages.svelte';
     import Icon from '@/components/icon.svelte';
     import TimelinePlot, { type Color, type Item } from '@/components/timeline-plot.svelte';
+    import StatusBadge from '@/components/status-badge.svelte';
 
     interface Props {
         route: any;
@@ -37,8 +37,8 @@
             timestamp: status.createdAt,
             series: {
                 "Is Online": {
-                    color: (status.isOnline ? 'green' : 'red') as Color,
-                    context: status.isOnline ? "Online" : "Offline",
+                    color: (status.status ? 'green' : 'red') as Color,
+                    context: status.status ? "Online" : "Offline",
                 },
             }
         }) as Item)
@@ -68,7 +68,7 @@
                             <h3 class="uk-card-title uk-margin-remove-bottom uk-text-bold">
                                 {$bot.name}
                                 &nbsp;
-                                <LineStatus status={$bot.isOnline} />
+                                <StatusBadge items={[ $bot ]} />
                             </h3>
                             <div class="uk-text-meta uk-margin-remove-top">
                                 {#if $bot.lastCheck}

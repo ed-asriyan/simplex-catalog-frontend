@@ -6,6 +6,7 @@
     import { convertUTCDateToLocalDate, delay, setQueryParam } from '@/utils';
     import Icon from '@/components/icon.svelte';
     import { goto } from "@mateothegreat/svelte5-router";
+    import StatusBadge from "../status-badge.svelte";
     
     interface Props {
         route: any,
@@ -16,13 +17,13 @@
     let params = $derived(route.result.querystring.params);
 
     let filter: Filter = $derived({
-        isOnline: params?.filterIsOnline === 'true' ? true : params?.filterIsOnline === 'false' ? false : undefined,
+        status: params?.filterStatus === 'true' ? true : params?.filterStatus === 'false' ? false : undefined,
         text: params?.q,
     });
 
     const setFilter = function (newFilter: Filter) {
         setQueryParam(route, {
-            filterIsOnline: newFilter.isOnline === undefined ? '' : newFilter.isOnline ? 'true' : 'false',
+            filterStatus: newFilter.status === undefined ? '' : newFilter.status ? 'true' : 'false',
             q: newFilter.text || '',
         });
     };
@@ -101,7 +102,7 @@
                     <input class="uk-search-input" type="search" placeholder="Search" aria-label="Search" value={_searchText} onkeyup={delay(e => onSearch(e.target.value), 1500)}>
                 </span>
             </form>
-            <select class="uk-width-auto@m uk-width-1-1@s uk-select uk-form-width-small uk-margin-left" value={filter.isOnline?.toString() || ''} onchange={e => setFilter({ ...filter, isOnline: e.target.value === '' ? undefined : e.target.value === 'true' })}>
+            <select class="uk-width-auto@m uk-width-1-1@s uk-select uk-form-width-small uk-margin-left" value={filter.status?.toString() || ''} onchange={e => setFilter({ ...filter, status: e.target.value === '' ? undefined : e.target.value === 'true' })}>
                 <option value="">All</option>
                 <option value="true">Online</option>
                 <option value="false">Offline</option>
@@ -133,8 +134,8 @@
                                         <h3 class="uk-card-title uk-margin-remove-bottom uk-text-bold">
                                             {bot.name}
                                         </h3>
-                                        {#if !bot.isOnline}
-                                            <span class="uk-label uk-label-danger uk-float-right">Offline</span>
+                                        {#if !bot.status}
+                                            <StatusBadge items={[ bot ]} />
                                         {/if}
                                         {#if bot.lastCheck}
                                             <p class="uk-text-meta uk-margin-remove-top">

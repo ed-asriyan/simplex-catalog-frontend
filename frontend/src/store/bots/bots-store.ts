@@ -6,7 +6,7 @@ export interface Bot {
     address: string;
     name: string;
     description: string | null;
-    isOnline: boolean | null;
+    status: boolean | null;
     uptime7: number;
     uptime30: number;
     uptime90: number;

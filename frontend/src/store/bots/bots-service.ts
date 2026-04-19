@@ -10,7 +10,7 @@ export interface FilterArray {
 }
 
 export interface Filter {
-    isOnline?: boolean | undefined;
+    status?: boolean | undefined;
     text?: string | undefined;
     uptime7?: number | undefined;
     uptime30?: number | undefined;
@@ -33,7 +33,7 @@ const parseServer = function (data: any): Bot {
         name: data.name,
         description: data.description,
         photo: data.photo,
-        isOnline: data['is_online'],
+        status: data['is_online'],
         uptime7: data.uptime7,
         uptime30: data.uptime30,
         uptime90: data.uptime90,
@@ -54,8 +54,8 @@ export class BotsService {
     async fetch (filter: Filter, sort: Sort, pageSize: number, pageNumber: number): Promise<string[]> {
         let query = this.client.from('v_bot_summaries').select('*', { count: 'exact' });
 
-        if (filter.isOnline !== undefined) {
-            query = query.eq('is_online', filter.isOnline);
+        if (filter.status !== undefined) {
+            query = query.eq('is_online', filter.status);
         }
     
         if (filter.uuids) {

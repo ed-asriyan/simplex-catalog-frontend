@@ -5,10 +5,11 @@
     import LineDate from '../fields/line-date.svelte';
     import LineServerInfo from '../fields/line-server-info.svelte';
     import LineProtocol from '../fields/line-protocol.svelte';
-    import LineStatus from '../fields/line-status.svelte';
+    import LineStatus from '@/components/status-badge.svelte';
     import LineUri from '../fields/line-uri.svelte';
     import Labels from '../labels.svelte';
     import Uptime from '@/components/uptime.svelte';
+  import StatusBadge from '@/components/status-badge.svelte';
 
     interface Props {
         servers: Server[];
@@ -68,7 +69,7 @@
         {/each}
     </td>
     <td>
-        <LineStatus {servers} />
+        <StatusBadge items={servers} />
     </td>
     <td>
         <Uptime {servers} style="inline" />

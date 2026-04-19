@@ -3,10 +3,11 @@
 	import Modal from '@/components/modal.svelte';
 	import { labelsStore } from '@/store/servers/labels-store';
 	import LineCountry from '../fields/line-country.svelte';
-	import LineStatus from '../fields/line-status.svelte';
+	import LineStatus from '@/components/status-badge.svelte';
     import LineUptime from '@/components/uptime.svelte';
 	import LineServerInfo from '../fields/line-server-info.svelte';
 	import ServerQrCode from '../fields/server-qrcode.svelte';
+  import StatusBadge from '@/components/status-badge.svelte';
 
 	interface Props {
 		serverGroups: Server[][];
@@ -66,7 +67,7 @@
 					</span>
 					<LineServerInfo server={server} icon={true}/>
 					<span class="uk-margin-small-right uk-margin-small-left">
-						<LineStatus status={server.status} />
+						<StatusBadge items={[ server ]} />
 					</span>
 				</div>
 			{/each}

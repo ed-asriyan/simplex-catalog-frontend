@@ -3,7 +3,7 @@ import { AbstractStore } from '../abstract-store';
 export interface BotStatus {
     uuid: string;
     botUuid: string;
-    isOnline: boolean;
+    status: boolean;
     createdAt: Date;
 }
 

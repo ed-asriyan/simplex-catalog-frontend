@@ -6,7 +6,7 @@ const parseBotStatus = function (data: any): BotStatus {
     return {
         uuid: data.uuid,
         botUuid: data.bot_uuid,
-        isOnline: data['is_online'],
+        status: data['is_online'],
         createdAt: new Date(data['created_at']),
     };
 };

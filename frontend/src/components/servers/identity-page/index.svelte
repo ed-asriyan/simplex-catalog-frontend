@@ -7,7 +7,7 @@
     import { getFlagEmoji } from '@/utils';
     import LineCountry from '../fields/line-country.svelte';
     import LineProtocol from '../fields/line-protocol.svelte';
-    import LineStatus from '../fields/line-status.svelte';
+    import LineStatus from '@/components/status-badge.svelte';
     import LineServerInfo from '../fields/line-server-info.svelte';
     import LineDate from '../fields/line-date.svelte';
     import Uptime from '@/components/uptime.svelte';
@@ -16,6 +16,7 @@
     import type { Item } from '@/components/timeline-plot.svelte';
     import LineUri from '../fields/line-uri.svelte';
     import ServerQrCode from '../fields/server-qrcode.svelte';
+  import StatusBadge from '@/components/status-badge.svelte';
 
     interface Props {
         route: any;
@@ -151,7 +152,7 @@
                                                     <LineUri servers={[server]} maxLength={16} />
                                                 </td>
                                                 <td><LineCountry country={server.country} largeFlag={false} /></td>
-                                                <td><LineStatus status={server.status} /></td>
+                                                <td><StatusBadge items={[ server ]} /></td>
                                                 <td><Uptime servers={[server]} style="inline" /></td>
                                                 <td><LineServerInfo {server} icon={true} /></td>
                                                 <td><LineDate date={server.lastCheck} /></td>
