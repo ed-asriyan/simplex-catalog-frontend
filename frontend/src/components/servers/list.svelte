@@ -46,10 +46,13 @@
         };
     };
 
+    const defaultFilter: Filter = { status: true };
+
     onMount(() => {
         const generatedFilter = generateFilter(params);
         if (Object.values(generatedFilter || {}).filter(x => x !== undefined).length === 0) {
-            updateFilter(JSON.parse(localStorage.getItem('serversFilter') || '{}') as Filter);
+            const stored = JSON.parse(localStorage.getItem('serversFilter') || 'null') as Filter | null;
+            updateFilter(stored && Object.values(stored).some(x => x !== undefined) ? stored : defaultFilter);
         }
     });
 
@@ -61,8 +64,8 @@
     });
 
     let sort: Sort = $derived({
-        field: params.sortField || 'last_check',
-        order: params.sortOrder || 'desc',
+        field: (params.sortField || 'last_check') as Sort['field'],
+        order: (params.sortOrder || 'desc') as Sort['order'],
     });
 
     const updateFilter = (newFilter: Filter) => {
@@ -125,7 +128,7 @@
     </div>
 </div>
 
-<div class="uk-section uk-section-default">
+<div class="uk-section uk-section-muted uk-section-small">
     <div class="uk-container uk-container-expand">
         <ServersTable {updateFilter} {updatePagination} {updateSort} {filter} {sort} {pageNumber} {pageSize} {refresh} />
     </div>

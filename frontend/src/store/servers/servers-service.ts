@@ -25,7 +25,7 @@ export interface Filter {
     uptime90?: number | undefined;
 }
 
-export type SortField = 'status' | 'host' | 'identity' | 'country' | 'type' | 'uptime7' | 'uptime30' | 'uptime90' | 'lastCheck';
+export type SortField = 'status' | 'host' | 'identity' | 'country' | 'protocol' | 'uptime7' | 'uptime30' | 'uptime90' | 'last_check' | 'info_page_available';
 export type SortOrder = 'asc' | 'desc';
 
 export interface Sort {
@@ -131,7 +131,6 @@ export class ServersService {
         query = this.applyFilters(query, filter);
     
         let field: string = sort.field;
-        if (field === 'lastCheck') field = 'last_check';
         query = query.order(field, { ascending: sort.order === 'asc' });
 
         const start = pageSize * (pageNumber - 1);
