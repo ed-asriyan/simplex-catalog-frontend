@@ -30,6 +30,7 @@
         text: string;
     }
     let toolTip: Tooltip | null = $state(null);
+    let mapLoaded = $state(false);
 
     let countriesMap = $derived(countries.reduce((acc, curr) => {
         acc[curr.code] = curr;
@@ -57,6 +58,7 @@
                 .attr("class", "country")
                 .attr("d", path);
 
+            mapLoaded = true;
         }).catch(error => {
             console.error("Error loading map data:", error);
             svg.append("text")
@@ -72,7 +74,7 @@
     };
 
     $effect(() => {
-        if (!svgElement || !countriesMap) return;
+        if (!svgElement || !countriesMap || !mapLoaded) return;
 
         d3.select(svgElement)
             .selectAll(".country")
