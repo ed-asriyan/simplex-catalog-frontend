@@ -17,7 +17,7 @@
 		"@mateothegreat/svelte5-router": "^2.16.19",
 		"@sentry/svelte": "^10.38.0",
 		"@supabase/supabase-js": "^2.89.0",
-		"@sveltejs/vite-plugin-svelte": "^6.2.1",
+		"@sveltejs/vite-plugin-svelte": "^7.0.0",
 		"@tsconfig/svelte": "^5.0.2",
 		"@types/d3": "^7.4.3",
 		"@types/node": "^25.5.2",
@@ -32,7 +32,7 @@
 		"tslib": "^2.6.2",
 		"typescript": "^5.9.3",
 		"uikit": "^3.25.1",
-		"vite": "^6.3.5"
+		"vite": "^8.0.8"
 	},
 	"type": "module"
 }
