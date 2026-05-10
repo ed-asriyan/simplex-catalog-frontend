@@ -8,9 +8,7 @@ use simploxide_client::{
 };
 use std::error::Error;
 
-fn get_bot_profile(
-    connection_plan: ConnectionPlan,
-) -> Option<BotProfile<impl IntoIterator<Item = BotCommand>>> {
+fn get_bot_profile(connection_plan: ConnectionPlan) -> Option<BotProfile> {
     match connection_plan {
         ConnectionPlan::ContactAddress {
             contact_address_plan:
@@ -58,6 +56,17 @@ fn get_bot_profile(
     }
 }
 
+async fn wait_for_connection(events: &mut EventStream, user: User) -> Result<i64, Box<dyn Error>> {
+    while let Some(event) = events.try_next().await? {
+        if let Event::ContactConnected(connected) = event.as_ref()
+            && connected.user.user_id == user.user_id
+        {
+            return Ok(connected.contact.contact_id);
+        }
+    }
+    Err("Event stream ended unexpectedly without receiving ContactConnected event".into())
+}
+
 async fn wait_for_message(events: &mut EventStream, user: User) -> Result<String, Box<dyn Error>> {
     while let Some(event) = events.try_next().await? {
         if let Event::NewChatItems(new_msgs) = event.as_ref()
@@ -95,34 +104,59 @@ async fn get_bot_greeting_message(
     full_link: &str,
     events: &mut EventStream,
     timeout: u64,
-) -> Result<Option<String>, Box<dyn Error>> {
+) -> Result<Option<Option<String>>, Box<dyn Error>> {
     client
         .api_connect(
             ApiConnect::builder()
                 .prepared_link(CreatedConnLink::builder().conn_full_link(full_link).build())
-                // .user_id(122)
                 .user_id(user.user_id)
                 .incognito(true)
                 .build(),
         )
         .await?;
 
-    match tokio::time::timeout(
+    let contact_id = tokio::time::timeout(
+        std::time::Duration::from_secs(timeout),
+        wait_for_connection(events, user.clone()),
+    )
+    .await
+    .ok()
+    .and_then(|res| res.ok());
+
+    if contact_id.is_none() {
+        return Ok(None);
+    }
+
+    let greeting_message = tokio::time::timeout(
         std::time::Duration::from_secs(timeout),
         wait_for_message(events, user.clone()),
     )
     .await
-    {
-        Ok(result) => Ok(Some(result?)),
-        Err(_) => Ok(None),
+    .ok()
+    .and_then(|res| res.ok());
+
+    if let Some(contact_id) = contact_id {
+        client
+            .api_delete_chat(
+                ChatRef::builder()
+                    .chat_id(contact_id)
+                    .chat_type(ChatType::Direct)
+                    .build(),
+                ChatDeleteMode::Full {
+                    notify: true,
+                    undocumented: Default::default(),
+                },
+            )
+            .await?;
     }
+
+    Ok(Some(greeting_message))
 }
 
-pub struct BotTestResult<T>
-where
-    T: IntoIterator<Item = BotCommand>,
-{
-    pub profile: Option<BotProfile<T>>,
+#[derive(Debug)]
+pub struct BotTestResult {
+    pub is_online: bool,
+    pub profile: Option<BotProfile>,
     pub greeting_message: Option<String>,
 }
 
@@ -130,7 +164,7 @@ pub async fn test_bot(
     uri: &str,
     smp_client_ws_uri: &str,
     timeout: u64,
-) -> Result<BotTestResult<impl IntoIterator<Item = BotCommand>>, Box<dyn Error>> {
+) -> Result<BotTestResult, Box<dyn Error>> {
     let (client, mut events) = simploxide_client::connect(&smp_client_ws_uri).await?;
 
     let user = client
@@ -150,19 +184,26 @@ pub async fn test_bot(
 
     let profile = get_bot_profile(plan.connection_plan.clone());
     if profile.is_some() {
+        let test_result = get_bot_greeting_message(
+            &client,
+            &user,
+            &plan.conn_link.conn_full_link,
+            &mut events,
+            timeout,
+        )
+        .await?;
+
+        let is_online = test_result.is_some();
+        let greeting_message = test_result.flatten();
+
         Ok(BotTestResult {
+            is_online,
             profile,
-            greeting_message: get_bot_greeting_message(
-                &client,
-                &user,
-                &plan.conn_link.conn_full_link,
-                &mut events,
-                timeout,
-            )
-            .await?,
+            greeting_message,
         })
     } else {
         Ok(BotTestResult {
+            is_online: false,
             profile: None,
             greeting_message: None,
         })

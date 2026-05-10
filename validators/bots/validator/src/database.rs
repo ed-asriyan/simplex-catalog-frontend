@@ -1,4 +1,7 @@
-use crate::types::{Bot, BotCommand, BotProfile};
+use crate::{
+    smp::BotTestResult,
+    types::{Bot, BotCommand, BotProfile},
+};
 pub use postgrest::Postgrest;
 use serde::{self, Deserialize, Serialize};
 use std::error::Error;
@@ -112,14 +115,11 @@ impl Database {
 
     /// Inserts a new status value along with its associated commands into the database
     /// Returns the UUID of the inserted status value
-    pub async fn bot_update_profile<T>(
+    pub async fn bot_update_profile(
         &self,
         bot_uuid: &str,
-        profile: BotProfile<T>,
-    ) -> Result<(), Box<dyn Error>>
-    where
-        T: IntoIterator<Item = BotCommand>,
-    {
+        profile: &BotProfile,
+    ) -> Result<(), Box<dyn Error>> {
         let raw_profile = RawBotProfile {
             bot_uuid,
             name: &profile.name,
@@ -147,9 +147,9 @@ impl Database {
         )?;
 
         let mut inserted_commands: Vec<String> = Vec::new();
-        for command in profile.commands {
+        for command in &profile.commands {
             let uuid = self
-                .insert_command(&inserted_profile.uuid, &command)
+                .insert_command(&inserted_profile.uuid, command)
                 .await?;
             inserted_commands.push(uuid);
         }
@@ -203,15 +203,15 @@ impl Database {
     pub async fn bot_insert_status(
         &self,
         bot_uuid: &str,
-        message_text: Option<&str>,
+        bot_status: &BotTestResult,
     ) -> Result<(), Box<dyn Error>> {
-        if let Some(text) = message_text {
+        if let Some(text) = bot_status.greeting_message.as_deref() {
             self.insert_greeting_message(bot_uuid, text).await?;
         }
 
         let raw_status = RawBotStatus {
             bot_uuid,
-            is_online: message_text.is_some(),
+            is_online: bot_status.is_online,
         };
 
         self.client

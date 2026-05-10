@@ -11,12 +11,9 @@ pub struct BotCommand {
 }
 
 #[derive(Debug)]
-pub struct BotProfile<T>
-where
-    T: IntoIterator<Item = BotCommand>,
-{
+pub struct BotProfile {
     pub name: String,
     pub description: Option<String>,
     pub photo: Option<String>,
-    pub commands: T,
+    pub commands: Vec<BotCommand>,
 }

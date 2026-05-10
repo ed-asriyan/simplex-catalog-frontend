@@ -28,7 +28,7 @@ async fn handle_bot(args: &Args<'_>, bot: &Bot) -> Result<(), Box<dyn std::error
             );
             match test_bot(&bot.address, args.smp_client_ws_uri, args.timeout).await {
                 Ok(r) => {
-                    if r.profile.is_some() || i == 0 {
+                    if r.is_online || i == 0 {
                         return Ok(r);
                     } else {
                         if i == 0 {
@@ -49,19 +49,15 @@ async fn handle_bot(args: &Args<'_>, bot: &Bot) -> Result<(), Box<dyn std::error
     };
 
     let status = test().await?;
-    info!(
-        "Done: profile={}, message={}",
-        status.profile.is_some(),
-        status.greeting_message.is_some()
-    );
+    info!("Done: {:#?}", status);
 
     info!("Adding bot status...");
     if !args.dry {
-        if let Some(profile) = status.profile {
+        if let Some(profile) = &status.profile {
             args.database.bot_update_profile(&bot.uuid, profile).await?;
         }
         args.database
-            .bot_insert_status(&bot.uuid, status.greeting_message.as_deref())
+            .bot_insert_status(&bot.uuid, &status)
             .await?;
     } else {
         info!("Running in dry mode. Skipping status addition.");
