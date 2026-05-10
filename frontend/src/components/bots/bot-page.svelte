@@ -123,7 +123,7 @@
                             {/if}
                         </div>
                         <div class="uk-width-1-2@m">
-                            {#if $botDetails.replyMessage}
+                            {#if $botDetails.greetingMessage}
                                 <LineMessages botDetails={$botDetails} />
                             {/if}
                         </div>

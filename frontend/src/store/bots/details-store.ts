@@ -7,7 +7,7 @@ export interface BotCommand {
 
 export interface BotDetails {
     botUuid: string;
-    replyMessage?: string;
+    greetingMessage?: string;
     commands: BotCommand[];
 }
 

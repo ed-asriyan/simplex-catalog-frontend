@@ -4,11 +4,11 @@ import { botsDetailsStore, type BotDetails, type BotsDetailsStore } from './deta
 
 const parse = function (bot: any): BotDetails {
     console.log(bot);
-    const replyMessage = bot['bot_reply_messages'];
+    const greetingMessage = bot['bot_greeting_messages'];
     const commands = (bot['bot_profiles']?.['bot_commands'] || []) as any[];
     return {
         botUuid: bot['uuid'],
-        replyMessage: replyMessage?.['text'],
+        greetingMessage: greetingMessage?.['text'],
         commands: commands.map(command => ({
             keyword: command.keyword,
             label: command.label
@@ -31,7 +31,7 @@ export class BotsDetailsService {
             .select(
                 `
                 uuid,
-                bot_reply_messages!bot_reply_messages_bot_uuid_fkey (*),
+                bot_greeting_messages!bot_greeting_messages_bot_uuid_fkey (*),
                 bot_profiles!bot_profiles_bot_uuid_fkey (
                     *,
                     bot_commands (*)
