@@ -13,7 +13,7 @@ struct RawBot<'a> {
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "snake_case")]
-struct RawBotReplyMessage<'a> {
+struct RawBotGreetingMessage<'a> {
     pub bot_uuid: &'a str,
     pub text: &'a str,
 }
@@ -171,23 +171,23 @@ impl Database {
         Ok(())
     }
 
-    async fn insert_reply_message(
+    async fn insert_greeting_message(
         &self,
         bot_uuid: &str,
         text: &str,
     ) -> Result<String, Box<dyn Error>> {
-        let raw_reply_message = RawBotReplyMessage { bot_uuid, text };
+        let raw_greeting_message = RawBotGreetingMessage { bot_uuid, text };
 
         #[derive(Serialize, Deserialize, Debug)]
         #[serde(rename_all = "snake_case")]
-        struct InsertedReplyMessage {
+        struct InsertedGreetingMessage {
             pub uuid: String,
         }
 
-        let inserted_reply_message: InsertedReplyMessage = serde_json::from_str(
+        let inserted_greeting_message: InsertedGreetingMessage = serde_json::from_str(
             self.client
-                .from("bot_reply_messages")
-                .upsert(serde_json::to_string(&raw_reply_message)?)
+                .from("bot_greeting_messages")
+                .upsert(serde_json::to_string(&raw_greeting_message)?)
                 .on_conflict("bot_uuid")
                 .single()
                 .execute()
@@ -197,7 +197,7 @@ impl Database {
                 .as_str(),
         )?;
 
-        Ok(inserted_reply_message.uuid)
+        Ok(inserted_greeting_message.uuid)
     }
 
     pub async fn bot_insert_status(
@@ -206,7 +206,7 @@ impl Database {
         message_text: Option<&str>,
     ) -> Result<(), Box<dyn Error>> {
         if let Some(text) = message_text {
-            self.insert_reply_message(bot_uuid, text).await?;
+            self.insert_greeting_message(bot_uuid, text).await?;
         }
 
         let raw_status = RawBotStatus {

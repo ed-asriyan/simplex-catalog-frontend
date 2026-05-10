@@ -52,7 +52,7 @@ async fn handle_bot(args: &Args<'_>, bot: &Bot) -> Result<(), Box<dyn std::error
     info!(
         "Done: profile={}, message={}",
         status.profile.is_some(),
-        status.reply_message.is_some()
+        status.greeting_message.is_some()
     );
 
     info!("Adding bot status...");
@@ -61,7 +61,7 @@ async fn handle_bot(args: &Args<'_>, bot: &Bot) -> Result<(), Box<dyn std::error
             args.database.bot_update_profile(&bot.uuid, profile).await?;
         }
         args.database
-            .bot_insert_status(&bot.uuid, status.reply_message.as_deref())
+            .bot_insert_status(&bot.uuid, status.greeting_message.as_deref())
             .await?;
     } else {
         info!("Running in dry mode. Skipping status addition.");

@@ -89,7 +89,7 @@ async fn wait_for_message(events: &mut EventStream, user: User) -> Result<String
     Err("Event stream ended unexpectedly without receiving NewChatItems event".into())
 }
 
-async fn get_bot_reply_message(
+async fn get_bot_greeting_message(
     client: &Client,
     user: &User,
     full_link: &str,
@@ -123,7 +123,7 @@ where
     T: IntoIterator<Item = BotCommand>,
 {
     pub profile: Option<BotProfile<T>>,
-    pub reply_message: Option<String>,
+    pub greeting_message: Option<String>,
 }
 
 pub async fn test_bot(
@@ -152,7 +152,7 @@ pub async fn test_bot(
     if profile.is_some() {
         Ok(BotTestResult {
             profile,
-            reply_message: get_bot_reply_message(
+            greeting_message: get_bot_greeting_message(
                 &client,
                 &user,
                 &plan.conn_link.conn_full_link,
@@ -164,7 +164,7 @@ pub async fn test_bot(
     } else {
         Ok(BotTestResult {
             profile: None,
-            reply_message: None,
+            greeting_message: None,
         })
     }
 }
