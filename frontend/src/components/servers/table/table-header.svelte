@@ -42,6 +42,7 @@
             <span class="cursor" onclick={() => toggleSort('uptime90')}>90d{sortIndicator('uptime90')}</span>
         </th>
         <th class="cursor" onclick={() => toggleSort('last_check')}>Last Check{sortIndicator('last_check')}</th>
+        <th class="cursor" onclick={() => toggleSort('created_at')}>Added at{sortIndicator('created_at')}</th>
         <th>Details</th>
     </tr>
 </thead>

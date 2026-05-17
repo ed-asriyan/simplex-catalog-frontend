@@ -5,11 +5,10 @@
     import LineDate from '../fields/line-date.svelte';
     import LineServerInfo from '../fields/line-server-info.svelte';
     import LineProtocol from '../fields/line-protocol.svelte';
-    import LineStatus from '@/components/status-badge.svelte';
     import LineUri from '../fields/line-uri.svelte';
     import Labels from '../labels.svelte';
     import Uptime from '@/components/uptime.svelte';
-  import StatusBadge from '@/components/status-badge.svelte';
+    import StatusBadge from '@/components/status-badge.svelte';
 
     interface Props {
         servers: Server[];
@@ -31,9 +30,12 @@
         [...new Set(servers.map(s => s.country))].filter(Boolean)
     );
 
-    // Latest last check
-    let latestLastCheck = $derived(
-        servers.reduce((latest, s) => (!latest || s.lastCheck > latest) ? s.lastCheck : latest, '')
+    let latestLastCheck: Date | null = $derived(
+        servers.reduce((latest, s) => (!latest || (s.lastCheck && s.lastCheck > latest)) ? s.lastCheck : latest, null as Date | null)
+    );
+
+    let earliestCreatedAt: Date  = $derived(
+        servers.reduce((earliest, s) => (!earliest || s.createdAt < earliest) ? s.createdAt : earliest, new Date())
     );
 
     const navigateToIdentity = () => {
@@ -76,6 +78,9 @@
     </td>
     <td>
         <LineDate date={latestLastCheck} />
+    </td>
+    <td>
+        <LineDate date={earliestCreatedAt} />
     </td>
     <td>
         <button class='uk-button uk-button-secondary uk-button-small' onclick={(e) => { e.stopPropagation(); navigateToIdentity(); }}>Details</button>

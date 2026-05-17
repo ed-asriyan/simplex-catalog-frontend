@@ -2,17 +2,18 @@ import { atom, type WritableAtom } from 'nanostores';
 import { AbstractStore } from '../abstract-store';
 
 export interface Server {
-    uuid: string;
-    host: string;
-    identity: string;
-    protocol: 'smp' | 'xftp';
-    infoPageAvailable: boolean;
-    status: boolean;
-    uptime7: number;
-    uptime30: number;
-    uptime90: number;
-    lastCheck: string;
-    country: string;
+  uuid: string;
+  host: string;
+  identity: string;
+  protocol: 'smp' | 'xftp';
+  infoPageAvailable: boolean;
+  status: boolean;
+  uptime7: number;
+  uptime30: number;
+  uptime90: number;
+  lastCheck: Date | null;
+  country: string;
+  createdAt: Date;
 }
 
 export const getServerUri = function(server: Server): string {

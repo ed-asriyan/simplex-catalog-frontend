@@ -25,7 +25,7 @@ export interface Filter {
     uptime90?: number | undefined;
 }
 
-export type SortField = 'status' | 'host' | 'identity' | 'country' | 'protocol' | 'uptime7' | 'uptime30' | 'uptime90' | 'last_check' | 'info_page_available';
+export type SortField = 'status' | 'host' | 'identity' | 'country' | 'protocol' | 'uptime7' | 'uptime30' | 'uptime90' | 'last_check' | 'info_page_available' | 'created_at';
 export type SortOrder = 'asc' | 'desc';
 
 export interface Sort {
@@ -44,8 +44,9 @@ const parseServer = function (data: any): Server {
         uptime7: data.uptime7,
         uptime30: data.uptime30,
         uptime90: data.uptime90,
-        lastCheck: data['last_check'],
+        lastCheck: data['last_check'] ? new Date(data['last_check']) : null,
         country: data.country,
+        createdAt: new Date(data['created_at']),
     }
 };
 
@@ -130,7 +131,9 @@ export class ServersService {
 
         query = this.applyFilters(query, filter);
     
+        // Map frontend sort field to backend column name if needed
         let field: string = sort.field;
+        if (field === 'created_at') field = 'created_at';
         query = query.order(field, { ascending: sort.order === 'asc' });
 
         const start = pageSize * (pageNumber - 1);

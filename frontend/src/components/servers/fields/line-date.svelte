@@ -5,23 +5,21 @@
     import { convertUTCDateToLocalDate } from '@/utils';
 
     interface Props {
-        date: string;
+        date: Date | null;
     }
 
     let { date }: Props = $props();
 
-    let dateObj = $derived(new Date(date));
-
-    const getMoment = function (): moment.Moment {
-        return dateObj && moment(convertUTCDateToLocalDate(dateObj));
+    const getMoment = function (): moment.Moment | null {
+        return date && moment(convertUTCDateToLocalDate(date));
     };
  
-    let display: Readable<moment.Moment> = $state();
+    let display: Readable<moment.Moment | null> = $state(null);
 
     onMount(() => {
-        display = readable<moment.Moment>(getMoment(), set => {
+        display = readable<moment.Moment | null>(getMoment(), set => {
             const interval = setInterval(() => {
-                dateObj && set(getMoment());
+                date && set(getMoment());
             }, 1000);
 
             return function stop() {
@@ -33,6 +31,6 @@
 
 {#if $display}
     <span uk-tooltip={$display ? $display.format('YYYY-MM-DD hh-mm-ss') : ""}>
-        {$display?.fromNow()}
+        {$display?.fromNow() || 'never'}
     </span> 
 {/if}

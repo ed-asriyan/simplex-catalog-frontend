@@ -16,7 +16,7 @@
     import type { Item } from '@/components/timeline-plot.svelte';
     import LineUri from '../fields/line-uri.svelte';
     import ServerQrCode from '../fields/server-qrcode.svelte';
-  import StatusBadge from '@/components/status-badge.svelte';
+    import StatusBadge from '@/components/status-badge.svelte';
 
     interface Props {
         route: any;
@@ -135,6 +135,7 @@
                                             <th>Uptime</th>
                                             <th>Info</th>
                                             <th>Last Check</th>
+                                            <th>Added at</th>
                                             <th>Labels</th>
                                         </tr>
                                     </thead>
@@ -156,6 +157,7 @@
                                                 <td><Uptime servers={[server]} style="inline" /></td>
                                                 <td><LineServerInfo {server} icon={true} /></td>
                                                 <td><LineDate date={server.lastCheck} /></td>
+                                                <td><LineDate date={server.createdAt} /></td>
                                                 <td><Labels uuid={server.uuid} /></td>
                                             </tr>
                                         {/each}
