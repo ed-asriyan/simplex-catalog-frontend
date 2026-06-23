@@ -148,25 +148,25 @@ impl Database {
 
         let mut inserted_commands: Vec<String> = Vec::new();
         for command in &profile.commands {
-            let uuid = self
-                .insert_command(&inserted_profile.uuid, command)
-                .await?;
+            let uuid = self.insert_command(&inserted_profile.uuid, command).await?;
             inserted_commands.push(uuid);
         }
 
-        self.client
+        let mut delete_query = self
+            .client
             .from("bot_commands")
             .delete()
-            .not(
+            .eq("bot_profile_uuid", &inserted_profile.uuid);
+
+        if !inserted_commands.is_empty() {
+            delete_query = delete_query.not(
                 "in",
                 "uuid",
                 format!("(\"{}\")", inserted_commands.join(",")),
-            )
-            .eq("bot_profile_uuid", &inserted_profile.uuid)
-            .execute()
-            .await?
-            .text()
-            .await?;
+            );
+        }
+
+        delete_query.execute().await?.text().await?;
 
         Ok(())
     }
