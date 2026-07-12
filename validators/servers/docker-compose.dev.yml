@@ -1,10 +1,10 @@
 services:
   tor:
-    image: dperson/torproxy
+    image: ghcr.io/simonhaas/torproxy/torproxy
     command: -n
     healthcheck:
       test: ["CMD", "sh", "-c", "curl --silent --fail --socks5-hostname localhost:9050 http://example.com"]
-      interval: 10s
+      interval: 30s
       timeout: 10s
       retries: 30
 
