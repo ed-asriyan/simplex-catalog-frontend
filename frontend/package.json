@@ -17,7 +17,7 @@
 		"@mateothegreat/svelte5-router": "^2.16.19",
 		"@sentry/svelte": "^10.38.0",
 		"@supabase/supabase-js": "^2.105.4",
-		"@sveltejs/vite-plugin-svelte": "^7.1.2",
+		"@sveltejs/vite-plugin-svelte": "^7.2.0",
 		"@tsconfig/svelte": "^5.0.2",
 		"@types/d3": "^7.4.3",
 		"@types/node": "^25.9.2",
