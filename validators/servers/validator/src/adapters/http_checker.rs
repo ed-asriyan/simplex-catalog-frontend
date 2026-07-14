@@ -30,10 +30,10 @@ impl HttpChecker {
             reqwest::Client::new()
         };
 
-        let url = if is_https {
-            format!("https://{}", host_info.value)
-        } else {
-            format!("http://{}", host_info.value)
+        let scheme = if is_https { "https" } else { "http" };
+        let url = match host_info.port {
+            Some(p) => format!("{scheme}://{}:{}", host_info.value, p),
+            None => format!("{scheme}://{}", host_info.value),
         };
 
         if let Ok(response) = client
