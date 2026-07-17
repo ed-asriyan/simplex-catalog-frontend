@@ -1,21 +1,23 @@
 <script lang="ts">
     import type { Server } from '@/store/servers/servers-store';
     import type { Bot } from '@/store/bots/bots-store';
+    import type { Relay } from '@/store/relays/relays-store';
 
     interface Props {
         style: 'inline' | 'block';
         servers?: Server[];
         bot?: Bot;
+        relay?: Relay;
     }
 
-    let { servers, bot, style }: Props = $props();
+    let { servers, bot, relay, style }: Props = $props();
 
     const avg = (vals: number[]) => vals.length > 0 ? vals.reduce((a, b) => a + b, 0) / vals.length : 0;
 
     let item: { uptime7: number; uptime30: number; uptime90: number } = $derived(
         servers && servers.length > 0
             ? { uptime7: avg(servers.map(s => s.uptime7)), uptime30: avg(servers.map(s => s.uptime30)), uptime90: avg(servers.map(s => s.uptime90)) }
-            : bot as { uptime7: number; uptime30: number; uptime90: number }
+            : (bot || relay) as { uptime7: number; uptime30: number; uptime90: number }
     );
 
     const uptimeStr = function (num: number): string {

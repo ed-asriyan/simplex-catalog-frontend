@@ -4,6 +4,7 @@
     import Sponsors from './sponsors.svelte';
     import Servers from './servers/index.svelte';
     import Bots from './bots/index.svelte';
+    import Relays from './relays/index.svelte';
     import { simplexGroupLink } from '@/settings';
     import { countriesService } from '@/store/servers/countries-service';
 
@@ -19,6 +20,10 @@
         {
             path: "bots",
             component: Bots,
+        },
+        {
+            path: "relays",
+            component: Relays,
         },
         {
             path: "servers",
@@ -50,6 +55,11 @@
                             🤖 Bots
                         </a>
                     </li>
+                    <li>
+                        <a use:route={{ active: { class: 'uk-active' }}} href="/#/relays">
+                            📡 Relays
+                        </a>
+                    </li>
 
                     <!-- <li class:uk-active={location.hashPaths.single === '/channels'}>
                         <a use:route={{ active: { class: 'active' }}} href="/channels">
@@ -78,7 +88,7 @@
     <div class="uk-margin-top">
         The website is not affiliated with the SimpleX team. Content is contributed by anonymous users.
         <br />
-        Servers and bots that have been inactive for 90 days or more may be removed from the directory.
+        Servers, bots and relays that have been inactive for 90 days or more may be removed from the directory.
     </div>
     <div class="uk-margin-top">
         <span>Powered by</span>
