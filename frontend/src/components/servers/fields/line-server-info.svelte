@@ -9,8 +9,10 @@
 
     let { server, icon }: Props = $props();
 
-    let urlSchema = $derived(server.country === 'TOR' ? 'http' : 'https');
-    let url = $derived(`${urlSchema}://${server.host.split(':')[0]}`);
+    const httpCountries = ['TOR', 'YGGDRASIL'];
+
+    let urlSchema = $derived(httpCountries.includes(server.country) ? 'http' : 'https');
+    let url = $derived(`${urlSchema}://${server.host}`);
 </script>
 
 {#if server.infoPageAvailable}
