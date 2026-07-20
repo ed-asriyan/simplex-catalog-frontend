@@ -28,7 +28,7 @@ pub fn init_logger() {
 }
 
 pub fn create_command() -> Command {
-    Command::new("simplex-directory-bots-validator")
+    Command::new("simplex-catalog-bots-validator")
         .author("Ed Asriyan")
         .arg(
             Arg::new("supabase-url")

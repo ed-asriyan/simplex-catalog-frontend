@@ -1,7 +1,7 @@
-# SimpleX Directory Bots Validator
-Backend service and performs scheduled validation of bots in [SimpleX Directory](https://simplex-directory.asriyan.me).
+# SimpleX Catalog Bots Validator
+Backend service and performs scheduled validation of bots in [SimpleX Catalog](https://simplex-catalog.asriyan.me).
 
-Frontend repository: [simplex-directory-frontend](https://github.com/ed-asriyan/simplex-directory-frontend)
+Frontend repository: [simplex-catalog-frontend](https://github.com/ed-asriyan/simplex-catalog-frontend)
 
 ## How to run
 The project uses [Supabase](https://supabase.com) as storage for bots and their status history. So you should setup
@@ -11,7 +11,7 @@ are two ways to do that: [run locally](#run-locally) (e.g. if you want to self-h
 [run on GitHub Acions](#run-on-github-actions).
 
 ## Setup Supabase project
-Read [simplex-directory-supabase](https://github.com/ed-asriyan/simplex-directory-supabase)
+Read [simplex-catalog-supabase](https://github.com/ed-asriyan/simplex-catalog-supabase)
 
 ## Run locally
 1. Fill variables in [.env](./.env)

@@ -1,5 +1,5 @@
 {
-  "name": "simplex-directory-bots-validator",
+  "name": "simplex-catalog-bots-validator",
   "dockerComposeFile": [
     "../docker-compose.dev.yml"
   ],
