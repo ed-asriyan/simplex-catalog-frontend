@@ -120,6 +120,9 @@
                 </div>
                 <StatsCounters {updateFilter} {filter} />
                 <button class="uk-button uk-button-default uk-margin" onclick={addServerClick}>Add server anonymously</button>
+                <div class="uk-text-small">
+                    <a href="/#/faq" class="uk-link-muted">How to deploy your own server?</a>
+                </div>
             </div>
             <div>
                 <StatsMap {updateFilter} {filter} />

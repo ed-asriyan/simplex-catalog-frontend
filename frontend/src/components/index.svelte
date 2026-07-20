@@ -5,6 +5,7 @@
     import Servers from './servers/index.svelte';
     import Bots from './bots/index.svelte';
     import Relays from './relays/index.svelte';
+    import FAQ from './faq.svelte';
     import { simplexGroupLink } from '@/settings';
     import { countriesService } from '@/store/servers/countries-service';
 
@@ -28,6 +29,10 @@
         {
             path: "servers",
             component: Servers,
+        },
+        {
+            path: "faq",
+            component: FAQ,
         },
     ];
 
@@ -58,6 +63,11 @@
                     <li>
                         <a use:route={{ active: { class: 'uk-active' }}} href="/#/relays">
                             📡 Relays
+                        </a>
+                    </li>
+                    <li>
+                        <a use:route={{ active: { class: 'uk-active' }}} href="/#/faq">
+                            ❓ FAQ
                         </a>
                     </li>
 

@@ -107,8 +107,11 @@
             <br/>
             Here anyone can anonymously add relays to the public list. The availability of each relay is checked periodically.
         </div>
-        <div class="uk-margin-top">
+        <div class="uk-margin-top uk-margin-bottom">
             <button class="uk-button uk-button-default" onclick={addRelayClick}>Add relay anonymously</button>
+        </div>
+        <div class="uk-text-small">
+            <a href="/#/faq" class="uk-link-muted">How to deploy your own relay?</a>
         </div>
     </div>
 </div>

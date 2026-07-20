@@ -67,8 +67,8 @@
     };
 </script>
 
-<div class="uk-section uk-section-default uk-section-small">
-    <div class="uk-container uk-text-center">
+<div class="uk-section uk-section-default uk-section-small uk-text-center">
+    <div class="uk-container">
         <h2 class="uk-heading-medium">🤖 Bots</h2>
         <div>
             Discover and share community-run SimpleX bots.
@@ -77,8 +77,12 @@
         </div>
     </div>
 
-    <div class="uk-container uk-text-center uk-margin-top">
-        <button class="uk-button uk-button-default uk-margin-left uk-margin-remove-right" onclick={addBotClick}>Add bot anonymously</button>
+    <div class="uk-container uk-margin-top uk-margin-bottom">
+        <button class="uk-button uk-button-default uk-margin-remove-right" onclick={addBotClick}>Add bot anonymously</button>
+    </div>
+
+    <div class="uk-text-small">
+        <a href="/#/faq" class="uk-link-muted">How to create your own bot?</a>
     </div>
 </div>
 
