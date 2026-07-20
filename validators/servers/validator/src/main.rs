@@ -39,7 +39,7 @@ struct Args {
 }
 
 fn parse_args() -> Args {
-    let command = Command::new("simplex-directory-servers-validator")
+    let command = Command::new("simplex-catalog-servers-validator")
         .author("Ed Asriyan")
         .arg(
             Arg::new("maxmind-db-path")
