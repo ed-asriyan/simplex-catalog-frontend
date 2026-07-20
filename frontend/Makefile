@@ -1,4 +1,4 @@
-IMAGE_NAME=simplex-directory-frontend
+IMAGE_NAME=simplex-catalog-frontend
 DEV_RUN_PARAMS=--workdir /app -v .:/app --rm -it
 DEV_INSTALL_COMMAND=npm ci
 CI_RUN_PARAMS=--workdir /app -v .:/app --rm
