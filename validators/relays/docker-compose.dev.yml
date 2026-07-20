@@ -1,4 +1,4 @@
-name: simplex-directory-relays-validator-dev
+name: simplex-catalog-relays-validator-dev
 services:
   tor:
     image: ghcr.io/simonhaas/torproxy/torproxy

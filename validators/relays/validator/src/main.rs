@@ -39,7 +39,7 @@ struct Args {
 }
 
 fn parse_args() -> Args {
-    let command = Command::new("simplex-directory-relays-validator")
+    let command = Command::new("simplex-catalog-relays-validator")
         .author("Ed Asriyan")
         .arg(
             Arg::new("smp-client-ws-url")

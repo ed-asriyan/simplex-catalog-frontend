@@ -1,5 +1,5 @@
 {
-  "name": "simplex-directory-servers-validator",
+  "name": "simplex-catalog-servers-validator",
   "dockerComposeFile": [
     "../docker-compose.dev.yml"
   ],

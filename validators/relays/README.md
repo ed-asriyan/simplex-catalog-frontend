@@ -1,11 +1,11 @@
-# SimpleX Directory Relays Validator
-Backend service and performs scheduled validation of relays in [SimpleX Directory](https://simplex-directory.asriyan.me/#/relays).
+# SimpleX Catalog Relays Validator
+Backend service and performs scheduled validation of relays in [SimpleX Catalog](https://simplex-catalog.asriyan.me/#/relays).
 
-Frontend repository: [simplex-directory-frontend](https://github.com/ed-asriyan/simplex-directory-frontend)
+Frontend repository: [simplex-catalog-frontend](https://github.com/ed-asriyan/simplex-catalog-frontend)
 
 ## How to run
 The project uses [Supabase](https://supabase.com) as storage for servers and their status history. So you should setup
-Supabase project first as described [here](https://github.com/ed-asriyan/simplex-directory-supabase). When the project is up and running, you should setup a validator which will go through servers list in the database and write status history by schedule. There are two ways to do that: [run locally](#run-locally) (e.g. if you want to self-host it); or [run on GitHub Acions](#run-on-github-actions).
+Supabase project first as described [here](https://github.com/ed-asriyan/simplex-catalog-supabase). When the project is up and running, you should setup a validator which will go through servers list in the database and write status history by schedule. There are two ways to do that: [run locally](#run-locally) (e.g. if you want to self-host it); or [run on GitHub Acions](#run-on-github-actions).
 
 ## Run locally
 1. Fill variables in [.env](./.env)
