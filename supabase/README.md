@@ -1,5 +1,5 @@
-# SimpleX Directory Supabase
-This is database and backend service for https://simplex-directory.asriyan.me.
+# SimpleX Catalog Supabase
+This is database and backend service for https://simplex-catalog.asriyan.me.
 
 # How to run locally
 ## Recommended: Use Dev Container
