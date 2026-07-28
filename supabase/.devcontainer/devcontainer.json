@@ -3,7 +3,7 @@
 	"name": "Supabase CLI",
 	"image": "mcr.microsoft.com/devcontainers/base:bookworm",
 	"features": {
-		"ghcr.io/devcontainers-extra/features/supabase-cli:1": {},
+		"ghcr.io/devcontainers/features/node:1": {},
 		"ghcr.io/devcontainers/features/docker-in-docker:2": {}
 	},
 	"forwardPorts": [
@@ -18,5 +18,6 @@
       "label": "Supabase Studio"
     }
   },
+  "postCreateCommand": "npm install -g supabase",
   "postStartCommand": "supabase start && (supabase functions serve &)"
 }
