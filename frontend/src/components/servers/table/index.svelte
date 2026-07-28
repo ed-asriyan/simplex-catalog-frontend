@@ -312,12 +312,12 @@
                                             </button>
                                         {/each}
                                     </div>
-                                    {#if pageNumber !== 1}
+                                    {#if pageNumber > 1}
                                         <button class="uk-button uk-button-default" onclick={() => changePage(pageCount, pageNumber - 1)}>
                                             ← Previous page
                                         </button>
                                     {/if}
-                                    {#if pageNumber !== pageCount}
+                                    {#if pageNumber < pageCount}
                                         <button class="uk-button uk-button-default" onclick={() => changePage(pageCount, pageNumber + 1)}>
                                             Next page →
                                         </button>
