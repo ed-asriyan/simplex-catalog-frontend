@@ -25,6 +25,7 @@
         setQueryParam(route, {
             filterStatus: newFilter.status === undefined ? '' : newFilter.status ? 'true' : 'false',
             q: newFilter.text || '',
+            pageNumber: '1',
         });
     };
 
@@ -33,9 +34,23 @@
       order: "desc",
     };
 
+    let pageNumber: number = $derived(+params.pageNumber || 1);
+    let pageSize: number = $derived(+params.pageSize || 12);
+    
+    let totalCountStore = $derived(botsStore.totalCount);
+    let totalCount: number = $derived($totalCountStore);
+    let pageCount: number = $derived(Math.ceil(totalCount / pageSize) || 1);
+
+    const changePage = function (newPage: number) {
+        if (newPage < 1 || newPage > pageCount) return;
+        setQueryParam(route, {
+            'pageNumber': String(newPage),
+        });
+    };
+
     let currentPageUuids: Promise<string[]> = $derived(
         botsService
-            .fetch(filter, sort, 10, 1)
+            .fetch(filter, sort, pageSize, pageNumber)
     );
     let currentPageBots: Promise<Bot[]> = $derived(
         currentPageUuids.then(
@@ -162,6 +177,32 @@
             {#if currentPageBots.length === 0}
                 <p class="uk-text-center">No bots found.</p>
             {/if}
+            {#if totalCount > 0}
+                <div class="uk-flex uk-flex-middle uk-flex-center uk-margin-large-top uk-flex-column uk-text-center pages">
+                    <div class="uk-margin-bottom">
+                        Total bots matching filters: {totalCount}
+                    </div>
+                    <div>
+                        <div class="uk-margin-bottom">
+                            {#each Array.from({ length: pageCount }, (_, i) => i + 1) as page}
+                                <button class="uk-button uk-button-default uk-button-small uk-margin-small-right" class:uk-button-secondary={page === pageNumber} onclick={() => changePage(page)}>
+                                    {page}
+                                </button>
+                            {/each}
+                        </div>
+                        {#if pageNumber > 1}
+                            <button class="uk-button uk-button-default uk-margin-small-right" onclick={() => changePage(pageNumber - 1)}>
+                                ← Previous page
+                            </button>
+                        {/if}
+                        {#if pageNumber < pageCount}
+                            <button class="uk-button uk-button-default" onclick={() => changePage(pageNumber + 1)}>
+                                Next page →
+                            </button>
+                        {/if}
+                    </div>
+                </div>
+            {/if}
         {:catch error}
             <p class="uk-text-center uk-text-danger">Error loading bots: {error.message}</p>
         {/await}
@@ -171,5 +212,9 @@
 <style lang="scss">
     .uk-card-body {
         white-space: pre-line;
+    }
+    .pages {
+        width: 100%;
+        max-width: 100vw;
     }
 </style>
