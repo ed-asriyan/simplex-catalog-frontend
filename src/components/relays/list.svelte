@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { onMount } from "svelte";
     import moment from "moment";
     import { relaysService, type Filter, type Sort } from '@/store/relays/relays-service';
     import { relaysStore, type Relay } from '@/store/relays/relays-store';
@@ -18,16 +19,34 @@
 
     let params = $derived(route.result.querystring.params);
 
+    const generateFilter = function (params: any): Filter {
+        return {
+            status: params?.filterStatus === 'true' ? true : params?.filterStatus === 'false' ? false : params?.filterStatus === 'any' ? undefined : undefined,
+            url: params?.filterUrl || undefined,
+            name: params?.filterName || undefined,
+            uptime7: +params?.filterUptime7 / 100 || undefined,
+            uptime30: +params?.filterUptime30 / 100 || undefined,
+            uptime90: +params?.filterUptime90 / 100 || undefined,
+        };
+    };
+
+    const defaultFilter: Filter = { status: true };
+
+    onMount(() => {
+        const generatedFilter = generateFilter(params);
+        if (Object.values(generatedFilter || {}).filter(x => x !== undefined).length === 0) {
+            const stored = JSON.parse(localStorage.getItem('relaysFilter') || 'null') as Filter | null;
+            setFilter(stored && Object.values(stored).some(x => x !== undefined) ? stored : defaultFilter);
+        }
+    });
+
     let filter: Filter = $derived({
-        status: params?.filterStatus === 'true' ? true : params?.filterStatus === 'false' ? false : params?.filterStatus === 'any' ? undefined : true,
-        url: params?.filterUrl || undefined,
-        name: params?.filterName || undefined,
-        uptime7: +params?.filterUptime7 / 100 || undefined,
-        uptime30: +params?.filterUptime30 / 100 || undefined,
-        uptime90: +params?.filterUptime90 / 100 || undefined,
+        ...defaultFilter,
+        ...generateFilter(params),
     });
 
     const setFilter = function (newFilter: Filter) {
+        localStorage.setItem('relaysFilter', JSON.stringify(newFilter));
         setQueryParam(route, {
             filterStatus: newFilter.status === undefined ? 'any' : newFilter.status ? 'true' : 'false',
             filterUrl: newFilter.url || '',
