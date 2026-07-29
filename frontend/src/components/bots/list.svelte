@@ -1,5 +1,6 @@
 
 <script lang="ts">
+    import { onMount } from "svelte";
     import moment from "moment";
     import { botsService, type Filter, type Sort } from '@/store/bots/bots-service';
     import { botsStore, type Bot } from '@/store/bots/bots-store';
@@ -16,14 +17,32 @@
 
     let params = $derived(route.result.querystring.params);
 
+    const generateFilter = function (params: any): Filter {
+        return {
+            status: params?.filterStatus === 'true' ? true : params?.filterStatus === 'false' ? false : params?.filterStatus === 'any' ? undefined : undefined,
+            text: params?.q || undefined,
+        };
+    };
+
+    const defaultFilter: Filter = { status: true };
+
+    onMount(() => {
+        const generatedFilter = generateFilter(params);
+        if (Object.values(generatedFilter || {}).filter(x => x !== undefined).length === 0) {
+            const stored = JSON.parse(localStorage.getItem('botsFilter') || 'null') as Filter | null;
+            setFilter(stored && Object.values(stored).some(x => x !== undefined) ? stored : defaultFilter);
+        }
+    });
+
     let filter: Filter = $derived({
-        status: params?.filterStatus === 'true' ? true : params?.filterStatus === 'false' ? false : undefined,
-        text: params?.q,
+        ...defaultFilter,
+        ...generateFilter(params),
     });
 
     const setFilter = function (newFilter: Filter) {
+        localStorage.setItem('botsFilter', JSON.stringify(newFilter));
         setQueryParam(route, {
-            filterStatus: newFilter.status === undefined ? '' : newFilter.status ? 'true' : 'false',
+            filterStatus: newFilter.status === undefined ? 'any' : newFilter.status ? 'true' : 'false',
             q: newFilter.text || '',
             pageNumber: '1',
         });
@@ -121,8 +140,8 @@
                     <input class="uk-search-input" type="search" placeholder="Search" aria-label="Search" value={_searchText} onkeyup={delay(e => onSearch(e.target.value), 1500)}>
                 </span>
             </form>
-            <select class="uk-width-auto@m uk-width-1-1@s uk-select uk-form-width-small uk-margin-left" value={filter.status?.toString() || ''} onchange={e => setFilter({ ...filter, status: e.target.value === '' ? undefined : e.target.value === 'true' })}>
-                <option value="">All</option>
+            <select class="uk-width-auto@m uk-width-1-1@s uk-select uk-form-width-small uk-margin-left" value={filter.status === undefined ? 'any' : filter.status.toString()} onchange={e => setFilter({ ...filter, status: e.target.value === 'any' ? undefined : e.target.value === 'true' })}>
+                <option value="any">All</option>
                 <option value="true">Online</option>
                 <option value="false">Offline</option>
             </select>
