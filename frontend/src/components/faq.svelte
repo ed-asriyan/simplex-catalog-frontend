@@ -35,6 +35,24 @@
                     <a href="https://github.com/simplex-chat/simplex-chat/tree/stable/bots#readme" target="_blank">Official guide: Bot</a>
                 </div>
             </li>
+            <li class="uk-open">
+                <a class="uk-accordion-title" href="#">I submitted a bot but it didn't appear<span uk-accordion-icon></span></a>
+                <div class="uk-accordion-content">
+                    <ol>
+                        <li>
+                            Ensure that the bot's <a href="https://github.com/simplex-chat/simplex-chat/blob/stable/bots/api/TYPES.md#chatpeertype" target="_blank">ChatPeerType</a> is <code>bot</code>. If it's not set or is <code>human</code>, the bot won't appear.
+                            <br/>
+                            <i>Note: This prevents regular user contacts from appearing in the catalog.</i>
+                        </li>
+                        <li>
+                            Wait up to 12 hours for the bot to appear in the catalog.
+                        </li>
+                        <li>
+                            If the bot hasn't appeared after 12 hours, check if the bot is online and the submitted contact link is active. If it's online and the contact link is active, please submit <a href="https://github.com/ed-asriyan/simplex-catalog-bots-validator/issues/new" target="_blank">a bug report</a>.
+                        </li>
+                    </ol>
+                </div>
+            </li>
         </ul>
     </div>
 </div>
