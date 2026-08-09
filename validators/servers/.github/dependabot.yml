@@ -39,3 +39,13 @@ updates:
       - dependency-name: "*"
         update-types:
           - "version-update:semver-patch"
+
+  - package-ecosystem: "devcontainers"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 1
+    ignore:
+      - dependency-name: "*"
+        update-types:
+          - version-update:semver-patch
