@@ -184,7 +184,7 @@ Deno.serve(async (req) => {
   switch (ctx.validationStatus) {
     case ValidationStatus.InvalidProtocol:
       logError('Invalid protocol', ctx);
-      return createResponse(400, { status: 2, error: 'URL must use HTTPS protocol' });
+      return createResponse(400, { status: 2, error: 'URL has invalid format. Schema must be HTTPS' });
     case ValidationStatus.NotBotAddress:
       logError('Not a bot address', ctx);
       return createResponse(400, { status: 3, error: 'URL is not a bot address' });
@@ -193,7 +193,7 @@ Deno.serve(async (req) => {
       return createResponse(400, { status: 4, error: 'Hostname is not allowed' });
     case ValidationStatus.InvalidContactData:
       logError('Invalid contact data', ctx);
-      return createResponse(400, { status: 6, error: 'Invalid contact data in URL' });
+      return createResponse(400, { status: 6, error: 'URL has invalid format. Invalid contact data.' });
   }
 
   // never should happen, but just in case
