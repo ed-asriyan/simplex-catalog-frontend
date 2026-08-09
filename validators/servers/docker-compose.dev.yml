@@ -16,7 +16,7 @@ services:
       - /dev/net/tun:/dev/net/tun
     environment:
       # Space-separated list of Yggdrasil peer URIs, e.g. "tcp://host1:port tcp://host2:port"
-      - YGGDRASIL_PEERS=tls://ygg.jjolly.dev:3443 tls://mo.us.ygg.triplebit.org:993 tls://ygg.mnpnk.com:443
+      - YGGDRASIL_PEERS=tcp://ygg1.asriyan.me:23672 tls://mo.us.ygg.triplebit.org:993 tls://ygg.mnpnk.com:443
     healthcheck:
       test: ["CMD", "sh", "-c", "curl --silent --fail http://[21e:a51c:885b:7db0:166e:927:98cd:d186]/"] # Yggdrasil Web directory
       interval: 5s
