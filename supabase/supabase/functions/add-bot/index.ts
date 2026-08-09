@@ -79,9 +79,13 @@ const validateUrl = function (url: URL): ValidationStatus {
   }
 
   if (url.pathname === '/a') {
-    const keyBase64 = url.hash.slice(1);
-    const key = decodeBase64Url(keyBase64);
-    return key.length === INVITATION_CODE_LENGTH ? ValidationStatus.Valid : ValidationStatus.InvalidContactData;
+    try {
+      const keyBase64 = url.hash.slice(1);
+      const key = decodeBase64Url(keyBase64);
+      return key.length === INVITATION_CODE_LENGTH ? ValidationStatus.Valid : ValidationStatus.InvalidContactData;
+    } catch {
+      return ValidationStatus.InvalidContactData;
+    }
   } else if (url.pathname === '/contact') {
     const hashParams = new URLSearchParams(url.hash.slice(2));
 
