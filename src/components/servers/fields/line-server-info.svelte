@@ -9,7 +9,7 @@
 
     let { server, icon }: Props = $props();
 
-    const httpCountries = ['TOR', 'YGGDRASIL'];
+    const httpCountries = ['TOR', 'YGGDRASIL', 'I2P'];
 
     let urlSchema = $derived(httpCountries.includes(server.country) ? 'http' : 'https');
     let url = $derived(`${urlSchema}://${server.host}`);

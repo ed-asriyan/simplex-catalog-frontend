@@ -40,6 +40,9 @@ export const getFlagEmoji = function (countryCode: string): string {
     if (countryCode === 'YGGDRASIL') {
         return '🌿';
     }
+    if (countryCode === 'I2P') {
+        return '🧄';
+    }
     const codePoints = countryCode
       .toUpperCase()
       .split('')

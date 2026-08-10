@@ -16,6 +16,8 @@
                 return 'TOR';
             case 'YGGDRASIL':
                 return 'Yggdrasil';
+            case 'I2P':
+                return 'I2P';
             default:
                 return country && countryCodeToName(country);
         }
