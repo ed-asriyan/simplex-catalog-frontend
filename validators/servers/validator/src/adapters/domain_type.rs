@@ -3,6 +3,7 @@ use std::net::{IpAddr, SocketAddr};
 pub enum Type {
     Clearnet,
     Onion,
+    I2p,
     Yggdrasil,
 }
 
@@ -14,6 +15,10 @@ pub struct Host {
 
 fn is_onion(host: &str) -> bool {
     host.ends_with(".onion")
+}
+
+fn is_i2p(host: &str) -> bool {
+    host.ends_with(".i2p")
 }
 
 fn is_yggdrasil(ip: &IpAddr) -> bool {
@@ -56,7 +61,9 @@ fn get_port_from_authority(authority: &str) -> Option<u16> {
         return None;
     }
     // domain:port or ipv4:port
-    authority.rsplit_once(':').and_then(|(_, p)| p.parse::<u16>().ok())
+    authority
+        .rsplit_once(':')
+        .and_then(|(_, p)| p.parse::<u16>().ok())
 }
 
 fn get_ip_from_authority(authority: &str) -> Option<IpAddr> {
@@ -82,6 +89,14 @@ pub fn parse_origin(authority: &str) -> Host {
     if is_onion(host) {
         return Host {
             domain_type: Type::Onion,
+            value: host.to_string(),
+            port,
+        };
+    }
+
+    if is_i2p(host) {
+        return Host {
+            domain_type: Type::I2p,
             value: host.to_string(),
             port,
         };
@@ -172,5 +187,21 @@ mod tests {
         let h = parse_origin("abc.onion:9000");
         assert_eq!(h.value, "abc.onion");
         assert_eq!(h.port, Some(9000));
+    }
+
+    #[test]
+    fn test_i2p_no_port() {
+        let h = parse_origin("abc.b32.i2p");
+        assert_eq!(h.value, "abc.b32.i2p");
+        assert_eq!(h.port, None);
+        assert!(matches!(h.domain_type, Type::I2p));
+    }
+
+    #[test]
+    fn test_i2p_with_port() {
+        let h = parse_origin("abc.b32.i2p:443");
+        assert_eq!(h.value, "abc.b32.i2p");
+        assert_eq!(h.port, Some(443));
+        assert!(matches!(h.domain_type, Type::I2p));
     }
 }

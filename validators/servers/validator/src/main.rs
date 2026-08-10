@@ -35,7 +35,7 @@ struct Args {
     maxmind_db_path: String,
     supabase_url: String,
     supabase_key: String,
-    tor_socks5_proxy: String,
+    socks5_proxy: String,
 }
 
 fn parse_args() -> Args {
@@ -74,10 +74,10 @@ fn parse_args() -> Args {
                 .required(true),
         )
         .arg(
-            Arg::new("tor-socks5-proxy")
-                .long("tor-socks5-proxy")
+            Arg::new("socks5-proxy")
+                .long("socks5-proxy")
                 .value_name("URL")
-                .help("Sets the Tor SOCKS5 proxy. Example: socks5h://localhost:9050")
+                .help("Sets the SOCKS5 proxy to gateway. Example: socks5h://localhost:1080")
                 .num_args(1)
                 .required(true),
         )
@@ -115,8 +115,8 @@ fn parse_args() -> Args {
     let maxmind_db_path = command
         .get_one::<String>("maxmind-db-path")
         .expect("required argument");
-    let tor_socks5_proxy = command
-        .get_one::<String>("tor-socks5-proxy")
+    let socks5_proxy = command
+        .get_one::<String>("socks5-proxy")
         .expect("required argument");
 
     Args {
@@ -126,7 +126,7 @@ fn parse_args() -> Args {
         supabase_url: supabase_url.clone(),
         supabase_key: supabase_key.clone(),
         maxmind_db_path: maxmind_db_path.clone(),
-        tor_socks5_proxy: tor_socks5_proxy.clone(),
+        socks5_proxy: socks5_proxy.clone(),
     }
 }
 
@@ -146,7 +146,7 @@ async fn main() {
         args.dry,
     );
     let servers_checker = adapters::servers_checker::ServersChecker::new(args.smp_server_uri);
-    let http_checker = http_checker::HttpChecker::new(args.tor_socks5_proxy.clone());
+    let http_checker = http_checker::HttpChecker::new(args.socks5_proxy.clone());
     let geoip =
         adapters::geoip::GeoIp::new(&args.maxmind_db_path).expect("Cannot initialize GeoIP");
 

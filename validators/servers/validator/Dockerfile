@@ -26,7 +26,7 @@ ENV SUPABASE_KEY=
 ENV SMP_CLIENT_URI=
 ENV DRY=
 ENV RETRY_COUNT=
-ENV TOR_SOCKS5_PROXY=
+ENV SOCKS5_PROXY=
 
 CMD ./validator \
     --maxmind-db-path GeoLite2-Country.mmdb \
@@ -34,5 +34,5 @@ CMD ./validator \
     --supabase-key $SUPABASE_KEY \
     --smp-client-ws-url $SMP_CLIENT_URI \
     --retry-count $RETRY_COUNT \
-    --tor-socks5-proxy $TOR_SOCKS5_PROXY \
+    --socks5-proxy $SOCKS5_PROXY \
     $( [ -n "$DRY" ] && echo "--dry" )

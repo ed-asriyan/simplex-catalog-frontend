@@ -8,6 +8,16 @@ services:
       timeout: 10s
       retries: 30
 
+  i2pd:
+    image: purplei2p/i2pd:latest-release
+    command: --httpproxy.address=0.0.0.0 --httpproxy.port=4444
+    user: root
+    healthcheck:
+      test: ["CMD", "sh", "-c", "curl --silent --proxy http://localhost:4444 http://proxy.i2p/ | grep -qi 'I2Pd HTTP proxy'"]
+      interval: 10s
+      timeout: 10s
+      retries: 60
+
   yggdrasil:
     build: yggdrasil
     cap_add:
@@ -19,9 +29,20 @@ services:
       - YGGDRASIL_PEERS=tcp://ygg1.asriyan.me:23672 tls://mo.us.ygg.triplebit.org:993 tls://ygg.mnpnk.com:443
     healthcheck:
       test: ["CMD", "sh", "-c", "curl --silent --fail http://[21e:a51c:885b:7db0:166e:927:98cd:d186]/"] # Yggdrasil Web directory
-      interval: 5s
-      timeout: 2s
+      interval: 10s
+      timeout: 10s
       retries: 10
+
+  gateway:
+    build: gateway
+    network_mode: "service:yggdrasil"
+    depends_on:
+      yggdrasil:
+        condition: service_healthy
+      tor:
+        condition: service_healthy
+      i2pd:
+        condition: service_started
 
   smp-client:
     build: smp-client
@@ -29,8 +50,10 @@ services:
     depends_on:
       yggdrasil:
         condition: service_healthy
-      tor:
-        condition: service_healthy
+      gateway:
+        condition: service_started
+    environment:
+      - SOCKS5_PROXY=127.0.0.1:1080
     healthcheck:
       test: ["CMD", "nc", "-z", "127.0.0.1", "80"]
       interval: 5s
@@ -45,14 +68,14 @@ services:
       - .env
     environment:
       - SMP_CLIENT_URI=ws://localhost:80
-      - TOR_SOCKS5_PROXY=socks5h://tor:9050
+      - SOCKS5_PROXY=socks5h://localhost:1080
       # - SUPABASE_URL=<to be filled in .env>
       # - SUPABASE_KEY=<to be filled in .env>
     depends_on:
       smp-client:
         condition: service_healthy
-      tor:
-        condition: service_healthy
+      gateway:
+        condition: service_started
     network_mode: "service:smp-client"
     working_dir: /workspace
     volumes:

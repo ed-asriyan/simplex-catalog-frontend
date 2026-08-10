@@ -56,6 +56,7 @@ impl GeoIp {
 
         match host.domain_type {
             Type::Onion => Ok("TOR".to_string()),
+            Type::I2p => Ok("I2P".to_string()),
             Type::Yggdrasil => Ok("YGGDRASIL".to_string()),
             Type::Clearnet => {
                 let ip: IpAddr = if is_ip_address(host.value.as_str()) {
