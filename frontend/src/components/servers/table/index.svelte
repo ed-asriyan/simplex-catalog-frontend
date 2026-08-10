@@ -122,8 +122,12 @@
     let countriesFilterValues = $derived(filter.countries?.values || []);
     let countries = $derived(countriesStore.allCountries);
     let countriesSorted = $derived(Array.from($countries).filter(x => x).sort((a, b) => {
-        if (['TOR', 'YGGDRASIL'].includes(a)) return -1;
-        if (['TOR', 'YGGDRASIL'].includes(b)) return 1;
+        const special = ['TOR', 'YGGDRASIL', 'I2P'];
+        const aIndex = special.indexOf(a);
+        const bIndex = special.indexOf(b);
+        if (aIndex !== -1 && bIndex !== -1) return aIndex - bIndex;
+        if (aIndex !== -1) return -1;
+        if (bIndex !== -1) return 1;
         return countryCodeToName(a).localeCompare(countryCodeToName(b));
     }));
 
