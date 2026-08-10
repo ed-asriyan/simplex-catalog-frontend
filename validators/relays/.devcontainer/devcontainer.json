@@ -5,7 +5,6 @@
   ],
   "workspaceFolder": "/workspace",
   "service": "validator",
-  "overrideCommand": false,
   "customizations": {
     "vscode": {
       "extensions": [
@@ -18,5 +17,6 @@
       }
     }
   },
-  "postCreateCommand": "rustup component add clippy rustfmt"
+  "postCreateCommand": "rustup component add clippy rustfmt",
+  "overrideCommand": true
 }
