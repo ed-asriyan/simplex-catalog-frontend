@@ -24,6 +24,12 @@ services:
       - NET_ADMIN
     devices:
       - /dev/net/tun:/dev/net/tun
+    dns:
+      - "1.1.1.1"
+      - "8.8.8.8"
+      - "308:c8:48:45::"
+      - "324:71e:281a:9ed3::53"
+      - "300:7c75:d590:c5d8::100"
     environment:
       # Space-separated list of Yggdrasil peer URIs, e.g. "tcp://host1:port tcp://host2:port"
       - YGGDRASIL_PEERS=tcp://ygg1.asriyan.me:23672 tls://mo.us.ygg.triplebit.org:993 tls://ygg.mnpnk.com:443
