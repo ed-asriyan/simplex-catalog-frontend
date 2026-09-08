@@ -62,7 +62,7 @@ impl Database {
         let response = self
             .client
             .from("bots")
-            .select("*")
+            .select("uuid,address")
             .execute()
             .await?
             .text()
