@@ -8,9 +8,10 @@ export interface Server {
   protocol: 'smp' | 'xftp';
   infoPageAvailable: boolean;
   status: boolean;
-  uptime7: number;
-  uptime30: number;
-  uptime90: number;
+  // null when there's no status check within that window (not the same as 0% uptime)
+  uptime7: number | null;
+  uptime30: number | null;
+  uptime90: number | null;
   lastCheck: Date | null;
   country: string;
   createdAt: Date;
