@@ -63,7 +63,7 @@
                             <h3 class="uk-card-title uk-margin-remove-bottom uk-text-bold">
                                 {$relay.name}
                                 &nbsp;
-                                <StatusBadge items={[ $relay ]} />
+                                <StatusBadge status={$relay.status} />
                             </h3>
                             <div class="uk-text-meta uk-margin-remove-top">
                                 {#if $relay.lastCheck}

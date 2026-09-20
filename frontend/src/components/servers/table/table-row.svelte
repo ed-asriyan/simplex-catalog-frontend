@@ -11,79 +11,53 @@
     import StatusBadge from '@/components/status-badge.svelte';
 
     interface Props {
-        servers: Server[];
+        server: Server;
         selected: boolean;
         onSelect?: () => {};
     }
 
-    let { servers, selected, onSelect }: Props = $props();
+    let { server, selected, onSelect }: Props = $props();
 
-    let identity = $derived(servers[0]?.identity || '');
-
-    // Deduplicated protocols
-    let uniqueProtocols = $derived(
-        [...new Set(servers.map(s => s.protocol))] as ('smp' | 'xftp')[]
-    );
-
-    // Deduplicated countries
-    let uniqueCountries = $derived(
-        [...new Set(servers.map(s => s.country))].filter(Boolean)
-    );
-
-    let latestLastCheck: Date | null = $derived(
-        servers.reduce((latest, s) => (!latest || (s.lastCheck && s.lastCheck > latest)) ? s.lastCheck : latest, null as Date | null)
-    );
-
-    let earliestCreatedAt: Date  = $derived(
-        servers.reduce((earliest, s) => (!earliest || s.createdAt < earliest) ? s.createdAt : earliest, new Date())
-    );
-
-    const navigateToIdentity = () => {
-        goto(`/#/servers/identity/${encodeURIComponent(identity)}`);
+    const navigateToServer = () => {
+        goto(`/#/servers/${encodeURIComponent(server.uuid)}`);
     };
 </script>
 
-<tr class='uk-text-small cursor' class:uk-text-danger={servers.some(s => !s.status)} onclick={navigateToIdentity}>
+<tr class='uk-text-small cursor' class:uk-text-danger={!server.status} onclick={navigateToServer}>
     <td onclick={(e) => e.stopPropagation()}>
         <input type='checkbox' checked={selected} onclick={onSelect} />
     </td>
     <td onclick={(e) => e.stopPropagation()}>
-        <Labels uuids={servers.map(s => s.uuid)} />
+        <Labels uuid={server.uuid} />
     </td>
     <td>
-        {#each uniqueProtocols as protocol (protocol)}
-            <div><LineProtocol {protocol} /></div>
-        {/each}
+        <LineProtocol protocol={server.protocol} />
     </td>
     <td>
         <span onclick={(e) => e.stopPropagation()}>
-            <LineUri {servers} />
+            <LineUri {server} />
         </span>
     </td>
     <td>
-        {#each uniqueCountries as country (country)}
-            <div><LineCountry {country} /></div>
-        {/each}
+        <LineCountry country={server.country} />
+    </td>
+    <td onclick={(e) => e.stopPropagation()}>
+        <LineServerInfo {server} icon={true} />
     </td>
     <td>
-        {#each servers as server (server.uuid)}
-            <div onclick={(e) => e.stopPropagation()}><LineServerInfo {server} icon={true} /></div>
-        {/each}
+        <StatusBadge status={server.status} />
     </td>
     <td>
-        <StatusBadge items={servers} />
+        <Uptime {server} style="inline" />
     </td>
     <td>
-        <Uptime {servers} style="inline" />
+        <LineDate date={server.lastCheck} />
     </td>
     <td>
-        <LineDate date={latestLastCheck} />
+        <LineDate date={server.createdAt} />
     </td>
     <td>
-        <LineDate date={earliestCreatedAt} />
-    </td>
-    <td>
-        <button class='uk-button uk-button-secondary uk-button-small' onclick={(e) => { e.stopPropagation(); navigateToIdentity(); }}>Details</button>
+        <button class='uk-button uk-button-secondary uk-button-small' onclick={(e) => { e.stopPropagation(); navigateToServer(); }}>Details</button>
     </td>
 </tr>
 

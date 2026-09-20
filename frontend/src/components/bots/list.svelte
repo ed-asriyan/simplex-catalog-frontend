@@ -240,7 +240,7 @@
                       {bot.name}
                     </h3>
                     {#if !bot.status}
-                      <StatusBadge items={[bot]} />
+                      <StatusBadge status={bot.status} />
                     {/if}
                     {#if bot.lastCheck}
                       <p class="uk-text-meta uk-margin-remove-top">

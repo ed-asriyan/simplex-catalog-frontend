@@ -16,7 +16,7 @@ export interface Filter {
     status?: boolean | 'unknown' | undefined;
     countries?: FilterArray | undefined;
     identity?: string | undefined;
-    identityExact?: string | undefined;
+    uuid?: string | undefined;
     infoPageAvailable?: boolean | undefined;
     host?: string | undefined;
     protocol?: 'smp' | 'xftp' | undefined;
@@ -50,6 +50,73 @@ const parseServer = function (data: any): Server {
     }
 };
 
+const applyFilters = function (query: any, filter: Filter): any {
+    if (filter.uuid) {
+        query = query.eq('uuid', filter.uuid);
+    }
+
+    if (filter.status !== undefined) {
+        if (filter.status === 'unknown') {
+            query = query.is('status', null);
+        } else {
+            query = query.eq('status', filter.status);
+        }
+    }
+
+    if (filter.labels) {
+        const uuids: string[] = filter.labels.values.reduce((acc, label) => {
+            return [...acc, ...Array.from(get(labelsStore)[label]) as string[]];
+        }, [] as string[]);
+        if (filter.labels.inclusive) {
+            query = query.in('uuid', uuids);
+        } else {
+            for (const uuid of uuids) {
+                query.neq('uuid', uuid);
+            }
+        }
+    }
+
+    if (filter.identity) {
+        query = query.like('identity', `%${filter.identity}%`);
+    }
+
+    if (filter.host) {
+        query = query.like('host', `%${filter.host}%`);
+    }
+
+    if (filter.countries) {
+        if (filter.countries.inclusive) {
+            query = query.in('country', filter.countries.values);
+        } else {
+            for (const uuid of filter.countries.values) {
+                query.neq('country', uuid);
+            }
+        }
+    }
+
+    if (filter.protocol) {
+        query = query.eq('protocol', filter.protocol === 'smp' ? 1 : 2);
+    }
+
+    if (filter.infoPageAvailable !== undefined) {
+        query = query.eq('info_page_available', filter.infoPageAvailable);
+    }
+
+    if (filter.uptime7) {
+        query = query.gte('uptime7', filter.uptime7);
+    }
+
+    if (filter.uptime30) {
+        query = query.gte('uptime30', filter.uptime30);
+    }
+
+    if (filter.uptime90) {
+        query = query.gte('uptime90', filter.uptime90);
+    }
+
+    return query;
+}
+
 export class ServersService {
     private readonly client: SupabaseClient;
     private readonly store: ServersStore;
@@ -58,78 +125,11 @@ export class ServersService {
         this.client = client;
         this.store = store;
     }
-
-    private applyFilters(query: any, filter: Filter, applyIdentity: boolean = true): any {
-        if (filter.status !== undefined) {
-            if (filter.status === 'unknown') {
-                query = query.is('status', null);
-            } else {
-                query = query.eq('status', filter.status);
-            }
-        }
-
-        if (filter.labels) {
-            const uuids: string[] = filter.labels.values.reduce((acc, label) => {
-                return [...acc, ...Array.from(get(labelsStore)[label]) as string[]];
-            }, [] as string[]);
-            if (filter.labels.inclusive) {
-                query = query.in('uuid', uuids);
-            } else {
-                for (const uuid of uuids) {
-                    query.neq('uuid', uuid);
-                }
-            }
-        }
-
-        if (applyIdentity) {
-            if (filter.identityExact) {
-                query = query.eq('identity', filter.identityExact);
-            } else if (filter.identity) {
-                query = query.like('identity', `%${filter.identity}%`);
-            }
-        }
-
-        if (filter.host) {
-            query = query.like('host', `%${filter.host}%`);
-        }
-
-        if (filter.countries) {
-            if (filter.countries.inclusive) {
-                query = query.in('country', filter.countries.values);
-            } else {
-                for (const uuid of filter.countries.values) {
-                    query.neq('country', uuid);
-                }
-            }
-        }
-
-        if (filter.protocol) {
-            query = query.eq('protocol', filter.protocol === 'smp' ? 1 : 2);
-        }
-
-        if (filter.infoPageAvailable !== undefined) {
-            query = query.eq('info_page_available', filter.infoPageAvailable);
-        }
-
-        if (filter.uptime7) {
-            query = query.gte('uptime7', filter.uptime7);
-        }
-
-        if (filter.uptime30) {
-            query = query.gte('uptime30', filter.uptime30);
-        }
-
-        if (filter.uptime90) {
-            query = query.gte('uptime90', filter.uptime90);
-        }
-
-        return query;
-    }
     
     async fetch (filter: Filter, sort: Sort, pageSize: number, pageNumber: number): Promise<string[]> {
         let query = this.client.from('v_server_summaries').select('*', { count: 'exact' });
 
-        query = this.applyFilters(query, filter);
+        query = applyFilters(query, filter);
     
         // Map frontend sort field to backend column name if needed
         let field: string = sort.field;
@@ -148,28 +148,17 @@ export class ServersService {
         return servers.map(({ uuid }) => uuid);
     }
 
-    async fetchSiblingsByIdentities(identities: string[], filter: Filter): Promise<Map<string, string[]>> {
-        if (identities.length === 0) return new Map();
+    async countByIdentity(identity: string, excludeUuid?: string): Promise<number> {
+        let query = this.client.from('v_server_summaries').select('*', { count: 'exact', head: true }).eq('identity', identity);
 
-        let query = this.client.from('v_server_summaries').select('*');
+        if (excludeUuid) {
+            query = query.neq('uuid', excludeUuid);
+        }
 
-        query = this.applyFilters(query, filter, false);
-        query = query.in('identity', identities);
-
-        const { data, error } = await query;
+        const { count, error } = await query;
         if (error) throw error;
 
-        const servers = data.map(parseServer);
-        this.store.addOrUpdate(...servers);
-
-        const grouped = new Map<string, string[]>();
-        for (const server of servers) {
-            if (!grouped.has(server.identity)) {
-                grouped.set(server.identity, []);
-            }
-            grouped.get(server.identity)!.push(server.uuid);
-        }
-        return grouped;
+        return count || 0;
     }
 
     async addServer (uri: string) {

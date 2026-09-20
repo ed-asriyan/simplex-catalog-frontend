@@ -1,7 +1,7 @@
 <script lang="ts">
     import { Router, type RouteConfig } from "@mateothegreat/svelte5-router";
     import List from './list.svelte';
-    import IdentityPage from './identity-page/index.svelte';
+    import ServerPage from './server-page/index.svelte';
 
     const routes: RouteConfig[] = [
         {
@@ -9,8 +9,8 @@
             component: List,
         },
         {
-            path: /servers\/identity\/(?<identity>[^?]*)/,
-            component: IdentityPage,
+            path: /servers\/(?<uuid>[^?]*)/,
+            component: ServerPage,
         }
     ];
 </script>

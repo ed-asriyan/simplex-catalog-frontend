@@ -33,8 +33,8 @@
             } : undefined,
             protocol: params.filterProtocol as 'smp' | 'xftp' || undefined,
             infoPageAvailable: params.filterInfoPage === 'true' ? true : params.filterInfoPage === 'false' ? false : undefined,
-            identity: params.filterIdentity || undefined,
-            host: params.filterHost || undefined,
+            identity: params.filterIdentity ? decodeURIComponent(params.filterIdentity) : undefined,
+            host: params.filterHost ? decodeURIComponent(params.filterHost) : undefined,
             countries: params.filterCountriesList ? {
                 inclusive: params.filterCountriesInclusive === 'true',
                 values: decodeURIComponent(params.filterCountriesList).split(','),
