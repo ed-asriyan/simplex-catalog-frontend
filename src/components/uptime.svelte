@@ -5,19 +5,15 @@
 
     interface Props {
         style: 'inline' | 'block';
-        servers?: Server[];
+        server?: Server;
         bot?: Bot;
         relay?: Relay;
     }
 
-    let { servers, bot, relay, style }: Props = $props();
-
-    const avg = (vals: number[]) => vals.length > 0 ? vals.reduce((a, b) => a + b, 0) / vals.length : 0;
+    let { server, bot, relay, style }: Props = $props();
 
     let item: { uptime7: number; uptime30: number; uptime90: number } = $derived(
-        servers && servers.length > 0
-            ? { uptime7: avg(servers.map(s => s.uptime7)), uptime30: avg(servers.map(s => s.uptime30)), uptime90: avg(servers.map(s => s.uptime90)) }
-            : (bot || relay) as { uptime7: number; uptime30: number; uptime90: number }
+        (server || bot || relay) as { uptime7: number; uptime30: number; uptime90: number }
     );
 
     const uptimeStr = function (num: number): string {

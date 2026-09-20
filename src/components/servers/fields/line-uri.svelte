@@ -4,22 +4,15 @@
     import Icon from '@/components/icon.svelte';
 
     interface Props {
-        server?: Server;
-        servers?: Server[];
+        server: Server;
         maxLength?: number;
     }
 
-    let { server, servers, maxLength = 30 }: Props = $props();
+    let { server, maxLength = 30 }: Props = $props();
 
-    let allServers: Server[] = $derived(servers || (server ? [server] : []));
+    let composedUri: string = $derived(`${server.protocol}://${server.identity}@${server.host}`);
 
-    let composedUri: string = $derived(
-        allServers.length > 0
-            ? `${allServers[0].protocol}://${allServers[0].identity}@${allServers.map(s => s.host).join(',')}`
-            : ''
-    );
-
-    let displayHost: string = $derived(allServers.map(s => s.host).join(','));
+    let displayHost: string = $derived(server.host);
 
     let copyTimeout: ReturnType<typeof setTimeout> | null = $state(null);
     const copyToClipboardClick = function (str: string) {

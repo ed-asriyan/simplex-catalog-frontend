@@ -234,7 +234,7 @@
                                     {relay.name || '—'}
                                 </td>
                                 <td>
-                                    <StatusBadge items={[ relay ]} />
+                                    <StatusBadge status={relay.status} />
                                 </td>
                                 <td>
                                     <Uptime relay={relay} style="inline" />

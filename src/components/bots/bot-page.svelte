@@ -68,7 +68,7 @@
                             <h3 class="uk-card-title uk-margin-remove-bottom uk-text-bold">
                                 {$bot.name}
                                 &nbsp;
-                                <StatusBadge items={[ $bot ]} />
+                                <StatusBadge status={$bot.status} />
                             </h3>
                             <div class="uk-text-meta uk-margin-remove-top">
                                 {#if $bot.lastCheck}

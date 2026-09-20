@@ -3,30 +3,29 @@
 	import Modal from '@/components/modal.svelte';
 	import { labelsStore } from '@/store/servers/labels-store';
 	import LineCountry from '../fields/line-country.svelte';
-	import LineStatus from '@/components/status-badge.svelte';
-    import LineUptime from '@/components/uptime.svelte';
+	import LineUptime from '@/components/uptime.svelte';
 	import LineServerInfo from '../fields/line-server-info.svelte';
 	import ServerQrCode from '../fields/server-qrcode.svelte';
-  import StatusBadge from '@/components/status-badge.svelte';
+	import StatusBadge from '@/components/status-badge.svelte';
 
 	interface Props {
-		serverGroups: Server[][];
+		servers: Server[];
 		onclick?: (server: Server) => void;
 	}
 
-	let { serverGroups = $bindable(), onclick }: Props = $props();
+	let { servers = $bindable(), onclick }: Props = $props();
 	let open: boolean = $state(false);
 
 	let i: number = $state(0);
 
-	let group: Server[] = $derived(serverGroups && serverGroups[i]);
+	let server: Server | undefined = $derived(servers && servers[i]);
 
 	$effect(() => {
-		if (serverGroups) i = 0;
+		if (servers) i = 0;
 	});
 
 	$effect(() => {
-		if (serverGroups?.length) {
+		if (servers?.length) {
 			open = true;
 		} else {
 			open = false;
@@ -34,7 +33,7 @@
 	});
 
 	let isTheFirst = $derived(i === 0);
-	let isTheLast = $derived(i + 1 === serverGroups?.length);
+	let isTheLast = $derived(i + 1 === servers?.length);
 	let nextText = $derived(isTheLast ? 'Close' : 'Next →');
 
 	const handleNext = function () {
@@ -54,26 +53,24 @@
 
 <Modal bind:open={open} width="500px">
 	<div class="uk-text-center" onclick={onclick}>
-        {#if group && group.length > 0}
-			{#if serverGroups.length > 1}
-				<div>{ i + 1 } / { serverGroups?.length }</div>
+        {#if server}
+			{#if servers.length > 1}
+				<div>{ i + 1 } / { servers?.length }</div>
 			{/if}
-			<ServerQrCode servers={group} />
-
-			{#each group as server (server.uuid)}
-				<div class="uk-margin-small-top">
-					<span class="uk-margin-small-right">
-						<LineCountry country={server.country} />
-					</span>
-					<LineServerInfo server={server} icon={true}/>
-					<span class="uk-margin-small-right uk-margin-small-left">
-						<StatusBadge items={[ server ]} />
-					</span>
-				</div>
-			{/each}
+			<ServerQrCode {server} />
 
 			<div class="uk-margin-small-top">
-				<LineUptime servers={group} style="inline" />
+				<span class="uk-margin-small-right">
+					<LineCountry country={server.country} />
+				</span>
+				<LineServerInfo {server} icon={true}/>
+				<span class="uk-margin-small-right uk-margin-small-left">
+					<StatusBadge status={server.status} />
+				</span>
+			</div>
+
+			<div class="uk-margin-small-top">
+				<LineUptime {server} style="inline" />
 			</div>
         {/if}
         <div>
@@ -83,8 +80,8 @@
 				{/if}
 				<button class="uk-flex-1 uk-button uk-button-defadult" onclick={handleNext}>{ nextText }</button>
 			</div>
-			{#if group}
-				<button class="uk-margin-top uk-width-1-1 uk-button uk-button" onclick={e => { group.forEach(s => labelsStore.include(s.uuid, 'added')); handleNext(e) }}>
+			{#if server}
+				<button class="uk-margin-top uk-width-1-1 uk-button uk-button" onclick={e => { labelsStore.include(server.uuid, 'added'); handleNext(e) }}>
 					Mark as added and { nextText }
 				</button>
 			{/if}
