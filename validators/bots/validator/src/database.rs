@@ -63,6 +63,7 @@ impl Database {
             .client
             .from("bots")
             .select("uuid,address")
+            .eq("approved", "true")
             .execute()
             .await?
             .text()
