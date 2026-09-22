@@ -4,7 +4,7 @@ use futures::TryStreamExt as _;
 use simploxide_client::{
     Client, EventStream,
     prelude::*,
-    types::{ChatBotCommand, ChatPeerType, ConnectionPlan, ContactAddressPlan, User},
+    types::{ChatBotCommand, ConnectionPlan, ContactAddressPlan, User},
 };
 use std::error::Error;
 
@@ -18,9 +18,7 @@ fn get_bot_profile(connection_plan: ConnectionPlan) -> Option<BotProfile> {
                 },
             ..
         } => {
-            if let Some(link_data) = contact_s_link_data
-                && let Some(ChatPeerType::Bot) = link_data.profile.peer_type
-            {
+            if let Some(link_data) = contact_s_link_data {
                 let commands = link_data
                     .profile
                     .preferences
