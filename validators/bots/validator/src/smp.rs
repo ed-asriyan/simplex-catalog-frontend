@@ -2,9 +2,9 @@ use crate::types::{BotCommand, BotProfile};
 use core::str;
 use futures::TryStreamExt as _;
 use simploxide_client::{
-    Client, EventStream,
     prelude::*,
     types::{ChatBotCommand, ConnectionPlan, ContactAddressPlan, User},
+    ws::{Client, EventStream},
 };
 use std::error::Error;
 
@@ -56,7 +56,7 @@ fn get_bot_profile(connection_plan: ConnectionPlan) -> Option<BotProfile> {
 
 async fn wait_for_connection(events: &mut EventStream, user: User) -> Result<i64, Box<dyn Error>> {
     while let Some(event) = events.try_next().await? {
-        if let Event::ContactConnected(connected) = event.as_ref()
+        if let Event::ContactConnected(connected) = &event
             && connected.user.user_id == user.user_id
         {
             return Ok(connected.contact.contact_id);
@@ -67,7 +67,7 @@ async fn wait_for_connection(events: &mut EventStream, user: User) -> Result<i64
 
 async fn wait_for_message(events: &mut EventStream, user: User) -> Result<String, Box<dyn Error>> {
     while let Some(event) = events.try_next().await? {
-        if let Event::NewChatItems(new_msgs) = event.as_ref()
+        if let Event::NewChatItems(new_msgs) = &event
             && new_msgs.user.user_id == user.user_id
         {
             for chat_item in &new_msgs.chat_items {
@@ -163,10 +163,15 @@ pub async fn test_bot(
     smp_client_ws_uri: &str,
     timeout: u64,
 ) -> Result<BotTestResult, Box<dyn Error>> {
-    let (client, mut events) = simploxide_client::connect(&smp_client_ws_uri).await?;
+    let (client, mut events) = simploxide_client::ws::connect(&smp_client_ws_uri).await?;
 
     let user = client
-        .create_active_user(NewUser::builder().past_timestamp(false).build())
+        .create_active_user(
+            NewUser::builder()
+                .past_timestamp(false)
+                .user_chat_relay(false)
+                .build(),
+        )
         .await?
         .user
         .clone();
@@ -176,6 +181,7 @@ pub async fn test_bot(
             ApiConnectPlan::builder()
                 .connection_link(uri.to_string())
                 .user_id(user.user_id)
+                .resolve_known(false)
                 .build(),
         )
         .await?;
