@@ -66,16 +66,15 @@
                         </a>
                     </li>
                     <li>
+                        <a href="https://slcw.github.io/SimpleX-Themes/" target="_blank" rel="noopener noreferrer">
+                            🎨 Themes
+                        </a>
+                    </li>
+                    <li>
                         <a use:route={{ active: { class: 'uk-active' }}} href="/#/faq">
                             ❓ FAQ
                         </a>
                     </li>
-
-                    <!-- <li class:uk-active={location.hashPaths.single === '/channels'}>
-                        <a use:route={{ active: { class: 'active' }}} href="/channels">
-                            📣 Channels
-                        </a>
-                    </li> -->
                 </ul>
 
                 <div class="uk-navbar-item">
