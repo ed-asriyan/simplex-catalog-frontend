@@ -1,9 +1,12 @@
 <script lang="ts">
-    import 'uikit/dist/js/uikit';
+    import UIkit from 'uikit/dist/js/uikit';
     import Analytics from './analytics.svelte';
     import Page from './components/index.svelte';
     import { environment, isProduction } from './settings';
     import './app.scss';
+
+    // bundlers don't expose UIkit as a browser global, but its components rely on it
+    window.UIkit = UIkit;
 </script>
 
 <Analytics/>
