@@ -1,4 +1,4 @@
-FROM --platform=linux/x86_64 python:3.14-alpine
+FROM --platform=linux/x86_64 python:3.15-alpine
 
 WORKDIR /app
 COPY proxy.py .
