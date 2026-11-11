@@ -21,6 +21,20 @@ fn is_i2p(host: &str) -> bool {
     host.ends_with(".i2p")
 }
 
+// Alfis zones: names in them resolve to Yggdrasil addresses only.
+// Keep in sync with YGG_ZONES in gateway/proxy.py.
+const YGGDRASIL_ZONES: &[&str] = &[
+    "ygg", "anon", "btn", "conf", "index", "merch", "mirror", "mob", "screen", "srv",
+];
+
+fn is_yggdrasil_domain(host: &str) -> bool {
+    let host = host.trim_end_matches('.').to_ascii_lowercase();
+    match host.rsplit_once('.') {
+        Some((_, tld)) => YGGDRASIL_ZONES.contains(&tld),
+        None => false,
+    }
+}
+
 fn is_yggdrasil(ip: &IpAddr) -> bool {
     if let IpAddr::V6(v6) = ip {
         let s = v6.segments()[0];
@@ -97,6 +111,14 @@ pub fn parse_origin(authority: &str) -> Host {
     if is_i2p(host) {
         return Host {
             domain_type: Type::I2p,
+            value: host.to_string(),
+            port,
+        };
+    }
+
+    if is_yggdrasil_domain(host) {
+        return Host {
+            domain_type: Type::Yggdrasil,
             value: host.to_string(),
             port,
         };
@@ -203,5 +225,41 @@ mod tests {
         assert_eq!(h.value, "abc.b32.i2p");
         assert_eq!(h.port, Some(443));
         assert!(matches!(h.domain_type, Type::I2p));
+    }
+
+    #[test]
+    fn test_ygg_domain_no_port() {
+        let h = parse_origin("smp1.asriyan.ygg");
+        assert_eq!(h.value, "smp1.asriyan.ygg");
+        assert_eq!(h.port, None);
+        assert!(matches!(h.domain_type, Type::Yggdrasil));
+    }
+
+    #[test]
+    fn test_ygg_domain_with_port() {
+        let h = parse_origin("xftp2.asriyan.ygg:443");
+        assert_eq!(h.value, "xftp2.asriyan.ygg");
+        assert_eq!(h.port, Some(443));
+        assert!(matches!(h.domain_type, Type::Yggdrasil));
+    }
+
+    #[test]
+    fn test_ygg_ip() {
+        let h = parse_origin("[21e:a51c:885b:7db0:166e:927:98cd:d186]:5223");
+        assert_eq!(h.port, Some(5223));
+        assert!(matches!(h.domain_type, Type::Yggdrasil));
+    }
+
+    #[test]
+    fn test_clearnet_domain_type() {
+        for d in ["smp6.simplex.im", "xftp4.asriyan.me:8443", "ygg.example.com"] {
+            assert!(matches!(parse_origin(d).domain_type, Type::Clearnet), "{d}");
+        }
+    }
+
+    #[test]
+    fn test_onion_domain_type() {
+        let h = parse_origin("ogtwfxyi3h2h5weftjjpjmxclhb5ugufa5rcyrmg7j4xlch7qsr5nuqd.onion");
+        assert!(matches!(h.domain_type, Type::Onion));
     }
 }
