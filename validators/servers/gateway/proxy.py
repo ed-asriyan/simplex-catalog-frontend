@@ -3,10 +3,49 @@ import struct
 import socket
 import os
 
+import dns.asyncresolver
+
 TOR_HOST = os.environ.get("TOR_HOST", "tor")
 TOR_PORT = int(os.environ.get("TOR_PORT", 9050))
 I2P_HOST = os.environ.get("I2P_HOST", "i2pd")
 I2P_PORT = int(os.environ.get("I2P_PORT", 4447))
+
+# Alfis (https://github.com/Revertron/Alfis) zones. Names in them are not
+# resolvable by clearnet resolvers (1.1.1.1 answers NXDOMAIN, and Docker's
+# embedded DNS does not fall through to the next upstream on NXDOMAIN), so they
+# are resolved explicitly through DNS servers reachable inside Yggdrasil.
+YGG_ZONES = tuple(
+    "." + z.strip(".").lower()
+    for z in os.environ.get(
+        "YGG_ZONES", "ygg anon btn conf index merch mirror mob screen srv"
+    ).split()
+)
+YGG_DNS_SERVERS = os.environ.get(
+    "YGG_DNS_SERVERS", "308:c8:48:45:: 324:71e:281a:9ed3::53 300:7c75:d590:c5d8::100"
+).split()
+
+ygg_resolver = dns.asyncresolver.Resolver(configure=False)
+ygg_resolver.nameservers = YGG_DNS_SERVERS
+ygg_resolver.lifetime = 10
+
+
+def is_ygg_domain(host):
+    return host.lower().rstrip(".").endswith(YGG_ZONES)
+
+
+async def resolve_ygg(name):
+    answer = await ygg_resolver.resolve(name, "AAAA")
+    return [record.address for record in answer]
+
+
+async def open_ygg_connection(host, port):
+    last_error = None
+    for addr in await resolve_ygg(host):
+        try:
+            return await asyncio.open_connection(addr, port)
+        except OSError as e:
+            last_error = e
+    raise last_error
 
 async def socks5_connect(host, port, proxy_host, proxy_port):
     reader, writer = await asyncio.open_connection(proxy_host, proxy_port)
@@ -105,6 +144,8 @@ async def handle_client(client_reader, client_writer):
                 remote_reader, remote_writer = await socks5_connect(dst_addr, dst_port, TOR_HOST, TOR_PORT)
             elif dst_addr.endswith(".i2p"):
                 remote_reader, remote_writer = await socks5_connect(dst_addr, dst_port, I2P_HOST, I2P_PORT)
+            elif is_ygg_domain(dst_addr):
+                remote_reader, remote_writer = await open_ygg_connection(dst_addr, dst_port)
             else:
                 remote_reader, remote_writer = await asyncio.open_connection(dst_addr, dst_port)
         except Exception as e:
