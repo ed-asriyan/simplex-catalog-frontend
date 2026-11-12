@@ -19,3 +19,13 @@ Supabase project first as described [here](https://github.com/ed-asriyan/simplex
 ([instruction](https://docs.github.com/en/actions/security-for-github-actions/security-guides/using-secrets-in-github-actions#creating-secrets-for-a-repository)),
 value of the secret is content of filled out `.env` file
 3. Done. The validator will run by schedule. You can dispatch the workflow manually in Actions sections of a repository 
+
+## Overlay networks
+All relay connections go through the `gateway` SOCKS5 proxy, which routes them by destination:
+- `*.onion` → Tor (`tor` service)
+- `*.i2p` → I2P (`i2pd` service)
+- Yggdrasil IPv6 addresses (`200::/7`) → directly via the `yggdrasil` TUN interface
+- Yggdrasil [Alfis](https://github.com/Revertron/Alfis) domains (`.ygg`, `.anon`, `.btn`, `.conf`, `.index`, `.merch`,
+`.mirror`, `.mob`, `.screen`, `.srv`) → resolved via Yggdrasil DNS servers (`YGG_DNS_SERVERS`), then connected via
+Yggdrasil
+- everything else → clearnet
