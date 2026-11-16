@@ -56,6 +56,16 @@
         </a>
     </li>
     <li>
+        <a href="https://simplex.chat/directory/" target="_blank" rel="noopener noreferrer">
+            👥 Groups
+        </a>
+    </li>
+    <li>
+        <a href="https://simplex.chat/directory/" target="_blank" rel="noopener noreferrer">
+            📢 Channels
+        </a>
+    </li>
+    <li>
         <a href="https://slcw.github.io/SimpleX-Themes/" target="_blank" rel="noopener noreferrer">
             🎨 Themes
         </a>
@@ -70,7 +80,7 @@
 <GithubCorner />
 
 <nav class="uk-navbar-container">
-    <div class="uk-container uk-container-secondary">
+    <div class="uk-container uk-container-secondary uk-container-xlarge">
         <div uk-navbar>
             <div class="uk-navbar-left">
                 <div class="uk-navbar-item uk-hidden@l">
@@ -86,12 +96,15 @@
                 </ul>
             </div>
 
-            <div class="uk-navbar-right">
-                <div class="uk-navbar-item uk-visible@l">
+            <div class="uk-navbar-right" style="padding-right: 36px;">
+                <div class="uk-navbar-item uk-visible@xl">
                     <a href={simplexGroupLink} target="_blank" class="uk-link-text">Join the group chat @ SimpleX!</a>
                 </div>
+                <div class="uk-navbar-item uk-visible@l uk-hidden@xl">
+                    <a href={simplexGroupLink} target="_blank" class="uk-link-text" title="Join the group chat @ SimpleX!">💬 Chat</a>
+                </div>
 
-                <div class="uk-navbar-item uk-visible@l">
+                <div class="uk-navbar-item uk-visible@xl">
                     <Sponsors />
                 </div>
             </div>
@@ -125,6 +138,9 @@
         The website is not affiliated with the SimpleX team. Content is contributed by anonymous users.
         <br />
         Servers, bots and relays that have been inactive for 90 days or more may be removed from the directory.
+    </div>
+    <div class="uk-margin-top uk-hidden@xl uk-visible@l">
+        <Sponsors />
     </div>
     <div class="uk-margin-top">
         <span>Powered by</span>
