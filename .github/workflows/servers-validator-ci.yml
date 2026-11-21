@@ -1,9 +1,20 @@
-name: CI (PR)
+name: Servers validator CI (PR)
 
 on:
   pull_request_target:
     branches:
       - master
+    paths:
+      - 'validators/servers/**'
+      - '.github/workflows/servers-validator-*.yml'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    working-directory: validators/servers
 
 jobs:
   validate:
@@ -18,7 +29,7 @@ jobs:
 
       - name: Save .env file
         env:
-          ENV_FILE_CONTENT: ${{ secrets.ENV_FILE_CONTENT }}
+          ENV_FILE_CONTENT: ${{ secrets.SERVERS_VALIDATOR_ENV_FILE_CONTENT }}
         shell: bash
         run: |
           echo "$ENV_FILE_CONTENT" > .env

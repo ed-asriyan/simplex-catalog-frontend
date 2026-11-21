@@ -1,9 +1,17 @@
-name: Deploy to Production
+name: Supabase deploy
 
 on:
   push:
     branches:
       - master
+    paths:
+      - 'supabase/**'
+      - '.github/workflows/supabase-deploy.yml'
+  workflow_dispatch:
+
+defaults:
+  run:
+    working-directory: supabase
 
 jobs:
   deploy:

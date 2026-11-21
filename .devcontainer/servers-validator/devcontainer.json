@@ -1,10 +1,11 @@
 {
   "name": "simplex-catalog-servers-validator",
   "dockerComposeFile": [
-    "../docker-compose.dev.yml"
+    "../../validators/servers/docker-compose.dev.yml"
   ],
   "workspaceFolder": "/workspace",
   "service": "validator",
+  "overrideCommand": false,
   "customizations": {
     "vscode": {
       "extensions": [
@@ -17,6 +18,5 @@
       }
     }
   },
-  "postCreateCommand": "rustup component add clippy rustfmt",
-  "overrideCommand": true
+  "postCreateCommand": "rustup component add clippy rustfmt"
 }

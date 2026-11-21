@@ -1,11 +1,10 @@
 {
-  "name": "simplex-catalog-bots-validator",
+  "name": "simplex-catalog-relays-validator",
   "dockerComposeFile": [
-    "../docker-compose.dev.yml"
+    "../../validators/relays/docker-compose.dev.yml"
   ],
   "workspaceFolder": "/workspace",
   "service": "validator",
-  "overrideCommand": false,
   "customizations": {
     "vscode": {
       "extensions": [
@@ -18,5 +17,6 @@
       }
     }
   },
-  "postCreateCommand": "rustup component add clippy rustfmt"
+  "postCreateCommand": "rustup component add clippy rustfmt",
+  "overrideCommand": true
 }

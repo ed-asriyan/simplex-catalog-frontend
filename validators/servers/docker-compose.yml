@@ -1,3 +1,6 @@
+# The project's name, which its images are named after (the validate workflow caches them by it).
+name: simplex-catalog-servers-validator
+
 services:
   tor:
     image: ghcr.io/simonhaas/torproxy/torproxy

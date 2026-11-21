@@ -1,6 +1,7 @@
 
 {
 	"name": "Supabase CLI",
+	"workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}/supabase",
 	"image": "mcr.microsoft.com/devcontainers/base:bookworm",
 	"features": {
 		"ghcr.io/devcontainers/features/node:2": {},

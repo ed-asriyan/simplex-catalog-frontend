@@ -1,9 +1,13 @@
-name: Validate
+name: Bots validator
 
 on:
   schedule:
     - cron: '0 */12 * * *'
   workflow_dispatch:
+
+defaults:
+  run:
+    working-directory: validators/bots
 
 jobs:
   validate:
@@ -17,7 +21,7 @@ jobs:
         id: cache-docker
         with:
           path: /tmp/docker
-          key: docker-${{ github.sha }}
+          key: bots-validator-docker-${{ hashFiles('validators/bots/**') }}
 
       - name: Load Docker images
         run: |
@@ -29,7 +33,7 @@ jobs:
 
       - name: Save .env file
         env:
-          ENV_FILE_CONTENT: ${{ secrets.ENV_FILE_CONTENT }}
+          ENV_FILE_CONTENT: ${{ secrets.BOTS_VALIDATOR_ENV_FILE_CONTENT }}
         shell: bash
         run: |
           echo "$ENV_FILE_CONTENT" > .env
@@ -39,11 +43,9 @@ jobs:
 
       - name: Save Docker images to cache
         if: steps.cache-docker.outputs.cache-hit != 'true'
-        env:
-          REPO_NAME: ${{ github.event.repository.name }}
         run: |
           mkdir -p /tmp/docker
-          images=$(docker images --format '{{.Repository}}:{{.Tag}}' | grep "^$REPO_NAME")
+          images=$(docker images --format '{{.Repository}}:{{.Tag}}' | grep "^simplex-catalog-bots-validator")
           for image in $images; do
             docker save $image -o /tmp/docker/$(echo $image | tr / _).tar
           done

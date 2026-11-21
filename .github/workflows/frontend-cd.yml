@@ -1,9 +1,13 @@
-name: CD
+name: Frontend CD
 
 on:
   push:
     branches:
       - "master"
+    paths:
+      - 'frontend/**'
+      - '.github/workflows/frontend-*.yml'
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -16,9 +20,9 @@ concurrency:
 
 jobs:
   build:
-    uses: ./.github/workflows/build.yml
+    uses: ./.github/workflows/frontend-build.yml
     with:
-      env_file_content: ${{ vars.ENV_FILE_CONTENT }}
+      env_file_content: ${{ vars.FRONTEND_ENV_FILE_CONTENT }}
 
   deploy:
     needs: build
