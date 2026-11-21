@@ -1,0 +1,6 @@
+# SOCKS proxy reachable from other containers on the compose network
+SocksPort 0.0.0.0:9050
+SocksPolicy accept *
+
+DataDirectory /var/lib/tor
+Log notice stdout
