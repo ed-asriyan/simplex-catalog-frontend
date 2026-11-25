@@ -5,7 +5,7 @@ on:
     branches:
       - master
     paths:
-      - 'validators/bots/**'
+      - 'src/bots-validator/**'
       - '.github/workflows/bots-validator-*.yml'
 
 concurrency:
@@ -14,7 +14,7 @@ concurrency:
 
 defaults:
   run:
-    working-directory: validators/bots
+    working-directory: src/bots-validator
 
 jobs:
   validate:

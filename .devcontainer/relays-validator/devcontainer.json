@@ -1,7 +1,7 @@
 {
   "name": "simplex-catalog-relays-validator",
   "dockerComposeFile": [
-    "../../validators/relays/docker-compose.dev.yml"
+    "../../src/relays-validator/docker-compose.dev.yml"
   ],
   "workspaceFolder": "/workspace",
   "service": "validator",

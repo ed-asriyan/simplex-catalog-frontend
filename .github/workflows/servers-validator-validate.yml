@@ -7,7 +7,7 @@ on:
 
 defaults:
   run:
-    working-directory: validators/servers
+    working-directory: src/servers-validator
 
 jobs:
   validate:
@@ -21,7 +21,7 @@ jobs:
         id: cache-docker
         with:
           path: /tmp/docker
-          key: servers-validator-docker-${{ hashFiles('validators/servers/**') }}
+          key: servers-validator-docker-${{ hashFiles('src/servers-validator/**') }}
 
       - name: Load Docker images
         run: |

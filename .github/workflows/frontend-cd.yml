@@ -5,7 +5,7 @@ on:
     branches:
       - "master"
     paths:
-      - 'frontend/**'
+      - 'src/frontend/**'
       - '.github/workflows/frontend-*.yml'
   workflow_dispatch:
 

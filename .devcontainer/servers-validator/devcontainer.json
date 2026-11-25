@@ -1,7 +1,7 @@
 {
   "name": "simplex-catalog-servers-validator",
   "dockerComposeFile": [
-    "../../validators/servers/docker-compose.dev.yml"
+    "../../src/servers-validator/docker-compose.dev.yml"
   ],
   "workspaceFolder": "/workspace",
   "service": "validator",

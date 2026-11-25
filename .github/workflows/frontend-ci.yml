@@ -3,7 +3,7 @@ name: Frontend CI
 on:
   pull_request:
     paths:
-      - 'frontend/**'
+      - 'src/frontend/**'
       - '.github/workflows/frontend-*.yml'
 
 jobs:

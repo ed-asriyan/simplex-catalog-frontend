@@ -1,17 +1,17 @@
-name: Supabase deploy
+name: Backend deploy
 
 on:
   push:
     branches:
       - master
     paths:
-      - 'supabase/**'
-      - '.github/workflows/supabase-deploy.yml'
+      - 'src/backend/**'
+      - '.github/workflows/backend-deploy.yml'
   workflow_dispatch:
 
 defaults:
   run:
-    working-directory: supabase
+    working-directory: src/backend
 
 jobs:
   deploy:

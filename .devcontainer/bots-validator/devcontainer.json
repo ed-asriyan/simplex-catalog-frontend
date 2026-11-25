@@ -1,7 +1,7 @@
 {
   "name": "simplex-catalog-bots-validator",
   "dockerComposeFile": [
-    "../../validators/bots/docker-compose.dev.yml"
+    "../../src/bots-validator/docker-compose.dev.yml"
   ],
   "workspaceFolder": "/workspace",
   "service": "validator",

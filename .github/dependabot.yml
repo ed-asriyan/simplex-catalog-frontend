@@ -1,7 +1,7 @@
 version: 2
 updates:
 - package-ecosystem: npm
-  directory: /frontend
+  directory: /src/frontend
   schedule:
     interval: weekly
   open-pull-requests-limit: 1
@@ -12,7 +12,7 @@ updates:
     update-types:
     - version-update:semver-patch
 - package-ecosystem: docker
-  directory: /frontend
+  directory: /src/frontend
   open-pull-requests-limit: 1
   schedule:
     interval: weekly
@@ -38,7 +38,7 @@ updates:
     update-types:
     - version-update:semver-patch
 - package-ecosystem: npm
-  directory: /supabase
+  directory: /src/backend
   schedule:
     interval: weekly
   open-pull-requests-limit: 1
@@ -49,7 +49,7 @@ updates:
     update-types:
     - version-update:semver-patch
 - package-ecosystem: devcontainers
-  directory: /.devcontainer/supabase
+  directory: /.devcontainer/backend
   schedule:
     interval: weekly
   open-pull-requests-limit: 1
@@ -60,7 +60,7 @@ updates:
     update-types:
     - version-update:semver-patch
 - package-ecosystem: cargo
-  directory: /validators/servers/validator
+  directory: /src/servers-validator/validator
   open-pull-requests-limit: 1
   schedule:
     interval: weekly
@@ -69,7 +69,7 @@ updates:
     update-types:
     - version-update:semver-patch
 - package-ecosystem: docker
-  directory: /validators/servers/validator
+  directory: /src/servers-validator/validator
   open-pull-requests-limit: 1
   schedule:
     interval: weekly
@@ -78,7 +78,7 @@ updates:
     update-types:
     - version-update:semver-patch
 - package-ecosystem: docker
-  directory: /validators/servers/gateway
+  directory: /src/servers-validator/gateway
   open-pull-requests-limit: 1
   schedule:
     interval: weekly
@@ -87,7 +87,7 @@ updates:
     update-types:
     - version-update:semver-patch
 - package-ecosystem: pip
-  directory: /validators/servers/gateway
+  directory: /src/servers-validator/gateway
   open-pull-requests-limit: 1
   schedule:
     interval: weekly
@@ -96,7 +96,7 @@ updates:
     update-types:
     - version-update:semver-patch
 - package-ecosystem: docker
-  directory: /validators/servers/yggdrasil
+  directory: /src/servers-validator/yggdrasil
   open-pull-requests-limit: 1
   schedule:
     interval: weekly
@@ -114,7 +114,7 @@ updates:
     update-types:
     - version-update:semver-patch
 - package-ecosystem: cargo
-  directory: /validators/relays/validator
+  directory: /src/relays-validator/validator
   open-pull-requests-limit: 1
   schedule:
     interval: weekly
@@ -123,7 +123,7 @@ updates:
     update-types:
     - version-update:semver-patch
 - package-ecosystem: docker
-  directory: /validators/relays/validator
+  directory: /src/relays-validator/validator
   open-pull-requests-limit: 1
   schedule:
     interval: weekly
@@ -132,7 +132,7 @@ updates:
     update-types:
     - version-update:semver-patch
 - package-ecosystem: docker
-  directory: /validators/relays/yggdrasil
+  directory: /src/relays-validator/yggdrasil
   open-pull-requests-limit: 1
   schedule:
     interval: weekly
@@ -141,7 +141,7 @@ updates:
     update-types:
     - version-update:semver-patch
 - package-ecosystem: docker
-  directory: /validators/relays/gateway
+  directory: /src/relays-validator/gateway
   open-pull-requests-limit: 1
   schedule:
     interval: weekly
@@ -150,7 +150,7 @@ updates:
     update-types:
     - version-update:semver-patch
 - package-ecosystem: pip
-  directory: /validators/relays/gateway
+  directory: /src/relays-validator/gateway
   open-pull-requests-limit: 1
   schedule:
     interval: weekly
@@ -159,7 +159,7 @@ updates:
     update-types:
     - version-update:semver-patch
 - package-ecosystem: cargo
-  directory: /validators/bots/validator
+  directory: /src/bots-validator/validator
   open-pull-requests-limit: 1
   schedule:
     interval: weekly
@@ -168,7 +168,7 @@ updates:
     update-types:
     - version-update:semver-patch
 - package-ecosystem: docker
-  directory: /validators/bots/validator
+  directory: /src/bots-validator/validator
   open-pull-requests-limit: 1
   schedule:
     interval: weekly
@@ -177,7 +177,7 @@ updates:
     update-types:
     - version-update:semver-patch
 - package-ecosystem: docker
-  directory: /validators/bots/tor
+  directory: /src/bots-validator/tor
   open-pull-requests-limit: 1
   schedule:
     interval: weekly
