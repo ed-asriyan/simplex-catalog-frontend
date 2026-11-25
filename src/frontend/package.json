@@ -20,7 +20,7 @@
 		"@sveltejs/vite-plugin-svelte": "^7.3.1",
 		"@tsconfig/svelte": "^5.0.2",
 		"@types/d3": "^7.4.3",
-		"@types/node": "^26.4.0",
+		"@types/node": "^26.6.6",
 		"d3": "^7.9.0",
 		"i18n-iso-countries": "^7.14.0",
 		"moment": "^2.31.0",
