@@ -1,0 +1,44 @@
+# End-to-end tests
+/e2e/**/node_modules/
+/e2e/**/test-results/
+/e2e/**/playwright-report/
+
+# Supabase
+/src/backend/supabase/**/.branches
+/src/backend/supabase/**/.temp
+/src/backend/supabase/**/.env.keys
+/src/backend/supabase/**/.env.local
+/src/backend/supabase/**/.env.*.local
+
+# Bots validator
+/src/bots-validator/**/node_modules
+/src/bots-validator/**/.env
+/src/bots-validator/**/target
+
+# Frontend
+/src/frontend/**/.DS_Store
+/src/frontend/**/node_modules
+/src/frontend/build
+/src/frontend/dist
+/src/frontend/.svelte-kit
+/src/frontend/package
+/src/frontend/**/.env
+/src/frontend/**/.env.*
+!/src/frontend/**/.env.example
+/src/frontend/**/vite.config.js.timestamp-*
+/src/frontend/**/vite.config.ts.timestamp-*
+/src/frontend/**/service-account-key.json
+/src/frontend/**/*.tsv
+
+# Relays validator
+/src/relays-validator/**/node_modules
+/src/relays-validator/**/.env
+/src/relays-validator/**/__pycache__/
+/src/relays-validator/**/*.py[cod]
+/src/relays-validator/validator/target
+
+# Servers validator
+/src/servers-validator/**/node_modules
+/src/servers-validator/**/.env
+/src/servers-validator/**/__pycache__/
+/src/servers-validator/validator/target
