@@ -113,7 +113,7 @@ test('the relays page: the text, the buttons, the filters and the table with its
   // What a run makes anew, which the screenshot masks: the relays' addresses and the times. Every row is the stack's
   // one relay, so the rows look alike in whatever order their checks came.
   const table = page.getByRole('table');
-  await looks(page, 'relays', [[table.locator('[uk-tooltip="Click to copy URI"]'), '22em'], [table.getByText(/ ago$/), '10em']]);
+  await looks(page, 'relays', [[table.locator('[uk-tooltip="Click to copy URI"]'), '30em'], [table.getByText(/ ago$/), '10em']]);
 });
 
 test('the relays table with no relay to show says so', async ({ page }) => {
@@ -308,7 +308,7 @@ test('a relay\'s page: the image, the name and status, the QR code, the address 
   await expect(entries.locator('.timeline-date')).toHaveText([DATE_TIME]);
   await looks(page, 'relay', [
     [page.locator('.uk-card svg'), '0'],
-    [page.locator('[uk-tooltip="Click to copy URI"]'), '16em'],
+    [page.locator('[uk-tooltip="Click to copy URI"]'), '24em'],
     [page.getByText(/^Last check: /), '16em'],
     [page.locator('.timeline-date'), '8em'],
     [page.getByText(/^Added to the catalog /), '20em'],
