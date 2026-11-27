@@ -1,0 +1,161 @@
+name: Unit tests
+
+# Every component's unit tests and architecture check (AGENTS.md, *Workflow*), each run when its component changes.
+
+on:
+  pull_request:
+
+concurrency:
+  group: "unit-tests-${{ github.ref }}"
+  cancel-in-progress: true
+
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      changed: ${{ steps.filter.outputs.changes }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Find the components the pull request changes
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            frontend:
+              - 'src/frontend/**'
+              - '.github/workflows/unit-tests.yml'
+            functions:
+              - 'src/backend/supabase/functions/**'
+              - '.github/workflows/unit-tests.yml'
+            database:
+              - 'src/backend/supabase/migrations/**'
+              - 'src/backend/supabase/tests/**'
+              - 'src/backend/supabase/seed.sql'
+              - 'src/backend/supabase/config.toml'
+              - 'e2e/package.json'
+              - '.github/workflows/unit-tests.yml'
+            servers:
+              - 'src/servers-validator/**'
+              - '.github/workflows/unit-tests.yml'
+            relays:
+              - 'src/relays-validator/**'
+              - '.github/workflows/unit-tests.yml'
+            bots:
+              - 'src/bots-validator/**'
+              - '.github/workflows/unit-tests.yml'
+
+  frontend:
+    needs: changes
+    if: contains(fromJSON(needs.changes.outputs.changed), 'frontend')
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: src/frontend
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: src/frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Unit tests
+        run: npm test
+
+      - name: Architecture check
+        run: npm run lint
+
+  functions:
+    needs: changes
+    if: contains(fromJSON(needs.changes.outputs.changed), 'functions')
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: src/backend/supabase/functions
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      # The architecture check reads the functions' sources.
+      - name: Unit tests and architecture check
+        run: deno test --allow-read
+
+  database:
+    needs: changes
+    if: contains(fromJSON(needs.changes.outputs.changed), 'database')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: e2e/package-lock.json
+
+      # The Supabase CLI is the one e2e/package.json pins.
+      - name: Install the Supabase CLI
+        working-directory: e2e
+        run: npm ci
+
+      - name: Start the database
+        working-directory: src/backend
+        run: ../../e2e/node_modules/.bin/supabase start -x studio,imgproxy,inbucket,logflare,vector,supavisor,postgres-meta,realtime,storage-api,edge-runtime
+
+      - name: pgTAP tests
+        working-directory: src/backend
+        run: ../../e2e/node_modules/.bin/supabase test db
+
+  validator:
+    needs: changes
+    strategy:
+      fail-fast: false
+      matrix:
+        name: [servers, relays, bots]
+    if: >-
+      contains(fromJSON(needs.changes.outputs.changed), 'servers') ||
+      contains(fromJSON(needs.changes.outputs.changed), 'relays') ||
+      contains(fromJSON(needs.changes.outputs.changed), 'bots')
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: src/${{ matrix.name }}-validator/validator
+    steps:
+      - name: Checkout
+        if: contains(fromJSON(needs.changes.outputs.changed), matrix.name)
+        uses: actions/checkout@v7
+
+      - name: Set up Rust
+        if: contains(fromJSON(needs.changes.outputs.changed), matrix.name)
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+
+      - name: Cache the build
+        if: contains(fromJSON(needs.changes.outputs.changed), matrix.name)
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src/${{ matrix.name }}-validator/validator
+
+      - name: Unit tests and architecture check
+        if: contains(fromJSON(needs.changes.outputs.changed), matrix.name)
+        run: cargo test
+
+      - name: Lint
+        if: contains(fromJSON(needs.changes.outputs.changed), matrix.name)
+        run: cargo clippy --all-targets -- -D warnings
