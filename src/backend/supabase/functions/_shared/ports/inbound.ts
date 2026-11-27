@@ -7,10 +7,12 @@ import type { Answer } from './types.ts';
 /** Adds a server's address to the catalog (US-B43…US-B47). */
 export interface AddServer {
   /**
-   * `body` is the request's JSON, of any shape: one that is not an object is answered as one without the field. Answers 204 when the servers of the address are stored or were there (an
-   * address of several hosts is a server for each, of one identity); 400 `{ error: 'Missing uri' }` without a
-   * `uri`; 400 `{ status: 1, error: 'Invalid URI format' }` for an address that is not `smp://` or `xftp://`,
-   * an identity and hosts; and 500 `{ status: 3 | 4 | 5, error }` with the database's message when the
+   * `body` is the request's JSON, of any shape: one that is not an object is answered as one without the
+   * field. Answers 204 when the servers of the address are stored or were there (an address of several hosts
+   * is a server for each, of one identity); 400 `{ error: 'Missing uri' }` without a `uri`; 400
+   * `{ status: 1, error: 'Invalid URI format' }` for an address that is not a scheme, an identity and hosts;
+   * 400 `{ status: 2, error: 'Unknown protocol: <scheme>' }` for a scheme other than `smp` and `xftp`, in
+   * lower case; and 500 `{ status: 3 | 4 | 5, error }` with the database's message when the
    * identity, a host or a server could not be stored.
    */
   add(body: unknown): Promise<Answer>;

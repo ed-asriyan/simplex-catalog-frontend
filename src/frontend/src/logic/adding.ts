@@ -4,15 +4,15 @@ import type { Result, Submission, Adding as AddingPort } from '../ports';
 export class Adding implements AddingPort {
     constructor(private readonly submission: Submission) {}
 
-    async addServer(_uri: string): Promise<Result<void>> {
-        throw new Error('todo');
+    addServer(uri: string): Promise<Result<void>> {
+        return this.submission.addServer(uri);
     }
 
-    async addBot(_url: string): Promise<Result<void>> {
-        throw new Error('todo');
+    addBot(url: string): Promise<Result<void>> {
+        return this.submission.addBot(url);
     }
 
-    async addRelay(_url: string): Promise<Result<void>> {
-        throw new Error('todo');
+    addRelay(url: string): Promise<Result<void>> {
+        return this.submission.addRelay(url);
     }
 }

@@ -1,71 +1,15 @@
-extern crate chrono;
-extern crate env_logger;
-extern crate log;
+//! The bots validator's program: it reads its arguments, makes the adapters and the application, and checks
+//! the bots once. The GitHub workflow, the Dockerfile and the end-to-end harness run it with these arguments.
+
+use std::time::Duration;
 
 use clap::{Arg, ArgAction, parser::ValueSource, value_parser};
 use log::{error, info};
-use rand::rng;
-use rand::seq::SliceRandom;
 
-use validator::{create_command, database::Database, init_logger, smp::test_bot, types::Bot};
-
-struct Args<'a> {
-    database: Database,
-    smp_client_ws_uri: &'a str,
-    dry: bool,
-    retry_count: u32,
-    timeout: u64,
-}
-
-async fn handle_bot(args: &Args<'_>, bot: &Bot) -> Result<(), Box<dyn std::error::Error>> {
-    let test = async || {
-        let mut i = args.retry_count;
-        loop {
-            info!(
-                "Checking {}, attempt {}",
-                bot.address,
-                args.retry_count - i + 1
-            );
-            match test_bot(&bot.address, args.smp_client_ws_uri, args.timeout).await {
-                Ok(r) => {
-                    if r.is_online || i == 0 {
-                        return Ok(r);
-                    } else {
-                        if i == 0 {
-                            return Ok(r);
-                        }
-                        i -= 1;
-                    }
-                }
-                Err(e) => {
-                    error!("Result: {}", e);
-                    if i == 0 {
-                        return Err(e);
-                    }
-                    i -= 1;
-                }
-            }
-        }
-    };
-
-    let status = test().await?;
-    info!("Done: {:#?}", status);
-
-    info!("Adding bot status...");
-    if !args.dry {
-        if let Some(profile) = &status.profile {
-            args.database.bot_update_profile(&bot.uuid, profile).await?;
-        }
-        args.database
-            .bot_insert_status(&bot.uuid, &status)
-            .await?;
-    } else {
-        info!("Running in dry mode. Skipping status addition.");
-    }
-    info!("Done");
-
-    Ok(())
-}
+use validator::adapters::{BotsRepository, SimplexCli};
+use validator::validator::app::App;
+use validator::validator::ports::BotsValidatorPort;
+use validator::{create_command, init_logger};
 
 #[tokio::main]
 async fn main() {
@@ -110,10 +54,10 @@ async fn main() {
     let smp_client_ws_url = command
         .get_one::<String>("smp-client-ws-url")
         .expect("required argument");
-    let supabase_uri = command
+    let supabase_url = command
         .get_one::<String>("supabase-url")
         .expect("required argument");
-    let supabase_token = command
+    let supabase_key = command
         .get_one::<String>("supabase-key")
         .expect("required argument");
     let dry = command.value_source("dry") == Some(ValueSource::CommandLine);
@@ -124,31 +68,22 @@ async fn main() {
         .get_one::<u64>("timeout")
         .expect("required argument");
 
-    let args = Args {
-        database: Database::new(supabase_uri, supabase_token),
-        smp_client_ws_uri: smp_client_ws_url,
-        dry,
-        retry_count,
-        timeout,
-    };
-
-    if args.dry {
+    if dry {
         info!("Running in dry mode. No changes will be made to the database.");
     }
 
-    match args.database.bots_get_all().await {
-        Ok(mut bots) => {
-            info!("Found {} bots", bots.len());
-            bots.shuffle(&mut rng());
-            for bot in bots {
-                if let Err(e) = handle_bot(&args, &bot).await {
-                    error!("Error: {}", e);
-                }
-            }
-        }
-        Err(e) => {
-            error!("Error fetching bots: {}", e);
-            return;
-        }
-    }
+    let Some(cli) = SimplexCli::connect(smp_client_ws_url).await else {
+        error!("No bot can be checked without the SimpleX CLI");
+        return;
+    };
+    let repository = BotsRepository::new(supabase_url, supabase_key, dry);
+    let app = App::new(
+        cli.clone(),
+        cli.clone(),
+        cli,
+        repository,
+        Duration::from_secs(timeout),
+    );
+
+    app.check_bots(retry_count).await;
 }

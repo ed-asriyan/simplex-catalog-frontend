@@ -1,5 +1,8 @@
 <script lang="ts">
-    import { labelsStore, labels, type Label } from '@/store/servers/labels-store';
+    import { labels, type Label } from '@/store/servers/labels-store';
+    import { useWebsite } from '@/store/website';
+
+    const { labels: labelsStore } = useWebsite();
 
     interface Props {
         uuid?: string;
@@ -10,23 +13,23 @@
 
     let allUuids: string[] = $derived(uuids || (uuid ? [uuid] : []));
 
-    const colourMap: {[x: Label]: string} = {
+    const colourMap: Record<Label, string> = {
         ignored: 'danger',
         added: 'success',
     };
 
-    const namesMap: {[x: Label]: string} = {
+    const namesMap: Record<Label, string> = {
         ignored: '🚫',
         added: '✅',
     };
 
-    const tooltipMap: {[x: Label]: string} = {
+    const tooltipMap: Record<Label, [string, string]> = {
         ignored: ['Ignore', 'Ignored'],
         added: ['Add', 'Added'],
     };
 
     // Active if ALL uuids have the label
-    const isActive = (label: Label) => allUuids.length > 0 && allUuids.every(u => $labelsStore[label].has(u));
+    const isActive = (label: Label) => allUuids.length > 0 && allUuids.every(u => $labelsStore[label].includes(u));
 
     const toggleAll = (label: Label) => {
         for (const u of allUuids) {

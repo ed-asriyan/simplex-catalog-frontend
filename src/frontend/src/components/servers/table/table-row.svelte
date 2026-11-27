@@ -1,5 +1,5 @@
 <script lang='ts'>
-    import type { Server } from '@/store/servers/servers-store';
+    import type { Server } from '@/ports';
     import { goto } from '@mateothegreat/svelte5-router';
     import LineCountry from '../fields/line-country.svelte';
     import LineDate from '../fields/line-date.svelte';

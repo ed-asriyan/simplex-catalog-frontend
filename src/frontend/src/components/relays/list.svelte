@@ -1,21 +1,24 @@
 <script lang="ts">
     import { onMount } from "svelte";
     import moment from "moment";
-    import { relaysService, type Filter, type Sort } from '@/store/relays/relays-service';
-    import { relaysStore, type Relay } from '@/store/relays/relays-store';
+    import type { PageOf, Relay, RelaysFilter as Filter, RelaysSortField, Sort as SortOf } from '@/ports';
+    import { useWebsite } from '@/store/website';
+    import { valueOf } from '@/store/result';
     import { convertUTCDateToLocalDate, delay, setQueryParam } from '@/utils';
     import Icon from '@/components/icon.svelte';
     import { goto } from "@mateothegreat/svelte5-router";
     import CopyLink from '@/components/copy-link.svelte';
     import Uptime from '@/components/uptime.svelte';
-    import type { Readable } from 'svelte/store';
     import StatusBadge from "@/components/status-badge.svelte";
 
     interface Props {
         route: any,
     }
 
+    type Sort = SortOf<RelaysSortField>;
+
     let { route }: Props = $props();
+    const { ports } = useWebsite();
 
     let params = $derived(route.result.querystring.params);
 
@@ -35,8 +38,8 @@
     onMount(() => {
         const generatedFilter = generateFilter(params);
         if (Object.values(generatedFilter || {}).filter(x => x !== undefined).length === 0) {
-            const stored = JSON.parse(localStorage.getItem('relaysFilter') || 'null') as Filter | null;
-            setFilter(stored && Object.values(stored).some(x => x !== undefined) ? stored : defaultFilter);
+            const stored = ports.filters.recall('relays') as Filter | null;
+            setFilter(stored ?? defaultFilter);
         }
     });
 
@@ -46,7 +49,7 @@
     });
 
     const setFilter = function (newFilter: Filter) {
-        localStorage.setItem('relaysFilter', JSON.stringify(newFilter));
+        ports.filters.remember('relays', newFilter);
         setQueryParam(route, {
             filterStatus: newFilter.status === undefined ? 'any' : newFilter.status ? 'true' : 'false',
             filterUrl: newFilter.url || '',
@@ -78,18 +81,19 @@
     let pageNumber: number = $derived(+params?.pageNumber || 1);
     let pageSize: number = $derived(+params?.pageSize || 50);
 
-    let totalCountStore: Readable<number> = $derived(relaysStore.totalCount);
-    let totalCount: number = $derived($totalCountStore);
+    // The total of the list last read, kept while the next one is read.
+    let totalCount: number = $state(0);
     let pageCount: number = $derived(Math.ceil(totalCount / pageSize));
 
-    let currentPageUuids: Promise<string[]> = $derived(
-        relaysService
-            .fetch(filter, sort, pageSize, pageNumber)
+    let currentPage: Promise<PageOf<Relay>> = $derived(
+        ports.relays.list(filter, sort, { size: pageSize, number: pageNumber }).then(result => {
+            const page = valueOf(result);
+            totalCount = page.total;
+            return page;
+        })
     );
     let currentPageRelays: Promise<Relay[]> = $derived(
-        currentPageUuids.then(
-            uuids => uuids.map(uuid => relaysStore.getBy("uuid", uuid).get()).filter(x => !!x)
-        )
+        currentPage.then(page => page.items)
     );
 
     const refresh = function () {
@@ -108,12 +112,11 @@
         const input = prompt('Enter relay URI:')?.trim();
         if (!input) return;
 
-        try {
-            await relaysService.addRelay(input.trim());
+        const added = await ports.adding.addRelay(input.trim());
+        if (added.ok) {
             alert('The relay is added to the database. If the relay is available, it will soon appear in the table for everyone.');
-        } catch (e: any) {
-            alert(e.message);
-            throw e;
+        } else {
+            alert(added.error);
         }
     };
 </script>
@@ -182,7 +185,7 @@
         {:then relays}
             <div class="uk-margin-small-bottom uk-flex uk-flex-between uk-flex-middle uk-flex-wrap" style="gap: 8px;">
                 <div class="uk-flex uk-flex-middle" style="gap: 8px;">
-                    {#await currentPageUuids}
+                    {#await currentPage}
                         <span uk-spinner="ratio: 1.2"></span>
                     {:then _}
                         <span class="cursor" onclick={refresh} title="Refresh">

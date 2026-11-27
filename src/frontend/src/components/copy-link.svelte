@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { copyToClipboard } from '@/utils';
+    import { useWebsite } from '@/store/website';
     import Icon from '@/components/icon.svelte';
 
     interface Props {
@@ -10,9 +10,11 @@
 
     let { url, maxLength = 40, truncateDirection = 'start' }: Props = $props();
 
+    const { ports } = useWebsite();
+
     let copyTimeout: ReturnType<typeof setTimeout> | null = $state(null);
     const copy = function () {
-        copyToClipboard(url);
+        ports.copying.copy(url);
         copyTimeout && clearTimeout(copyTimeout);
         copyTimeout = setTimeout(() => {
             copyTimeout = null;

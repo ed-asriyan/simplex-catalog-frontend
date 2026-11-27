@@ -1,8 +1,7 @@
 <script lang="ts">
-    import { relaysService } from '@/store/relays/relays-service';
-    import { relaysStore } from '@/store/relays/relays-store';
-    import { relayStatusesStore } from '@/store/relays/statuses-store';
-    import { relayStatusesService } from '@/store/relays/statuses-service';
+    import type { Relay, RelayCheck } from '@/ports';
+    import { useWebsite } from '@/store/website';
+    import { readAll, valueOf } from '@/store/result';
     import { convertUTCDateToLocalDate } from '@/utils';
     import moment from 'moment';
     import CopyLink from '@/components/copy-link.svelte';
@@ -16,19 +15,23 @@
 
     let { route }: Props = $props();
     let { uuid } = $derived(route.result.path.params || {});
+    const { ports } = useWebsite();
 
-    let relay = $derived(relaysStore.getBy('uuid', uuid));
-    let relayStatuses = $derived(relayStatusesStore.getByIndex('relayUuid', uuid));
+    let relay: Relay | null = $state(null);
+    let relayStatuses: RelayCheck[] = $state([]);
 
     let loadingPromise: Promise<any> = $derived(
         uuid ? Promise.all([
-            relaysService.fetch({ uuids: { inclusive: true, values: [uuid] } }, { field: 'is_online', order: 'desc' }, 1, 1),
-            relayStatusesService.fetch([uuid]),
-        ]) : Promise.resolve()
+            ports.relays.relay(uuid).then(valueOf),
+            readAll(page => ports.relays.checks([uuid], page)).then(valueOf),
+        ]).then(([found, checks]) => {
+            relay = found;
+            relayStatuses = checks;
+        }) : Promise.resolve()
     );
 
     let timelineItems: Item[] = $derived(
-        $relayStatuses?.map(status => ({
+        relayStatuses.map(status => ({
             timestamp: status.createdAt,
             series: {
                 "Is Online": {
@@ -47,12 +50,12 @@
                 <span data-uk-spinner="ratio: 3"></span>
             </div>
         {:then _}
-            {#if $relay}
+            {#if relay}
                 <div class="uk-card uk-card-default uk-card-body">
                     <div class="uk-grid-small uk-flex-middle" data-uk-grid>
                         <div class="uk-width-auto">
-                            {#if $relay.photo}
-                                <img class="uk-border-circle" width="80" height="80" src={$relay.photo} alt={$relay.name}>
+                            {#if relay.photo}
+                                <img class="uk-border-circle" width="80" height="80" src={relay.photo} alt={relay.name}>
                             {:else}
                                 <div class="uk-border-circle uk-background-muted uk-flex uk-flex-center uk-flex-middle" style="width: 80px; height: 80px; font-size: 40px;">
                                     🤖
@@ -61,14 +64,14 @@
                         </div>
                         <div class="uk-width-expand">
                             <h3 class="uk-card-title uk-margin-remove-bottom uk-text-bold">
-                                {$relay.name}
+                                {relay.name}
                                 &nbsp;
-                                <StatusBadge status={$relay.status} />
+                                <StatusBadge status={relay.status} />
                             </h3>
                             <div class="uk-text-meta uk-margin-remove-top">
-                                {#if $relay.lastCheck}
-                                    <div uk-tooltip={convertUTCDateToLocalDate($relay.lastCheck).toLocaleString()}>
-                                        Last check: {moment(convertUTCDateToLocalDate($relay.lastCheck)).fromNow()}
+                                {#if relay.lastCheck}
+                                    <div uk-tooltip={convertUTCDateToLocalDate(relay.lastCheck).toLocaleString()}>
+                                        Last check: {moment(convertUTCDateToLocalDate(relay.lastCheck)).fromNow()}
                                     </div>
                                 {/if}
                             </div>
@@ -77,11 +80,11 @@
 
                     <div class="uk-margin-top" data-uk-grid>
                         <div class="uk-width-1-3@l uk-text-center">
-                            {#if $relay.url}
-                                <QRCode data={$relay.url} />
+                            {#if relay.url}
+                                <QRCode data={relay.url} />
                             {/if}
                             <div class="uk-margin-small-top">
-                                <CopyLink url={$relay.url} maxLength={28} truncateDirection="end" />
+                                <CopyLink url={relay.url} maxLength={28} truncateDirection="end" />
                             </div>
                         </div>
                         <div class="uk-width-2-3@l">
@@ -94,8 +97,8 @@
                         </div>
                     </div>
                     <p class="uk-text-small uk-text-muted">
-                        <span uk-tooltip={convertUTCDateToLocalDate($relay.createdAt).toLocaleString()}>
-                            Added to the catalog {moment(convertUTCDateToLocalDate($relay.createdAt)).fromNow()}
+                        <span uk-tooltip={convertUTCDateToLocalDate(relay.createdAt).toLocaleString()}>
+                            Added to the catalog {moment(convertUTCDateToLocalDate(relay.createdAt)).fromNow()}
                         </span>
                     </p>
                 </div>

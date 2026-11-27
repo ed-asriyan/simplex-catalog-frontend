@@ -1,7 +1,5 @@
 <script lang="ts">
-    import type { Server } from '@/store/servers/servers-store';
-    import type { Bot } from '@/store/bots/bots-store';
-    import type { Relay } from '@/store/relays/relays-store';
+    import type { Bot, Relay, Server } from '@/ports';
 
     interface Props {
         style: 'inline' | 'block';

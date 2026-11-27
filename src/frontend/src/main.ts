@@ -1,7 +1,9 @@
 import { mount } from 'svelte';
 import * as Sentry from '@sentry/svelte';
 import Root from './App.svelte';
-import { environment, sentryDsn, url } from './settings';
+import { makeOutboundPorts } from './adapters';
+import { makeInboundPorts } from './logic';
+import { environment, sentryDsn, supabaseKey, supabaseUrl, url } from './settings';
 
 if (sentryDsn) {
     Sentry.init({
@@ -24,6 +26,9 @@ if (sentryDsn) {
     });
 }
 
+const ports = makeInboundPorts(makeOutboundPorts(supabaseUrl, supabaseKey));
+
 export default mount(Root, {
     target: document.getElementById('app'),
+    props: { ports },
 });

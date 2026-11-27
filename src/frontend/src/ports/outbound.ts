@@ -9,7 +9,7 @@ import type {
 
 /** The catalog's servers, as the backend has them. */
 export interface ServersRead {
-    /** The page of the servers the query lets through, by when they were added, and how many it lets through in all (US-B5, US-B10…US-B29, US-B40). */
+    /** The page of the servers the query lets through, in an order that stays the same from page to page, and how many it lets through in all (US-B5, US-B10…US-B29, US-B40). */
     list(query: ServerQuery, page: Page): Promise<Result<PageOf<Server>>>;
 
     /** The page of the checks of the servers given, oldest first (US-B35, US-B40). */

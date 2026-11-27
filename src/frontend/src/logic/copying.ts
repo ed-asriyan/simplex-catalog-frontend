@@ -4,7 +4,7 @@ import type { Clipboard, Result, Copying as CopyingPort } from '../ports';
 export class Copying implements CopyingPort {
     constructor(private readonly clipboard: Clipboard) {}
 
-    async copy(_text: string): Promise<Result<void>> {
-        throw new Error('todo');
+    copy(text: string): Promise<Result<void>> {
+        return this.clipboard.copy(text);
     }
 }

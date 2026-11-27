@@ -1,6 +1,6 @@
 <script lang="ts">
-    import { type Server } from '@/store/servers/servers-store';
-    import { copyToClipboard } from '@/utils';
+    import type { Server } from '@/ports';
+    import { useWebsite } from '@/store/website';
     import Icon from '@/components/icon.svelte';
 
     interface Props {
@@ -14,9 +14,11 @@
 
     let displayHost: string = $derived(server.host);
 
+    const { ports } = useWebsite();
+
     let copyTimeout: ReturnType<typeof setTimeout> | null = $state(null);
     const copyToClipboardClick = function (str: string) {
-        copyToClipboard(str);
+        ports.copying.copy(str);
         copyTimeout && clearTimeout(copyTimeout);
         copyTimeout = setTimeout(() => {
             copyTimeout = null;

@@ -4,8 +4,6 @@
         color: string;
         text: string;
     }
-
-    const worldMapUrl = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json";
 </script>
 
 <script lang="ts">
@@ -14,6 +12,7 @@
     import * as i18IsoCountries from 'i18n-iso-countries';
     import { onMount } from 'svelte';
     import LineCountry from '@/components/servers/fields/line-country.svelte';
+    import { useWebsite } from '@/store/website';
 
     interface Props {
         countries: Country[];
@@ -21,6 +20,7 @@
     }
 
     let { countries, onCountryClick }: Props = $props();
+    const { ports } = useWebsite();
     let svgElement: SVGSVGElement;
 
     interface Tooltip {
@@ -49,7 +49,9 @@
 
         const path = d3.geoPath().projection(projection);
 
-        d3.json(worldMapUrl).then(worldData => {
+        ports.world.countries().then(world => {
+            if (!world.ok) throw new Error(world.error);
+            const worldData = world.value;
             const countries = topojson.feature(worldData, worldData.objects.countries);
 
             svg.selectAll("path")

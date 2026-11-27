@@ -4,7 +4,7 @@ import type { Result, WorldMap, WorldTopology, WorldShapes as WorldShapesPort } 
 export class WorldShapes implements WorldShapesPort {
     constructor(private readonly worldMap: WorldMap) {}
 
-    async countries(): Promise<Result<WorldTopology>> {
-        throw new Error('todo');
+    countries(): Promise<Result<WorldTopology>> {
+        return this.worldMap.countries();
     }
 }

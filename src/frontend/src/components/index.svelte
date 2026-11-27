@@ -7,7 +7,7 @@
     import Relays from './relays/index.svelte';
     import FAQ from './faq.svelte';
     import { simplexGroupLink } from '@/settings';
-    import { countriesService } from '@/store/servers/countries-service';
+    import { useWebsite } from '@/store/website';
 
     const routes: RouteConfig[] = [
         {
@@ -36,7 +36,7 @@
         },
     ];
 
-    countriesService.fetchCountries();
+    useWebsite().countries.load();
 </script>
 
 {#snippet navLinks()}

@@ -1,5 +1,7 @@
 <script lang="ts">
-    import type { Sort } from '@/store/servers/servers-service';
+    import type { ServersSortField, Sort as SortOf } from '@/ports';
+
+    type Sort = SortOf<ServersSortField>;
 
     interface Props {
         sort: Sort,

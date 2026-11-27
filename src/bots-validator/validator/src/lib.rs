@@ -8,9 +8,7 @@ use env_logger::Builder;
 use log::LevelFilter;
 use std::io::Write;
 
-pub mod database;
-pub mod smp;
-pub mod types;
+pub mod adapters;
 pub mod validator;
 
 pub fn init_logger() {

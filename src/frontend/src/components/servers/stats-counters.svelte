@@ -1,6 +1,6 @@
 <script lang='ts'>
-    import { countriesStore } from '@/store/servers/countries-store';
-    import type { Filter } from '@/store/servers/servers-service';
+    import type { ServersFilter as Filter } from '@/ports';
+    import { useWebsite } from '@/store/website';
 
     interface Props {
         filter: Filter;
@@ -9,6 +9,7 @@
 
     let { updateFilter, filter }: Props = $props();
 
+    const { countries: countriesStore } = useWebsite();
     let countries = $derived(countriesStore.items);
     let activeCountries = $derived($countries.filter(({ active }) => !!active));
     let activeTorCountries = $derived(activeCountries.filter(({ country }) => country === 'TOR'));

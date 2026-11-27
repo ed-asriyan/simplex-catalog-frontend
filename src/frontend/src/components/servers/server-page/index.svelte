@@ -1,8 +1,7 @@
 <script lang="ts">
-    import { serversService } from '@/store/servers/servers-service';
-    import { serversStore, type Server } from '@/store/servers/servers-store';
-    import { serverStatusesService } from '@/store/servers/statuses-service';
-    import { serverStatusesStore } from '@/store/servers/statuses-store';
+    import type { Server, ServerCheck } from '@/ports';
+    import { useWebsite } from '@/store/website';
+    import { readAll, valueOf } from '@/store/result';
     import { getFlagEmoji } from '@/utils';
     import LineCountry from '../fields/line-country.svelte';
     import LineProtocol from '../fields/line-protocol.svelte';
@@ -21,28 +20,28 @@
     }
 
     let { route }: Props = $props();
+    const { ports } = useWebsite();
     let uuidEncoded = $derived(route.result.path.params?.uuid || '');
     let uuid: string = $derived(decodeURIComponent(uuidEncoded));
 
     let server: Server | null = $state(null);
+    let checks: ServerCheck[] = $state([]);
     let statusesFetched = $state(false);
     let siblingCount: number = $state(0);
 
     let loadingPromise: Promise<void> = $derived(
         uuid
-            ? serversService.fetch(
-                { uuid, labels: undefined },
-                { field: 'status', order: 'desc' },
-                1,
-                1
-            ).then(async uuids => {
-                const found = uuids.map(id => serversStore.getBy("uuid", id).get()).filter(Boolean)[0] as Server | undefined;
-                server = found || null;
+            ? ports.servers.server(uuid).then(async result => {
+                server = valueOf(result);
                 if (server) {
+                    const found = server;
                     statusesFetched = false;
                     const [, count] = await Promise.all([
-                        serverStatusesService.fetch([server.uuid]).then(() => { statusesFetched = true; }),
-                        serversService.countByIdentity(server.identity, server.uuid),
+                        readAll(page => ports.servers.checks([found.uuid], page)).then(result => {
+                            checks = valueOf(result);
+                            statusesFetched = true;
+                        }),
+                        ports.servers.othersWithIdentity(found).then(valueOf),
                     ]);
                     siblingCount = count;
                 }
@@ -55,8 +54,7 @@
         host.length > MAX_HOST_LENGTH ? '…' + host.slice(host.length - MAX_HOST_LENGTH) : host;
 
     const getTimelineItems = function (server: Server) {
-        const statuses = serverStatusesStore.getByIndex('serverUuid', server.uuid);
-        return statuses.get().map(status => ({
+        return checks.filter(status => status.serverUuid === server.uuid).map(status => ({
             timestamp: status.createdAt,
             series: {
                 "Status": {

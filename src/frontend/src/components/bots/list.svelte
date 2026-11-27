@@ -1,12 +1,9 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import moment from "moment";
-  import {
-    botsService,
-    type Filter,
-    type Sort,
-  } from "@/store/bots/bots-service";
-  import { botsStore, type Bot } from "@/store/bots/bots-store";
+  import type { Bot, BotsFilter as Filter, BotsSortField, PageOf, Sort as SortOf } from "@/ports";
+  import { useWebsite } from "@/store/website";
+  import { valueOf } from "@/store/result";
   import { convertUTCDateToLocalDate, delay, setQueryParam } from "@/utils";
   import Icon from "@/components/icon.svelte";
   import { goto } from "@mateothegreat/svelte5-router";
@@ -16,7 +13,10 @@
     route: any;
   }
 
+  type Sort = SortOf<BotsSortField>;
+
   let { route }: Props = $props();
+  const { ports } = useWebsite();
 
   let params = $derived(route.result.querystring.params);
 
@@ -42,14 +42,8 @@
       Object.values(generatedFilter || {}).filter((x) => x !== undefined)
         .length === 0
     ) {
-      const stored = JSON.parse(
-        localStorage.getItem("botsFilter") || "null",
-      ) as Filter | null;
-      setFilter(
-        stored && Object.values(stored).some((x) => x !== undefined)
-          ? stored
-          : defaultFilter,
-      );
+      const stored = ports.filters.recall("bots") as Filter | null;
+      setFilter(stored ?? defaultFilter);
     }
   });
 
@@ -59,7 +53,7 @@
   });
 
   const setFilter = function (newFilter: Filter) {
-    localStorage.setItem("botsFilter", JSON.stringify(newFilter));
+    ports.filters.remember("bots", newFilter);
     setQueryParam(route, {
       filterStatus:
         newFilter.status === undefined
@@ -80,8 +74,8 @@
   let pageNumber: number = $derived(+params.pageNumber || 1);
   let pageSize: number = $derived(+params.pageSize || 12);
 
-  let totalCountStore = $derived(botsStore.totalCount);
-  let totalCount: number = $derived($totalCountStore);
+  // The total of the list last read, kept while the next one is read.
+  let totalCount: number = $state(0);
   let pageCount: number = $derived(Math.ceil(totalCount / pageSize) || 1);
 
   const changePage = function (newPage: number) {
@@ -91,15 +85,15 @@
     });
   };
 
-  let currentPageUuids: Promise<string[]> = $derived(
-    botsService.fetch(filter, sort, pageSize, pageNumber),
+  let currentPage: Promise<PageOf<Bot>> = $derived(
+    ports.bots.list(filter, sort, { size: pageSize, number: pageNumber }).then((result) => {
+      const page = valueOf(result);
+      totalCount = page.total;
+      return page;
+    }),
   );
   let currentPageBots: Promise<Bot[]> = $derived(
-    currentPageUuids.then((uuids) =>
-      uuids
-        .map((uuid) => botsStore.getBy("uuid", uuid).get())
-        .filter((x) => !!x),
-    ),
+    currentPage.then((page) => page.items),
   );
 
   let _searchText = $derived(filter.text || "");
@@ -116,14 +110,13 @@
     const input = prompt("Enter invite link:")?.trim();
     if (!input) return;
 
-    try {
-      await botsService.addBot(input.trim());
+    const added = await ports.adding.addBot(input.trim());
+    if (added.ok) {
       alert(
         "The bot was submitted and will appear after it has been moderated and approved.",
       );
-    } catch (e: any) {
-      alert(e.message);
-      throw e;
+    } else {
+      alert(added.error);
     }
   };
 </script>
@@ -157,7 +150,7 @@
   <div class="uk-container uk-container-small uk-container-default">
     <div uk-grid>
       <div class="uk-width-auto">
-        {#await currentPageUuids}
+        {#await currentPage}
           <span class="uk-margin-small-right" uk-spinner="ratio: 1.2"></span>
         {:then _}
           <span

@@ -1,7 +1,7 @@
 <script lang="ts">
-  	import { type Server } from '@/store/servers/servers-store';
+  	import type { Server } from '@/ports';
 	import Modal from '@/components/modal.svelte';
-	import { labelsStore } from '@/store/servers/labels-store';
+	import { useWebsite } from '@/store/website';
 	import LineCountry from '../fields/line-country.svelte';
 	import LineUptime from '@/components/uptime.svelte';
 	import LineServerInfo from '../fields/line-server-info.svelte';
@@ -14,6 +14,7 @@
 	}
 
 	let { servers = $bindable(), onclick }: Props = $props();
+	const { labels: labelsStore } = useWebsite();
 	let open: boolean = $state(false);
 
 	let i: number = $state(0);
@@ -81,7 +82,7 @@
 				<button class="uk-flex-1 uk-button uk-button-defadult" onclick={handleNext}>{ nextText }</button>
 			</div>
 			{#if server}
-				<button class="uk-margin-top uk-width-1-1 uk-button uk-button" onclick={e => { labelsStore.include(server.uuid, 'added'); handleNext(e) }}>
+				<button class="uk-margin-top uk-width-1-1 uk-button uk-button" onclick={e => { labelsStore.markAdded(server.uuid); handleNext(e) }}>
 					Mark as added and { nextText }
 				</button>
 			{/if}

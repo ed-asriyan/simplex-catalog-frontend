@@ -188,7 +188,7 @@ describe('sorts', () => {
 
 describe('paging', () => {
     const many = (n: number): Server[] =>
-        Array.from({ length: n }, (_, i) => server(`s${String(i).padStart(3, '0')}`, { host: `h${String(i).padStart(3, '0')}.com` }));
+        Array.from({ length: n }, (_, i) => server(`s${String(i).padStart(4, '0')}`, { host: `h${String(i).padStart(4, '0')}.com` }));
 
     // US-B28
     it('gives the page asked for, of the size asked for, and how many servers the filter lets through in all', async () => {
@@ -196,7 +196,7 @@ describe('paging', () => {
         const first = await uuids({}, byHost, 10, 1);
         const third = await uuids({}, byHost, 10, 3);
         expect(first.uuids).toEqual(many(10).map(s => s.uuid));
-        expect(third.uuids).toEqual(['s020', 's021', 's022']);
+        expect(third.uuids).toEqual(['s0020', 's0021', 's0022']);
         expect(first.total).toBe(23);
         expect(third.total).toBe(23);
     });

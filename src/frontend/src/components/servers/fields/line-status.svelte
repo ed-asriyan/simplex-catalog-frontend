@@ -1,5 +1,5 @@
 <script lang="ts">
-    import type { Server } from '@/store/servers/servers-store';
+    import type { Server } from '@/ports';
 
     interface Props {
         status?: boolean;

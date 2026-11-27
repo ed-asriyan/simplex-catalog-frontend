@@ -1,15 +1,15 @@
 <script lang="ts">
-    import type { Readable } from 'svelte/store';
-    import { serversService, type Filter, type Sort } from '@/store/servers/servers-service';
-    import { type Server, serversStore } from '@/store/servers/servers-store';
+    import type { Server, ServersFilter as Filter, ServersSortField, Sort as SortOf } from '@/ports';
+    import { useWebsite } from '@/store/website';
+    import { valueOf } from '@/store/result';
     import ServerModal from '../server-modal/index.svelte';
     import TableHeader from './table-header.svelte';
     import TableRow from './table-row.svelte';
     import Icon from '@/components/icon.svelte';
-    import { labelsStore } from '@/store/servers/labels-store';
-    import { countriesStore } from '@/store/servers/countries-store';
-    import { countryCodeToName, delay, exportFile, importFile } from '@/utils';
+    import { countryCodeToName, delay } from '@/utils';
     import LineCountry from '../fields/line-country.svelte';
+
+    type Sort = SortOf<ServersSortField>;
 
     interface Props {
         filter: Filter;
@@ -24,15 +24,19 @@
 
     let { filter, updateFilter, updateSort, updatePagination, sort, pageNumber, pageSize, refresh }: Props = $props();
 
-    let totalCountStore: Readable<number> = $derived(serversStore.totalCount);
-    let totalCount: number = $derived($totalCountStore);
+    const { ports, labels: labelsStore, countries: countriesStore } = useWebsite();
+
+    // The total of the list last read, kept while the next one is read.
+    let totalCount: number = $state(0);
 
     let pageCount: number = $derived(Math.ceil(totalCount / pageSize));
 
     let currentPageServers: Promise<Server[]> = $derived(
-        serversService.fetch(filter, sort, pageSize, pageNumber).then(uuids =>
-            uuids.map(uuid => serversStore.getBy("uuid", uuid).get()).filter(Boolean) as Server[]
-        )
+        ports.servers.list(filter, sort, { size: pageSize, number: pageNumber }).then(result => {
+            const page = valueOf(result);
+            totalCount = page.total;
+            return page.items;
+        })
     );
 
     let selectedServersModal: Server[] = $state([]);
@@ -63,20 +67,21 @@
     };
 
     const exportLabels = function () {
-        const labels = Object.entries($labelsStore).reduce((acc, [label, uuids]) => {
-            acc[label] = Array.from(uuids);
-            return acc;
-        }, {} as Record<string, string[]>);
-        exportFile(JSON.stringify(labels), `${location.hostname}_labels_${new Date().toISOString()}.json`, 'application/json');
+        ports.labels.export();
     };
 
     const importLabels = async function () {
-        const data = await importFile('application/json');
-        const labels = JSON.parse(data) as Record<string, string[]>;
+        const read = await ports.labels.read();
+        if (!read.ok) {
+            console.error('The labels file could not be read:', read.error);
+            return;
+        }
+        const labels = read.value;
+        if (labels === null) return;
 
         const list = Object.entries(labels).map(([label, uuids]) => `Label "${label}": ${uuids.length} servers`).join('\n');
         if (confirm(`The current labels in this browser will be replaced by the import:\n\n${list}\n\nContinue?`)) {
-            labelsStore.importFromJson(labels);
+            labelsStore.replace(labels);
         }
     };
 

@@ -1,7 +1,15 @@
 //! The relays validator's application: reads every page of the relays, tests each, and writes what the test
 //! found (US-D22…US-D24).
 
-use super::ports::{RelayRepositoryPort, RelayTestPort, RelaysValidatorPort};
+use log::{error, info};
+use rand::seq::SliceRandom;
+
+use super::ports::{
+    Page, Relay, RelayCheck, RelayRepositoryPort, RelayTestPort, RelaysValidatorPort,
+};
+
+/// How many relays one page asks for.
+const PAGE_SIZE: u32 = 1000;
 
 pub struct App<R: RelayRepositoryPort, T: RelayTestPort> {
     relay_repository: R,
@@ -15,12 +23,74 @@ impl<R: RelayRepositoryPort, T: RelayTestPort> App<R, T> {
             relay_test,
         }
     }
+
+    /// Every relay of the list, page after page until the list's total is read. `None` when a page could not be
+    /// read: a list read in part is not checked as if it were whole.
+    async fn read_all_relays(&self) -> Option<Vec<Relay>> {
+        let mut relays: Vec<Relay> = Vec::new();
+        let mut number = 1;
+        loop {
+            let page = self
+                .relay_repository
+                .read_relays(Page { size: PAGE_SIZE, number })
+                .await?;
+            let is_empty = page.items.is_empty();
+            relays.extend(page.items);
+            if is_empty || relays.len() >= page.total as usize {
+                return Some(relays);
+            }
+            number += 1;
+        }
+    }
+
+    async fn test_relay(&self, url: &str, retry_count: u32) -> Option<RelayCheck> {
+        for attempt in 0..=retry_count {
+            info!("Checking relay: {} (attempt {})", url, attempt + 1);
+            if let Some(check) = self.relay_test.test(url).await {
+                info!("Relay check: {:?}", check);
+                return Some(check);
+            }
+            error!("Failed to test relay {}", url);
+        }
+        None
+    }
+
+    async fn write_check(&self, relay: &Relay, check: &RelayCheck) {
+        if let RelayCheck::Online { profile } = check {
+            if self
+                .relay_repository
+                .replace_profile(&relay.id, profile)
+                .await
+                .is_none()
+            {
+                error!("Failed to replace the profile of relay {}", relay.id);
+                return;
+            }
+        }
+        if self
+            .relay_repository
+            .create_check(&relay.id, check)
+            .await
+            .is_none()
+        {
+            error!("Failed to create the check of relay {}", relay.id);
+        }
+    }
 }
 
 impl<R: RelayRepositoryPort, T: RelayTestPort> RelaysValidatorPort for App<R, T> {
-    async fn check_relays(&self, _retry_count: u32) {
-        let _ = (&self.relay_repository, &self.relay_test);
-        todo!()
+    async fn check_relays(&self, retry_count: u32) {
+        let Some(mut relays) = self.read_all_relays().await else {
+            error!("Failed to retrieve relays from repository");
+            return;
+        };
+        info!("Retrieved {} relays", relays.len());
+        relays.shuffle(&mut rand::rng());
+        for relay in &relays {
+            if let Some(check) = self.test_relay(&relay.url, retry_count).await {
+                self.write_check(relay, &check).await;
+            }
+        }
     }
 }
 

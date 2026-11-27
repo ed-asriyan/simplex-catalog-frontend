@@ -1,6 +1,6 @@
 <script lang="ts">
     import QRCode from '@castlenine/svelte-qrcode';
-    import type { Server } from '@/store/servers/servers-store';
+    import type { Server } from '@/ports';
     import LineUri from './line-uri.svelte';
 
     interface Props {

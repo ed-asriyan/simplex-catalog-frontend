@@ -2,13 +2,15 @@
     import StatsMap from './stats-map.svelte';
     import StatsCounters from './stats-counters.svelte';
     import ServersTable from './table/index.svelte';
-    import { type Filter, type Sort } from '@/store/servers/servers-service';
-    import { serversService } from '@/store/servers/servers-service';
+    import type { ServersFilter as Filter, ServersSortField, Sort as SortOf } from '@/ports';
     import { setQueryParam } from '@/utils';
-    import { labelsStore } from '@/store/servers/labels-store';
+    import { useWebsite } from '@/store/website';
     import { onMount } from 'svelte';
 
+    type Sort = SortOf<ServersSortField>;
+
     let { route } = $props();
+    const { ports, labels: labelsStore } = useWebsite();
 
     let params = $derived(route.result.querystring.params);
 
@@ -16,12 +18,11 @@
         const input = prompt('Enter SMP or XFTP server URI:')?.trim();
         if (!input) return;
 
-        try {
-            await serversService.addServer(input.trim());
+        const added = await ports.adding.addServer(input.trim());
+        if (added.ok) {
             alert('The server is added to the database. If the server is available, it will soon appear in the table for everyone.');
-        } catch (e) {
-            alert(e.message);
-            throw e;
+        } else {
+            alert(added.error);
         }
     };
 
@@ -51,8 +52,8 @@
     onMount(() => {
         const generatedFilter = generateFilter(params);
         if (Object.values(generatedFilter || {}).filter(x => x !== undefined).length === 0) {
-            const stored = JSON.parse(localStorage.getItem('serversFilter') || 'null') as Filter | null;
-            updateFilter(stored && Object.values(stored).some(x => x !== undefined) ? stored : defaultFilter);
+            const stored = ports.filters.recall('servers') as Filter | null;
+            updateFilter(stored ?? defaultFilter);
         }
     });
 
@@ -69,7 +70,7 @@
     });
 
     const updateFilter = (newFilter: Filter) => {
-        localStorage.setItem('serversFilter', JSON.stringify(newFilter));
+        ports.filters.remember('servers', newFilter);
         setQueryParam(route, {
             filterProtocol: newFilter.protocol === undefined ? '' : newFilter.protocol,
             filterLabelsList: newFilter.labels ? newFilter.labels.values.join(',') : '',
