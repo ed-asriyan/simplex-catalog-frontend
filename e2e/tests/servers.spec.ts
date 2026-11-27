@@ -347,7 +347,7 @@ test('Type shows the SMP servers, the XFTP servers or both', async ({ page }) =>
   await shows(page, catalog.xftp.host);
 });
 
-// US-B14
+// US-B14, US-B14b
 test('Status shows the servers online, offline, not checked yet, or all', async ({ page }) => {
   await servers(page, 'filterHost=.test');
   const status = select(page, 'Inactive');
@@ -556,7 +556,7 @@ test('Total countries sets Location to Not TOR, exclusive, and Status to Active'
 
 // ---- Sorting and pages
 
-// US-B27
+// US-B27, US-B22b
 test('a column\'s title sorts the table by it, descending, then ascending', async ({ page }) => {
   await servers(page, 'filterHost=.test&filterStatus=');
   const type = page.getByRole('columnheader', { name: /^Type/ });
@@ -591,7 +591,7 @@ test('Page size shows that many servers a page, and is not kept in the address',
   await expect(size).toHaveValue('50');
 });
 
-// US-B29
+// US-B29, US-B52
 test('the page buttons, Previous page and Next page show the page, and 🔄 fetches the table again', async ({ page }) => {
   await servers(page, 'filterHost=.test&filterStatus=&pageSize=5');
   const first = await hosts(page);
@@ -707,7 +707,7 @@ async function inTableOrder(page: Page, picks: Address[]): Promise<Address[]> {
   return [...picks].sort((a, b) => shown.indexOf(a.host) - shown.indexOf(b.host));
 }
 
-// US-B34
+// US-B34, US-B53
 test('ticked rows count in Bulk mode, which needs two; the head\'s box ticks all and unticks them', async ({ page }) => {
   await servers(page, 'filterHost=.test&filterStatus=true');
   const mode = (n: number) => page.getByRole('button', { name: `Bulk mode (${n})` });
@@ -926,7 +926,7 @@ test('an address the catalog has already is accepted the same way, and changes n
   await expect(row(page, catalog.online.host)).toHaveCount(1);
 });
 
-// US-B47
+// US-B47, US-B54
 test('an address that is not a SMP or XFTP server\'s is refused, and cancelling does nothing', async ({ page }) => {
   await servers(page);
   for (const wrong of ['https://smp.example.com', 'smp://smp.example.com']) {

@@ -95,7 +95,7 @@ export interface ServerQuery {
 /** The filters of the servers' table (US-B10…US-B26), as the page's address and the visitor's browser keep them. */
 export interface ServersFilter {
     labels?: FilterArray;
-    /** `'unknown'`, for the servers not checked yet, is read back from the page's address as no filter (US-B14). */
+    /** `'unknown'`, for the servers not checked yet, is read back from the page's address as no filter (US-B14b). */
     status?: boolean | 'unknown';
     countries?: FilterArray;
     identity?: string;
