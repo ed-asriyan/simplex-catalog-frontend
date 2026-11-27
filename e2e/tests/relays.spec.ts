@@ -333,6 +333,9 @@ test('the page of a relay the catalog does not list says so', async ({ page }) =
 });
 
 // ---- Adding a relay
+//
+// The website asks for the address and tells what it did in the browser's own dialogs, drawn outside the page: they
+// have no screenshot, and their texts are checked.
 
 // US-D17
 test('Add relay anonymously asks for the relay\'s address', async ({ page }) => {

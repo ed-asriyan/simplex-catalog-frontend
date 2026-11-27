@@ -353,6 +353,9 @@ test('the page of a bot the catalog does not list says so', async ({ page }) => 
 });
 
 // ---- Adding a bot
+//
+// The website asks for the address and tells what it did in the browser's own dialogs, drawn outside the page: they
+// have no screenshot, and their texts are checked.
 
 // US-C16
 test('Add bot anonymously asks for the invite link', async ({ page }) => {
