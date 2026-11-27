@@ -11,7 +11,7 @@ import { randomBytes } from 'node:crypto';
 import { expect, test, type Locator, type Page } from '@playwright/test';
 import { once } from '../harness/fixture';
 import { relayAdded } from '../harness/maintainer';
-import { add, allowClipboard, answering, clipboard, DATE_TIME, open, qrText, typeInto, WEBSITE } from '../harness/site';
+import { add, allowClipboard, answering, clipboard, DATE_TIME, looks, open, qrText, typeInto, WEBSITE } from '../harness/site';
 import { deleteRelayAddress, stack } from '../harness/stack';
 import { validate } from '../harness/validators';
 
@@ -110,7 +110,10 @@ test('the relays page: the text, the buttons, the filters and the table with its
   await expect(cell(r, 'Added')).toHaveText(/ago$/);
   await expect(r).not.toHaveClass(/uk-text-danger/);
   await total(page, 3);
-  await expect(page).toHaveScreenshot('relays.png', { fullPage: true, mask: [page.getByRole('table'), page.getByText(/^Total relays/)] });
+  // What a run makes anew, which the screenshot masks: the relays' addresses and the times. Every row is the stack's
+  // one relay, so the rows look alike in whatever order their checks came.
+  const table = page.getByRole('table');
+  await looks(page, 'relays', [[table.locator('[uk-tooltip="Click to copy URI"]'), '22em'], [table.getByText(/ ago$/), '10em']]);
 });
 
 test('the relays table with no relay to show says so', async ({ page }) => {
@@ -303,14 +306,13 @@ test('a relay\'s page: the image, the name and status, the QR code, the address 
   const shown = (await page.locator('[uk-tooltip="Click to copy URI"]').innerText()).trim();
   expect(shown.endsWith('…') && address!.startsWith(shown.slice(0, -1))).toBe(true);
   await expect(entries.locator('.timeline-date')).toHaveText([DATE_TIME]);
-  await expect(page).toHaveScreenshot('relay.png', {
-    fullPage: true,
-    mask: [
-      // The QR code and the address under it, a column of one size whatever the address.
-      page.locator('.uk-card svg').locator('..'), page.getByText(/^Last check: /),
-      page.locator('.timeline-date'), page.getByText(/^Added to the catalog /),
-    ],
-  });
+  await looks(page, 'relay', [
+    [page.locator('.uk-card svg'), '0'],
+    [page.locator('[uk-tooltip="Click to copy URI"]'), '16em'],
+    [page.getByText(/^Last check: /), '16em'],
+    [page.locator('.timeline-date'), '8em'],
+    [page.getByText(/^Added to the catalog /), '20em'],
+  ]);
 });
 
 // US-D15

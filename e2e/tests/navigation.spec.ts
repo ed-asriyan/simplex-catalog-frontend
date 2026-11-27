@@ -1,7 +1,7 @@
 // Epic A: getting around — the header and its menu, the footer, the FAQ.
 // These pages hold nothing of the catalog's data.
 import { expect, test, type Page } from '@playwright/test';
-import { open, opensTab, stubOtherWebsites, WEBSITE } from '../harness/site';
+import { looks, open, opensTab, stubOtherWebsites, WEBSITE } from '../harness/site';
 
 /** The corner's picture, the link of no size around it being what the person clicks. */
 const corner = (page: Page) => page.locator('a[aria-label="View source on GitHub"] svg');
@@ -54,7 +54,7 @@ test.describe('on a computer', () => {
       await expect(header.getByRole('link', { name: '💬 Chat' })).toBeHidden();
       await expect(header.locator('iframe[title="Sponsor ed-asriyan"]')).toBeVisible();
       await expect(header.getByRole('link', { name: 'Donate using Liberapay' })).toBeVisible();
-      await expect(page).toHaveScreenshot('header-wide-computer.png', { fullPage: true });
+      await looks(page, 'header-wide-computer');
     });
 
     // US-A11
@@ -209,7 +209,7 @@ test.describe('on a phone', () => {
     // The pointer is taken off the menu, where the tap on Open menu left it over an item. The menu is a layer over
     // the page as tall as the window: it is taken as the window shows it, not as the whole page.
     await page.mouse.move(389, 843);
-    await expect(page).toHaveScreenshot('menu-phone.png');
+    await looks(page, 'menu-phone', [], true);
 
     await menu.getByRole('button', { name: 'Close menu' }).click();
     await expect(menu).toBeHidden();
@@ -267,5 +267,5 @@ test('the FAQ: the questions, with their answers open', async ({ page }) => {
   await expect(page.getByText('Note: This prevents regular user contacts from appearing in the catalog.')).toBeVisible();
   await expect(page.getByText('Wait up to 12 hours for the bot to appear in the catalog.')).toBeVisible();
   await expect(page.getByText("If the bot hasn't appeared after 12 hours, check if the bot is online and the submitted contact link is active. If it's online and the contact link is active, please submit a bug report.")).toBeVisible();
-  await expect(page).toHaveScreenshot('faq.png', { fullPage: true });
+  await looks(page, 'faq');
 });

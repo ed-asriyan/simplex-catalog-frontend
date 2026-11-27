@@ -8,7 +8,7 @@ import { expect, test, type Locator, type Page } from '@playwright/test';
 import {
   downServer, i2pServer, onionServer, smpServer, xftpServer, yggServer, smpIdentity, strangerServer, unknownServer, type Address,
 } from '../harness/hosts';
-import { add, allowClipboard, answering, clipboard, DATE_TIME, open, qrText, stubMap, typeInto, WEBSITE } from '../harness/site';
+import { add, allowClipboard, answering, clipboard, DATE_TIME, looks, open, qrText, stubMap, typeInto, WEBSITE } from '../harness/site';
 import { once } from '../harness/fixture';
 import { validate } from '../harness/validators';
 
@@ -131,10 +131,13 @@ test('the servers page: the text, the counts, the add button, the filters and th
   }
   await expect(page.getByRole('columnheader', { name: /^Last Check ▼$/ })).toBeVisible();
   await expect(page.getByText(/^Total servers matching filters: \d+$/)).toBeVisible();
-  await expect(page).toHaveScreenshot('servers.png', {
-    fullPage: true,
-    mask: [page.locator('svg[viewBox="0 0 960 600"]'), page.locator('table'), page.getByText(/^Total servers/), page.getByText(/^Active servers/)],
-  });
+  // The table in an order of its own, by host, of the stack's servers: by the time of the latest check, the order is
+  // that in which the validator checked them, which no run repeats, and the seed's uptimes move with the hour.
+  await servers(page, 'filterHost=e2e.test&sortField=host&sortOrder=asc');
+  await expect(page.getByRole('columnheader', { name: /^URI ▲$/ })).toBeVisible();
+  // What a run makes anew, which the screenshot masks: the stack's identity, and the times.
+  const table = page.locator('table');
+  await looks(page, 'servers', [[table.locator('code'), '0'], [table.getByText(/ ago$/), '10em']]);
 });
 
 // The world map: the stack's own, with Germany, Japan and Brazil (the website loads it from a CDN).
@@ -778,14 +781,13 @@ test('a server\'s page: its type and host, its identity, the QR code, the table\
   expect(await qrText(page.locator('.uk-card svg'))).toBe(catalog.online.uri);
   await expect(table.getByRole('row', { name: /^Added at/ })).toContainText('ago');
   await expect(entries.locator('.timeline-date')).toHaveText([DATE_TIME]);
-  await expect(page).toHaveScreenshot('server.png', {
-    fullPage: true,
-    mask: [
-      page.locator('.uk-card code'), page.locator('.uk-card svg'), page.getByRole('link', { name: /^There are \d+ more servers/ }),
-      table.getByRole('row', { name: /^Last check/ }).getByRole('cell').last(), table.getByRole('row', { name: /^Added at/ }).getByRole('cell').last(),
-      page.locator('.timeline-date'),
-    ],
-  });
+  await looks(page, 'server', [
+    [page.locator('.uk-card code'), '0'],
+    [page.locator('.uk-card svg'), '0'],
+    [page.getByRole('link', { name: /^There are \d+ more servers/ }), '20em'],
+    [table.getByText(/ ago$/), '10em'],
+    [page.locator('.timeline-date'), '8em'],
+  ]);
 });
 
 test('a server unchecked yet has no availability data', async ({ page }) => {

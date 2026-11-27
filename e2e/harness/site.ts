@@ -95,11 +95,12 @@ const stubbed = new WeakSet<BrowserContext>();
 /**
  * Stands in for every website but the catalog's, which the stack does not reach: a page of one (a link opened, the
  * sponsor button's frame) is a blank page, and an image of one (the icons, the Liberapay button) is one grey image, so
- * a page shows the same every run. Done once a context, by `open`.
+ * a page shows the same every run; the world map is the stack's own (`stubMap`). Done once a context, by `open`.
  */
 export async function stubOtherWebsites(context: BrowserContext) {
   if (stubbed.has(context)) return;
   stubbed.add(context);
+  await stubMap(context);
   await context.route(
     (url) => url.hostname !== '127.0.0.1' && url.hostname !== 'localhost',
     (route) => {
@@ -178,3 +179,26 @@ export async function qrText(qr: Locator): Promise<string | null> {
 
 /** A date and time as a timeline shows it: `Nov 27, 2026 12:01 AM`. */
 export const DATE_TIME = /^[A-Z][a-z]{2} \d{1,2}, \d{4}\s+\d{1,2}:\d{2} [AP]M$/;
+
+/** A value a run makes anew, masked on a screenshot, and the least width it takes there (`10em`). */
+export type Masked = [Locator, string];
+
+/**
+ * Compares the page with its approved screenshot `<name>.png`: the whole page, or what the window shows when
+ * `window` (a layer opened over the page as tall as the window). Each masked element is given its least width
+ * first, more than its value can take, so it is as wide every run: its mask covers that value and no more, and
+ * nothing beside it moves.
+ */
+export async function looks(page: Page, name: string, masked: Masked[] = [], window = false) {
+  for (const [locator, width] of masked) {
+    await locator.evaluateAll((elements, least) => {
+      for (const element of elements as HTMLElement[]) {
+        const display = getComputedStyle(element).display;
+        if (display === 'inline') element.style.display = 'inline-block';
+        if (display === 'block') element.style.width = 'max-content';
+        element.style.minWidth = least;
+      }
+    }, width);
+  }
+  await expect(page).toHaveScreenshot(`${name}.png`, { fullPage: !window, mask: masked.map(([locator]) => locator) });
+}

@@ -10,7 +10,7 @@ import { expect, test, type Page } from '@playwright/test';
 import { Bot, type SavedBot } from '../harness/bots';
 import { once } from '../harness/fixture';
 import { addedBot, approveBot, submitBot } from '../harness/maintainer';
-import { add, allowClipboard, answering, clipboard, DATE_TIME, open, opensTab, stubOtherWebsites, typeInto, WEBSITE } from '../harness/site';
+import { add, allowClipboard, answering, clipboard, DATE_TIME, looks, open, opensTab, stubOtherWebsites, typeInto, WEBSITE } from '../harness/site';
 import { validate } from '../harness/validators';
 
 const ADD = 'Add bot anonymously';
@@ -136,7 +136,7 @@ test('the bots page: the text, the controls, and the cards, the bots online firs
   await expect(p).toContainText('🤖');
   await expect(search(page)).toHaveValue(key(plain));
   // What a run makes anew, which the screenshot masks: the time of the check.
-  await expect(page).toHaveScreenshot('bots.png', { fullPage: true, mask: [cards(page).getByText(/^Last check: /)] });
+  await looks(page, 'bots', [[cards(page).getByText(/^Last check: /), '16em']]);
 });
 
 // US-C1 (the order: online first; a bot offline is marked)
@@ -308,10 +308,11 @@ test('a bot\'s page: the image, the name and status, the address, the descriptio
   await expect(page.getByText(/^The bot was added to the catalog .* ago$/)).toBeVisible();
   // What a run makes anew, which the screenshot masks: the times.
   await expect(page.locator('.timeline-date')).toHaveText([DATE_TIME]);
-  await expect(page).toHaveScreenshot('bot.png', {
-    fullPage: true,
-    mask: [page.getByText(/^Last check: /), page.locator('.timeline-date'), page.getByText(/^The bot was added to the catalog /)],
-  });
+  await looks(page, 'bot', [
+    [page.getByText(/^Last check: /), '16em'],
+    [page.locator('.timeline-date'), '8em'],
+    [page.getByText(/^The bot was added to the catalog /), '24em'],
+  ]);
 });
 
 test('a bot without a description, commands or message: what its page says instead', async ({ page }) => {
