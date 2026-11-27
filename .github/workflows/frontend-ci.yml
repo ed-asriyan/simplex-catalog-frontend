@@ -9,5 +9,3 @@ on:
 jobs:
   build:
     uses: ./.github/workflows/frontend-build.yml
-    with:
-      env_file_content: ${{ vars.FRONTEND_ENV_FILE_CONTENT }}

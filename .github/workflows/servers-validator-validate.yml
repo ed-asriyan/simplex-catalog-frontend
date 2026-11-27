@@ -31,12 +31,19 @@ jobs:
             done
           fi
 
+      # The validators share the project's address, its secret key and the number of tries (README.md).
       - name: Save .env file
         env:
-          ENV_FILE_CONTENT: ${{ secrets.SERVERS_VALIDATOR_ENV_FILE_CONTENT }}
+          SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          RETRY_COUNT: ${{ vars.VALIDATORS_RETRY_COUNT || '3' }}
         shell: bash
         run: |
-          echo "$ENV_FILE_CONTENT" > .env
+          {
+            echo "SUPABASE_URL=$SUPABASE_URL"
+            echo "SUPABASE_KEY=$SUPABASE_KEY"
+            echo "RETRY_COUNT=$RETRY_COUNT"
+          } > .env
 
       - name: Run validation
         run: make validate

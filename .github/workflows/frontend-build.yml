@@ -2,11 +2,6 @@ name: Frontend build
 
 on:
   workflow_call:
-    inputs:
-      env_file_content:
-        description: 'Content of the .env file'
-        required: true
-        type: string
 
 defaults:
   run:
@@ -19,12 +14,20 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
 
+      # What the website is built with: all of it is in the pages it serves, so none of it is a secret (README.md).
       - name: Save .env file
         env:
-          ENV_FILE_CONTENT: ${{ inputs.env_file_content }}
+          VITE_URL: ${{ vars.WEBSITE_URL }}
+          VITE_SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+          VITE_SUPABASE_KEY: ${{ vars.SUPABASE_ANON_KEY }}
+          VITE_SIMPLEX_GROUP_LINK: ${{ vars.SIMPLEX_GROUP_LINK }}
+          VITE_SENTRY_DSN: ${{ vars.SENTRY_DSN }}
+          VITE_ANALYTICS_MEASHUREMENT_ID: ${{ vars.ANALYTICS_MEASUREMENT_ID }}
         shell: bash
         run: |
-          echo "$ENV_FILE_CONTENT" > .env
+          for name in VITE_URL VITE_SUPABASE_URL VITE_SUPABASE_KEY VITE_SIMPLEX_GROUP_LINK VITE_SENTRY_DSN VITE_ANALYTICS_MEASHUREMENT_ID; do
+            echo "$name=${!name}"
+          done > .env
 
       - name: Build the app
         run: make prod_build_bundle
