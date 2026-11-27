@@ -1,0 +1,202 @@
+# The catalog's end-to-end stack, beside the local Supabase the harness starts
+# with the Supabase CLI (e2e/harness/stack.ts): servers for the validators to
+# check, a SimpleX CLI for the bots the tests run, the website as production
+# builds it, and the browser of the tests. The validators run by their own
+# compose files, overridden by e2e/validators/ (e2e/harness/validators.ts).
+#   docker compose -f e2e/docker-compose.yml …
+# The harness sets E2E_SUPABASE_URL and E2E_SUPABASE_KEY (the public ones)
+# for the website, and E2E_PLAYWRIGHT_VERSION for the browser.
+name: simplex-catalog-e2e
+
+# The stack's own addresses, which the servers validator's GeoIP database
+# (e2e/validators/GeoLite2-Country.mmdb) gives countries: the real one knows
+# none of a private address, and a server the validator finds no country of
+# leaves no status at all.
+networks:
+  default:
+    ipam:
+      config:
+        - subnet: 10.99.0.0/16
+
+services:
+  # A SMP server: one the tests add to the catalog, and the one every SimpleX
+  # CLI of the stack uses, so no message leaves the machine.
+  smp-server:
+    image: simplexchat/smp-server:v7.0.1
+    environment:
+      - ADDR=smp.e2e.test
+      - WEB_MANUAL=1
+    networks:
+      default:
+        aliases:
+          - smp.e2e.test
+
+  # Servers in other countries, for the tests to add as the catalog's servers: a
+  # forwarder to the stack's SMP and XFTP servers, at an address of a country
+  # (10.99.1.0/24 Germany, 10.99.2.0/24 Japan, 10.99.3.0/24 Brazil), under names
+  # of its own (e2e/harness/hosts.ts takes them in turn). It answers as they do.
+  servers-de:
+    image: alpine/socat:1.8.0.3
+    entrypoint: ["sh", "-c", "socat TCP-LISTEN:5223,fork,reuseaddr TCP:smp-server:5223 & exec socat TCP-LISTEN:443,fork,reuseaddr TCP:xftp-server:443"]
+    depends_on: [smp-server, xftp-server]
+    networks:
+      default:
+        ipv4_address: 10.99.1.10
+        aliases:
+          - de01.e2e.test
+          - de02.e2e.test
+          - de03.e2e.test
+          - de04.e2e.test
+          - de05.e2e.test
+          - de06.e2e.test
+          - de07.e2e.test
+          - de08.e2e.test
+          - de09.e2e.test
+          - de10.e2e.test
+          - de11.e2e.test
+          - de12.e2e.test
+          - de13.e2e.test
+          - de14.e2e.test
+          - de15.e2e.test
+          - de16.e2e.test
+
+  servers-jp:
+    image: alpine/socat:1.8.0.3
+    entrypoint: ["sh", "-c", "socat TCP-LISTEN:5223,fork,reuseaddr TCP:smp-server:5223 & exec socat TCP-LISTEN:443,fork,reuseaddr TCP:xftp-server:443"]
+    depends_on: [smp-server, xftp-server]
+    networks:
+      default:
+        ipv4_address: 10.99.2.10
+        aliases:
+          - jp01.e2e.test
+          - jp02.e2e.test
+          - jp03.e2e.test
+          - jp04.e2e.test
+          - jp05.e2e.test
+          - jp06.e2e.test
+          - jp07.e2e.test
+          - jp08.e2e.test
+
+  servers-br:
+    image: alpine/socat:1.8.0.3
+    entrypoint: ["sh", "-c", "socat TCP-LISTEN:5223,fork,reuseaddr TCP:smp-server:5223 & exec socat TCP-LISTEN:443,fork,reuseaddr TCP:xftp-server:443"]
+    depends_on: [smp-server, xftp-server]
+    networks:
+      default:
+        ipv4_address: 10.99.3.10
+        aliases:
+          - br01.e2e.test
+          - br02.e2e.test
+          - br03.e2e.test
+          - br04.e2e.test
+          - br05.e2e.test
+          - br06.e2e.test
+          - br07.e2e.test
+          - br08.e2e.test
+
+  # Servers nobody answers at, in a country (10.99.9.0/24 Netherlands): the
+  # connection is refused.
+  servers-down:
+    image: alpine:3.24
+    command: ["sleep", "infinity"]
+    networks:
+      default:
+        ipv4_address: 10.99.9.10
+        aliases:
+          - down01.e2e.test
+          - down02.e2e.test
+          - down03.e2e.test
+          - down04.e2e.test
+          - down05.e2e.test
+          - down06.e2e.test
+          - down07.e2e.test
+          - down08.e2e.test
+          - down09.e2e.test
+          - down10.e2e.test
+          - down11.e2e.test
+          - down12.e2e.test
+          - down13.e2e.test
+          - down14.e2e.test
+          - down15.e2e.test
+          - down16.e2e.test
+
+  # A XFTP server, for the catalog's file servers.
+  xftp-server:
+    image: simplexchat/xftp-server:v7.0.1
+    environment:
+      - ADDR=xftp.e2e.test
+      - QUOTA=1gb
+      - PASS=
+    # Where the server keeps the files it is sent (a check of it sends one).
+    tmpfs:
+      - /srv/xftp
+    networks:
+      default:
+        aliases:
+          - xftp.e2e.test
+
+  # The bots of the tests: a SimpleX CLI the tests drive through its websocket
+  # API, one user profile per bot, the CLI the bots validator runs.
+  bots:
+    image: simplex-catalog-e2e/simplex-chat:latest
+    build:
+      context: ../src/bots-validator/smp-client
+    command: ["sh", "-c", './simplex-chat --create-bot-display-name e2e -p 5225 -d /bots -s "$$SMP_SERVER"']
+    environment:
+      - SMP_SERVER=${E2E_SMP_SERVER:-}
+    ports:
+      - "127.0.0.1:${E2E_BOTS_PORT:-15226}:15226"
+    depends_on:
+      - smp-server
+
+  # The CLI listens on 127.0.0.1 only; this forwards the published port to it.
+  bots-ws:
+    image: alpine/socat:1.8.0.3
+    network_mode: service:bots
+    command: ["TCP-LISTEN:15226,fork,reuseaddr", "TCP:127.0.0.1:5225"]
+
+  # A chat relay of the tests: a SimpleX CLI running as one, the CLI the relays
+  # validator runs. A relay has no websocket API and needs a terminal: the
+  # tests type its commands into the FIFO /commands, and read its answers in
+  # its log.
+  relay:
+    image: simplex-catalog-e2e/simplex-chat-relay:latest
+    build:
+      context: ../src/relays-validator/smp-client
+    # Its terminal is a pseudo-terminal `script` gives it, fed from the FIFO.
+    command: ["sh", "-c", 'mkfifo /commands && tail -f /commands | script -qfc "stty cols 200 rows 50; ./simplex-chat --relay --create-bot-display-name relay -d /relay -s $$SMP_SERVER" /dev/null']
+    environment:
+      - SMP_SERVER=${E2E_SMP_SERVER:-}
+    depends_on:
+      - smp-server
+
+  # The website, built and served as production does, on the local Supabase.
+  website:
+    image: simplex-catalog-e2e/website:latest
+    build:
+      context: ../src/frontend
+      target: app
+      args:
+        - VITE_URL=http://127.0.0.1:${E2E_WEBSITE_PORT:-18081}
+        - VITE_SUPABASE_URL=${E2E_SUPABASE_URL:-}
+        - VITE_SUPABASE_KEY=${E2E_SUPABASE_KEY:-}
+        - VITE_SIMPLEX_GROUP_LINK=https://smp.e2e.test/g#catalog
+        - NODE_ENV=production
+    ports:
+      - "127.0.0.1:${E2E_WEBSITE_PORT:-18081}:80"
+
+  # The tests' browser, in the image of the Playwright the tests run (the
+  # harness sets E2E_PLAYWRIGHT_VERSION from e2e/node_modules), so a page
+  # renders the same on every machine and screenshots compare. It serves the
+  # tests' own Playwright, read from their node_modules; the tests connect to
+  # it and let it go out through their machine, to the website and Supabase.
+  browser:
+    image: mcr.microsoft.com/playwright:v${E2E_PLAYWRIGHT_VERSION:-0}-noble
+    init: true
+    user: pwuser
+    working_dir: /e2e
+    command: ["node", "node_modules/@playwright/test/cli.js", "run-server", "--port", "3000", "--host", "0.0.0.0"]
+    volumes:
+      - ./node_modules:/e2e/node_modules:ro
+    ports:
+      - "127.0.0.1:${E2E_BROWSER_PORT:-13000}:3000"

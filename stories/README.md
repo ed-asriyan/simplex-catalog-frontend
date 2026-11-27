@@ -39,7 +39,7 @@ The catalog at [simplex-catalog.asriyan.me](https://simplex-catalog.asriyan.me) 
   >
   > [Ed Asriyan](https://asriyan.me)
 
-  On a computer narrower than a wide one, the sponsor buttons are between the first lines and *Powered by*: [Sponsor](https://github.com/sponsors/ed-asriyan) on GitHub and [Donate using Liberapay](https://liberapay.com/ed-asriyan/donate). On a wide computer they are in the header (US-A2), on a phone in the menu (US-A4).
+  On a computer that is not a wide one, the sponsor buttons are between the first lines and *Powered by*: the GitHub Sponsors button, *Sponsor ed-asriyan* (a frame showing https://github.com/sponsors/ed-asriyan/button), and the link [Donate using Liberapay](https://liberapay.com/ed-asriyan/donate). On a wide computer they are in the header (US-A2), on a phone in the menu (US-A4).
 - **US-A14.** As a visitor, when I open `/#/faq`, I read the heading **❓ FAQ** and the questions, each with its answer open:
   - **How to deploy your own server?**
 
@@ -86,7 +86,7 @@ The catalog at [simplex-catalog.asriyan.me](https://simplex-catalog.asriyan.me) 
   - *Details*: the button **Details**.
 
   A server not online at its latest check, offline or not checked yet, has its row in red. Under the table I read `Total servers matching filters: 37`.
-- **US-B6.** As a visitor, when I click a server's host in the *URI* column, the server's whole address, `smp://64jc_Sfg93KT6jSkJV7slVswcWNyNpz5uQ_gQlwQp5E@smp.example.com`, is copied, and *Copied to clipboard* stands in the host's place for 4 seconds.
+- **US-B6.** As a visitor, when I click a server's host in the *URI* column, the server's whole address, `smp://64jc_Sfg93KT6jSkJV7slVswcWNyNpz5uQ_gQlwQp5E@smp.example.com`, is copied. The table shows nothing of it; on a server's page (US-B40) *Copied to clipboard* stands in the host's place for 4 seconds.
 - **US-B7.** As a visitor, when I click a server's link icon in the *Info page* column, its info page opens in a new tab: `https://smp.example.com`, or `http://` for a server reached over Tor, I2P or Yggdrasil.
 - **US-B8.** As a visitor, when I click **Details** in a server's row, or anywhere in the row but its check box, labels, host and info page link, I am on the server's page, `/#/servers/<id>` (US-B40).
 - **US-B9.** As a visitor, when I click [How to deploy your own server?](/#/faq) on `/#/servers`, I am on `/#/faq` (US-A14).
@@ -96,13 +96,13 @@ The catalog at [simplex-catalog.asriyan.me](https://simplex-catalog.asriyan.me) 
 - **US-B11.** As a visitor, when I type `example` in **URI**, the table shows the servers whose host contains it, in any case.
 - **US-B12.** As a visitor, when I type `64jc` in **Identity**, the table shows the servers whose identity contains it, in any case.
 - **US-B13.** As a visitor, when I choose *SMP* or *XFTP* in **Type**, the table shows the servers of that type; *All* shows both.
-- **US-B14.** As a visitor, when I choose in **Status** *Active*, *Inactive* or *Unknown*, the table shows the servers online at their latest check, offline at it, or not checked yet; *Any* shows them all.
+- **US-B14.** As a visitor, when I choose in **Status** *Active* or *Inactive*, the table shows the servers online at their latest check, or offline at it; *Any* shows them all. *Unknown* is put in the page's address, which the page reads as no filter: the table shows all the servers, and **Status** reads *Any*.
 - **US-B15.** As a visitor, when I choose *Yes* or *No* in **Info page**, the table shows the servers with an info page, or without one; *Any* shows them all.
-- **US-B16.** As a visitor, when I click **Location** (reading *Any*), it opens the list of the locations of the catalog's servers, *TOR*, *Yggdrasil* and *I2P* first, then the countries by name, each with a check box, and *Inclusive* at its top.
-- **US-B17.** As a visitor, when I tick `🇩🇪 Germany` in the **Location** list, the table shows only the servers in Germany, and the button reads *1 selected*; ticking another adds its servers.
-- **US-B18.** As a visitor, when I click *Inclusive* at the top of the **Location** list, it reads *Exclusive*, each location reads `Not 🇩🇪 Germany`, and the table shows only the servers in none of the locations ticked; clicking it again turns it back.
+- **US-B16.** As a visitor, when I click **Location** (reading *Any*), it opens the list of the locations of the catalog's servers, `Not TOR`, `Not Yggdrasil` and `Not 🧄 I2P` first, then the countries by name (`Not 🇩🇪 Germany`), each with a check box, and *Exclusive* at its top.
+- **US-B17.** As a visitor, when I tick `Not 🇩🇪 Germany` in the **Location** list, the table shows only the servers that are not in Germany, and the button reads *1 selected*; ticking another hides its servers too.
+- **US-B18.** As a visitor, when I click *Exclusive* at the top of the **Location** list, it reads *Inclusive*, each location reads without *Not* (`🇩🇪 Germany`), and the table shows only the servers in the locations ticked; clicking it again turns it back.
 - **US-B19.** As a visitor, when I click *Clear* in the **Location** list, shown while a location is ticked, every location is unticked and the button reads *Any*.
-- **US-B20.** As a visitor, when I click **Labels**, it opens the list of my labels, ✅ and 🚫, which work as the locations do (US-B17 to US-B19): ticking ✅ shows the servers I labelled ✅; *Exclusive* those I did not.
+- **US-B20.** As a visitor, when I click **Labels**, it opens the list of my labels, `Not added` and `Not ignored` (✅ and 🚫), which work as the locations do (US-B17 to US-B19): ticking `Not added` hides the servers I labelled ✅; after *Exclusive* is clicked, ticking `added` shows only them.
 - **US-B21.** As a visitor, when I type `90` in **Min uptime 7d (%)**, the table shows the servers whose uptime over the last 7 days is at least 90%; the same for 30 and 90 days.
 - **US-B22.** As a visitor, when I open a link to `/#/servers` with filters in its address, as the page wrote them (`/#/servers?filterProtocol=smp&filterStatus=true`), I see the table with those filters set.
 - **US-B23.** As a visitor, when I open `/#/servers` with no filter in its address, the filters are those I used last in this browser; on my first visit, **Status** *Active*, the others empty.
@@ -132,7 +132,7 @@ The catalog at [simplex-catalog.asriyan.me](https://simplex-catalog.asriyan.me) 
 
 ### Bulk mode
 - **US-B34.** As a visitor, when I tick a server's check box, it counts in **Bulk mode (1)**; the box in the table's head ticks every server on the page, and unticks them. With fewer than two ticked, **Bulk mode** is disabled (hover: *Select 2 or more rows*).
-- **US-B35.** As a visitor, when I click **Bulk mode (3)**, a dialog shows the first of the servers ticked: `1 / 3`, the QR code of its address, *URI:* and its host to copy (US-B6), its location, its info page link, its status and its uptime, then **Next →** and **Mark as added and Next →**.
+- **US-B35.** As a visitor, when I click **Bulk mode (3)**, a dialog shows the first of the servers ticked, in the order of the table: `1 / 3`, the QR code of its address, *URI:* and its host to copy (US-B6), its location, its info page link, its status and its uptime, then **Next →** and **Mark as added and Next →**.
 - **US-B36.** As a visitor, when I click **Next →** in the dialog, it shows the next server, with **← Back** from the second on; on the last one the button reads **Close**, and clicking it closes the dialog.
 - **US-B37.** As a visitor, when I click **← Back** in the dialog, it shows the server before.
 - **US-B38.** As a visitor, when I click **Mark as added and Next →** (**Mark as added and Close** on the last), the server's ✅ is set in the table and the dialog goes on as **Next →** does. The label is not saved in my browser then: after a reload it is gone, unless I have since set or cleared a label by clicking it (US-B30), which saves all my labels, this one included.
@@ -154,7 +154,7 @@ The catalog at [simplex-catalog.asriyan.me](https://simplex-catalog.asriyan.me) 
 
   > The server is added to the database. If the server is available, it will soon appear in the table for everyone.
 
-  and the server is in the table at once, *Unknown* until its first check (US-B48); it shows under **Status** *Any* or *Unknown*, not under the *Active* of a first visit.
+  and the server is in the table at once, *Unknown* until its first check (US-B48); it shows under **Status** *Any*, not under the *Active* of a first visit.
 - **US-B45.** As a visitor, when I enter an address with several hosts, `smp://64jc_Sfg93KT6jSkJV7slVswcWNyNpz5uQ_gQlwQp5E@smp.example.com,abcdefghijklmnop.onion`, I am told the same, and the catalog has a server for each host, with the same identity.
 - **US-B46.** As a visitor, when I enter an address the catalog has already, I am told the same, and nothing changes.
 - **US-B47.** As a visitor, when I enter an address that is not a SMP or XFTP server's, `https://smp.example.com`, or one without its identity, `smp://smp.example.com`, I am told "Invalid URI format", and nothing is added. When I cancel, or enter nothing, nothing happens.
@@ -198,7 +198,7 @@ The catalog at [simplex-catalog.asriyan.me](https://simplex-catalog.asriyan.me) 
   - "The bot was added to the catalog 3 days ago".
 - **US-C13.** As a visitor, when I click **Open the bot**, the bot's address opens in a new tab, for SimpleX to connect to it.
 - **US-C14.** As a visitor, when I click the copy icon on a bot's page, the bot's address is copied.
-- **US-C15.** As a visitor, when I open `/#/bots/<id>` with an id of no bot the catalog lists, I read "Error: Bot not found", in red.
+- **US-C15.** As a visitor, when I open `/#/bots/<id>` with an id nobody has added, I read "Bot not found."
 
 ### Adding a bot
 - **US-C16.** As a visitor, when I click **Add bot anonymously**, I am asked "Enter invite link:".
@@ -219,10 +219,10 @@ The catalog at [simplex-catalog.asriyan.me](https://simplex-catalog.asriyan.me) 
 
 ### Approval and checks
 - **US-C22.** As the maintainer, when I approve a bot a visitor added, in the catalog's Supabase project, the catalog checks it from its next check on, and the website lists it once a check has read its profile. Whether to approve it is mine to decide: the catalog lists an approved bot whatever its profile says it is, a bot, a person, or nothing.
-- **US-C23.** As a visitor, a bot the maintainer has not approved is never checked or listed, and its page, `/#/bots/<id>`, reads "Error: Bot not found", in red.
+- **US-C23.** As a visitor, a bot the maintainer has not approved is never checked or listed, and its page, `/#/bots/<id>`, reads "Error: Bot not found", in red
 - **US-C24.** As a visitor, after the catalog's check, which runs every 12 hours, an approved bot shows the name, description, image and commands its address's profile gives.
 - **US-C25.** As a visitor, after a check, a bot that accepted the catalog as a contact within the time limit shows *Online*, and one that did not, even after a few tries, *Offline*; its `Last check` is the check's time. The catalog connects incognito, and deletes the contact once the check is over.
-- **US-C26.** As a visitor, after a check, a bot whose address gives no profile shows *Offline*, with the profile an earlier check found.
+- **US-C26.** As a visitor, after a check of a bot whose address no longer exists, the bot shows what the last check found, its status, name, description and first message, and its `Last check` is that check's time: nothing new is recorded for it.
 - **US-C27.** As a visitor, after a check, **The First Bot's Message** is what the bot wrote first after accepting the contact, within the time limit; when it wrote nothing, the message an earlier check found, or none.
 - **US-C28.** As a visitor, after each check, a bot's uptime over 7, 30 and 90 days is the share of the checks of those last days that found it *Online*, and the check is in its timeline when it found it different from the one before.
 

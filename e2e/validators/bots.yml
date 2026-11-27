@@ -1,0 +1,40 @@
+# The bots validator in the end-to-end stack, over its own compose file
+# (src/bots-validator/docker-compose.yml): the same CLI and validator, with a
+# stand-in for Tor that does nothing — the CLI goes through Tor for onion
+# addresses only, and the stack's bots are not on one — and the CLI on the
+# stack's SMP server, joined to the stack and the local Supabase. The harness
+# sets E2E_SMP_SERVER and E2E_SUPABASE_KEY (the secret one);
+# e2e/harness/validators.ts runs it.
+services:
+  tor:
+    build: !reset null
+    image: alpine:3.24
+    command: ["sleep", "infinity"]
+    healthcheck: !override
+      test: ["CMD", "true"]
+      interval: 1s
+
+  smp-client:
+    command: ["sh", "-c", './simplex-chat --create-bot-display-name simplex-catalog-asriyan-me -p 80 --socks-proxy "$$(getent hosts tor | cut -d '' '' -f 1):9050" --socks-mode onion -s "$$SMP_SERVER"']
+    environment:
+      - SMP_SERVER=${E2E_SMP_SERVER:-}
+    networks:
+      - default
+      - e2e
+      - supabase
+
+  validator:
+    environment:
+      - SUPABASE_URL=http://supabase_kong_simplex-catalog:8000/rest/v1
+      - SUPABASE_KEY=${E2E_SUPABASE_KEY:-}
+      - RETRY_COUNT=1
+      - TIMEOUT=30
+      - DRY=
+
+networks:
+  e2e:
+    name: simplex-catalog-e2e_default
+    external: true
+  supabase:
+    name: supabase_network_simplex-catalog
+    external: true

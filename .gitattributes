@@ -1,0 +1,2 @@
+# The approved screenshots of the end-to-end tests are kept in Git LFS (AGENTS.md, *Workflow*).
+e2e/tests/__screenshots__/**/*.png filter=lfs diff=lfs merge=lfs -text

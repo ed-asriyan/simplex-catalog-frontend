@@ -22,7 +22,9 @@ jobs:
 
       - uses: supabase/setup-cli@v3
         with:
-          version: latest
+          # The CLI the end-to-end tests run (e2e/package.json): 3.x does not read
+          # this project's config.toml.
+          version: 2.122.1
 
       - name: Deploy to Supabase
         env:
