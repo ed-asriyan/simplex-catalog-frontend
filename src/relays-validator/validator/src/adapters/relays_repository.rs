@@ -1,5 +1,4 @@
-use crate::validator::ports::{RelayRecord, RelayRepositoryPort, RelayStatus};
-use log::info;
+use crate::validator::ports::{Page, PageOf, Relay, RelayCheck, RelayProfile, RelayRepositoryPort};
 pub use postgrest::Postgrest;
 use serde::{self, Deserialize, Serialize};
 
@@ -27,6 +26,7 @@ pub struct RelayProfileRow {
     pub photo: Option<String>,
 }
 
+#[allow(dead_code)]
 pub struct RelaysRepository {
     client: DatabaseClient,
     is_dry: bool,
@@ -39,88 +39,18 @@ impl RelaysRepository {
             .insert_header("Authorization", format!("Bearer {}", token));
         Self { is_dry, client }
     }
-
-    async fn get_relay_records(&self) -> Option<Vec<RelayRow>> {
-        let response = self
-            .client
-            .from("relays")
-            .select("*")
-            .execute()
-            .await
-            .ok()?
-            .text()
-            .await
-            .ok()?;
-
-        serde_json::from_str(&response).ok()
-    }
-
-    async fn update_relay_profile_row(&self, profile: &RelayProfileRow) -> Option<()> {
-        if self.is_dry {
-            info!("Dry run: would update relay profile {:?}", profile);
-        } else {
-            // Here you would implement the actual logic to update the relay profile in your database
-            info!("Updating relay profile {:?}", profile);
-            self.client
-                .from("relay_profiles")
-                .upsert(serde_json::to_string(&[profile]).ok()?)
-                .on_conflict("relay_uuid")
-                .execute()
-                .await
-                .ok()?;
-        }
-        Some(())
-    }
-
-    async fn update_relay_status_row(&self, status: &RelayStatusRow) -> Option<()> {
-        if self.is_dry {
-            info!("Dry run: would update relay {:?}", status);
-        } else {
-            // Here you would implement the actual logic to update the relay status in your database
-            info!("Updating relay {:?}", status);
-            self.client
-                .from("relay_statuses")
-                .insert(serde_json::to_string(&[status]).ok()?)
-                .execute()
-                .await
-                .ok()?;
-        }
-        Some(())
-    }
 }
 
 impl RelayRepositoryPort for RelaysRepository {
-    async fn get_relays(&self) -> Option<Vec<RelayRecord>> {
-        let row = self.get_relay_records().await;
-        info!(
-            "Retrieved {} relays",
-            row.as_ref().map(|r| r.len()).unwrap_or(0)
-        );
-        self.get_relay_records().await.map(|rows| {
-            rows.into_iter()
-                .map(|row| RelayRecord {
-                    id: row.uuid,
-                    url: row.url,
-                })
-                .collect()
-        })
+    async fn read_relays(&self, _page: Page) -> Option<PageOf<Relay>> {
+        todo!()
     }
 
-    async fn update_relay_status(&self, relay_id: &String, status: &RelayStatus) -> Option<()> {
-        if let RelayStatus::Success(profile) = status {
-            self.update_relay_profile_row(&RelayProfileRow {
-                relay_uuid: relay_id.clone(),
-                name: profile.name.clone(),
-                photo: profile.image.clone(),
-            })
-            .await?;
-        }
+    async fn replace_profile(&self, _relay_id: &str, _profile: &RelayProfile) -> Option<()> {
+        todo!()
+    }
 
-        self.update_relay_status_row(&RelayStatusRow {
-            relay_uuid: relay_id.clone(),
-            is_online: matches!(status, RelayStatus::Success(_)),
-        })
-        .await
-        .map(|_| ())
+    async fn create_check(&self, _relay_id: &str, _check: &RelayCheck) -> Option<()> {
+        todo!()
     }
 }

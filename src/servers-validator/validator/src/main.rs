@@ -12,6 +12,7 @@ use log::{info, LevelFilter};
 use std::io::Write;
 
 use crate::adapters::http_checker;
+use crate::validator::ports::ServersValidatorPort;
 
 pub fn init_logger() {
     Builder::new()

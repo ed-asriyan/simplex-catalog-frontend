@@ -26,7 +26,7 @@ pub trait ServerRepositoryPort {
     /// Writes a check of the server; `None` when the backend did not take it.
     fn update_server_status(
         &self,
-        server_id: &String,
+        server_id: &str,
         status: &ServerStatus,
     ) -> impl Future<Output = Option<()>>;
 }

@@ -1,4 +1,7 @@
-use crate::validator::ports::{Server, ServerRepositoryPort, ServerStatus, ServerType};
+// The old reading and writing stay until `/implement` uses them again.
+#![allow(dead_code)]
+
+use crate::validator::ports::{Page, PageOf, Server, ServerRepositoryPort, ServerStatus};
 use log::info;
 pub use postgrest::Postgrest;
 use serde::{self, Deserialize, Serialize};
@@ -81,37 +84,15 @@ impl ServersRepository {
 }
 
 impl ServerRepositoryPort for ServersRepository {
-    async fn get_servers(&self) -> Option<Vec<Server>> {
-        Some(
-            self.get_servers_rows()
-                .await?
-                .iter()
-                .filter_map(|row| {
-                    let type_ = match row.protocol {
-                        1 => ServerType::SMP,
-                        2 => ServerType::XFTP,
-                        _ => return None,
-                    };
-
-                    Some(Server {
-                        type_,
-                        id: row.uuid.clone(),
-                        identity: row.server_identities.identity.clone(),
-                        host: row.server_hosts.host.clone(),
-                    })
-                })
-                .collect(),
-        )
+    async fn get_servers(&self, _page: Page) -> Option<PageOf<Server>> {
+        todo!()
     }
 
-    async fn update_server_status(&self, server_id: &String, status: &ServerStatus) -> Option<()> {
-        let status_row = ServerStatusRow {
-            server_uuid: server_id.clone(),
-            status: status.status,
-            country: status.country.clone(),
-            info_page_available: status.info_page_available,
-        };
-        self.update_server_status_row(&status_row).await?;
-        Some(())
+    async fn update_server_status(
+        &self,
+        _server_id: &str,
+        _status: &ServerStatus,
+    ) -> Option<()> {
+        todo!()
     }
 }

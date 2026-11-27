@@ -163,7 +163,7 @@ The catalog at [simplex-catalog.asriyan.me](https://simplex-catalog.asriyan.me) 
 - **US-B48.** As a visitor, after the catalog's check, which runs every 12 hours, a server that answered as a SMP or XFTP server at its address shows *Online*, and one that did not, even after a few tries, *Offline*; its *Last Check* is the check's time, and the check is in its **Availability History** (US-B40) when it found something different from the one before.
 - **US-B49.** As a visitor, after a check, a server's location is the country of its host's address, or *TOR*, *Yggdrasil* or *I2P* for a host on one of them.
 - **US-B50.** As a visitor, after a check, a server has an info page when its host, asked over HTTPS (HTTP for a host on Tor, I2P or Yggdrasil), answered within 5 seconds with a page that mentions SimpleX.
-- **US-B51.** As a visitor, after each check, a server's uptime over 7, 30 and 90 days is the share of the checks of those last days that found it *Online*, `N/A` while it has had none in that time.
+- **US-B51.** As a visitor, after each check, a server's uptime over 7, 30 and 90 days is the share of the hours of those last days it was *Online*: what a check found holds from its hour until the hour of the next check, the latest check's until now, and the hours before its first check do not count; `N/A` while it has never been checked.
 
 ## C. Bots
 ### The page

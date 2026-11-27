@@ -52,7 +52,7 @@ export interface Server {
     /** The location of its latest check (`DE`, `TOR`, `I2P`, `YGGDRASIL`); empty before its first check. */
     country: string;
     infoPageAvailable: boolean;
-    /** The share of the period the server was online, 0 to 1; `null` for a period with no check (US-B51). */
+    /** The share of the hours of the period the server was online, 0 to 1; `null` before its first check (US-B51). */
     uptime7: number | null;
     uptime30: number | null;
     uptime90: number | null;

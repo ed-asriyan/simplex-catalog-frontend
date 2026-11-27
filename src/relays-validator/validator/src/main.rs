@@ -9,6 +9,7 @@ use chrono::Local;
 use clap::{parser::ValueSource, value_parser, Arg, ArgAction, Command};
 use env_logger::Builder;
 use log::{info, LevelFilter};
+use validator::ports::RelaysValidatorPort;
 use std::io::Write;
 
 pub fn init_logger() {

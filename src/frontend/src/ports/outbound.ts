@@ -90,6 +90,13 @@ export interface WorldMap {
     countries(): Promise<Result<WorldTopology>>;
 }
 
+/** Where the website is served from, and what time it is there: they name the file the labels are saved to (US-B31). */
+export interface Environment {
+    /** The host the website is served from. */
+    host: string;
+    now(): Date;
+}
+
 export interface OutboundPorts {
     servers: ServersRead;
     bots: BotsRead;
@@ -99,4 +106,5 @@ export interface OutboundPorts {
     clipboard: Clipboard;
     files: Files;
     worldMap: WorldMap;
+    environment: Environment;
 }

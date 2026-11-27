@@ -82,12 +82,15 @@ mod tests {
             "http://[21e:a51c:885b:7db0:166e:927:98cd:d186]:5223"
         );
         assert_eq!(url_for("200:abcd::1"), "http://[200:abcd::1]");
-        reqwest::Url::parse(&url_for("[200:abcd::1]:443")).unwrap();
+        reqwest::Url::parse(&url_for("[200:abcd::1]:443")).expect("a valid URL");
     }
 
     #[test]
     fn test_non_ipv6_url() {
-        assert_eq!(url_for("xftp4.asriyan.me:8443"), "http://xftp4.asriyan.me:8443");
+        assert_eq!(
+            url_for("xftp4.asriyan.me:8443"),
+            "http://xftp4.asriyan.me:8443"
+        );
         assert_eq!(url_for("smp1.asriyan.ygg"), "http://smp1.asriyan.ygg");
         assert_eq!(url_for("1.2.3.4:80"), "http://1.2.3.4:80");
     }
