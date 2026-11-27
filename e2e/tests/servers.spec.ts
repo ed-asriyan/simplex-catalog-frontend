@@ -8,7 +8,7 @@ import { expect, test, type Locator, type Page } from '@playwright/test';
 import {
   downServer, i2pServer, onionServer, smpServer, xftpServer, yggServer, smpIdentity, strangerServer, unknownServer, type Address,
 } from '../harness/hosts';
-import { add, allowClipboard, answering, clipboard, DATE_TIME, looks, open, qrText, stubMap, typeInto, WEBSITE } from '../harness/site';
+import { add, allowClipboard, answering, clipboard, DATE_TIME, looks, open, qrText, stubMap, typeInto, WEBSITE, type Masked } from '../harness/site';
 import { once } from '../harness/fixture';
 import { validate } from '../harness/validators';
 
@@ -91,6 +91,26 @@ async function types(page: Page): Promise<string[]> {
 const shows = (page: Page, host: string) => expect(row(page, host)).toHaveCount(1);
 const hides = (page: Page, host: string) => expect(row(page, host)).toHaveCount(0);
 
+/**
+ * The servers page as its screenshots take it: the stack's servers alone, by host, whatever else the address asks
+ * for. By the time of the latest check the order is that in which the validator checked them, which no run repeats,
+ * and the seed's uptimes move with the hour.
+ */
+async function screenshotted(page: Page, query = '') {
+  await servers(page, `filterHost=e2e.test&sortField=host&sortOrder=asc${query ? `&${query}` : ''}`);
+  await expect(page.getByRole('columnheader', { name: /^URI ▲$/ })).toBeVisible();
+}
+
+/**
+ * What a run makes anew in the servers' table, which a screenshot masks: the times, and the stack's identities where
+ * the table shows them.
+ */
+async function tableMasked(page: Page): Promise<Masked[]> {
+  const table = page.locator('table');
+  await expect(table.getByText(/ ago$/).first()).toBeVisible();
+  return [[table.locator('code'), '0'], [table.getByText(/ ago$/), '10em']];
+}
+
 async function openServerPage(page: Page, a: Address) {
   await servers(page, `filterHost=${encodeURIComponent(a.host)}`);
   await row(page, a.host).getByRole('button', { name: 'Details' }).click();
@@ -131,13 +151,8 @@ test('the servers page: the text, the counts, the add button, the filters and th
   }
   await expect(page.getByRole('columnheader', { name: /^Last Check ▼$/ })).toBeVisible();
   await expect(page.getByText(/^Total servers matching filters: \d+$/)).toBeVisible();
-  // The table in an order of its own, by host, of the stack's servers: by the time of the latest check, the order is
-  // that in which the validator checked them, which no run repeats, and the seed's uptimes move with the hour.
-  await servers(page, 'filterHost=e2e.test&sortField=host&sortOrder=asc');
-  await expect(page.getByRole('columnheader', { name: /^URI ▲$/ })).toBeVisible();
-  // What a run makes anew, which the screenshot masks: the stack's identity, and the times.
-  const table = page.locator('table');
-  await looks(page, 'servers', [[table.locator('code'), '0'], [table.getByText(/ ago$/), '10em']]);
+  await screenshotted(page);
+  await looks(page, 'servers', await tableMasked(page));
 });
 
 // The world map: the stack's own, with Germany, Japan and Brazil (the website loads it from a CDN).
@@ -388,6 +403,9 @@ test('Location opens the list of the locations of the servers, TOR, Yggdrasil an
   const texts = (await list.locator('div.uk-margin-small').allInnerTexts()).map((t) => t.replace(/\s+/g, ' ').trim());
   expect(texts.slice(0, 3)).toEqual(['Not TOR', 'Not Yggdrasil', 'Not 🧄 I2P']);
   expect(texts.some((t) => /^Not .*Germany$/.test(t))).toBe(true);
+  await screenshotted(page);
+  await locations(page);
+  await looks(page, 'location-list', await tableMasked(page));
 });
 
 const location = (list: Locator, name: string) => list.locator('div.uk-margin-small').filter({ hasText: name });
@@ -442,13 +460,18 @@ const labelsFilter = (page: Page) => page.locator('div').filter({ hasText: /^Lab
 
 // US-B20
 test('Labels filters by my labels as Location does: Not added hides the servers labelled, Inclusive shows them only', async ({ page }) => {
-  await servers(page, 'filterHost=de0');
+  await servers(page, 'filterHost=de0&sortField=host&sortOrder=asc');
   await cell(row(page, catalog.online.host), 'Labels').locator('.uk-label').first().click();
+  await expect(cell(row(page, catalog.online.host), 'Labels').locator('.uk-label').first()).not.toHaveClass(/uk-label-muted/);
   const f = labelsFilter(page);
-  await f.getByRole('button').first().click();
   const list = f.locator('[uk-dropdown]');
-  await expect(list.getByText('Exclusive', { exact: true })).toBeVisible();
+  // The table is fetched again once a label is set, which can close the list as it opens: then it is clicked again.
+  await expect(async () => {
+    if (!(await list.isVisible())) await f.getByRole('button').first().click();
+    await expect(list.getByText('Exclusive', { exact: true })).toBeVisible({ timeout: 2000 });
+  }).toPass();
   await expect(list.locator('div.uk-margin-small').first()).toContainText('Not');
+  await looks(page, 'labels-list', await tableMasked(page));
   await list.locator('div.uk-margin-small').filter({ hasText: 'added' }).getByRole('checkbox').check();
   await expect(f.getByRole('button').first()).toHaveText('1 selected');
   await hides(page, catalog.online.host);
@@ -623,6 +646,9 @@ const labelsFile = (added: string[], ignored: string[]) => ({
   name: 'labels.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify({ added, ignored })),
 });
 
+// The question of an import is the browser's own confirmation, drawn outside the page: it has no screenshot, and its
+// text is checked.
+
 // US-B32
 test('Import labels asks to replace my labels, and replaces them when I confirm', async ({ page }) => {
   await servers(page, `filterHost=${catalog.online.host}`);
@@ -653,12 +679,26 @@ test('cancelling the import leaves my labels as they were', async ({ page }) => 
 
 // ---- Bulk mode
 
-/** Ticks the rows of the hosts, and opens bulk mode. */
+/** Ticks the rows of the hosts, and opens bulk mode. The table is sorted by host, so the dialog goes through them in the same order every run. */
 async function bulk(page: Page, picks: Address[]) {
-  await servers(page, 'filterHost=.test&filterStatus=true');
+  await servers(page, 'filterHost=.test&filterStatus=true&sortField=host&sortOrder=asc');
   for (const a of picks) await cell(row(page, a.host), '').getByRole('checkbox').check();
   await page.getByRole('button', { name: `Bulk mode (${picks.length})` }).click();
   return page.getByRole('dialog');
+}
+
+/**
+ * The dialog as its screenshot takes it, as the window shows it (the dialog and its backdrop are as tall as the
+ * window), over the top of the page, where nothing a run makes anew is: the table's times, masked, would be drawn over
+ * the dialog. What the dialog shows anew, the QR code of the address, which holds the stack's identity, is masked, and
+ * checked to be that of `shown`.
+ */
+async function looksBulk(page: Page, name: string, shown: Address) {
+  // The dialog's first drawing is its ✕: the QR code is the first of what it shows.
+  const qr = page.getByRole('dialog').locator('div.uk-text-center svg').first();
+  expect(await qrText(qr)).toBe(shown.uri);
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await looks(page, name, [[qr, '0']], true);
 }
 
 /** Of `picks`, those the table shows, in its order: the order bulk mode goes through them in. */
@@ -697,14 +737,26 @@ test('Bulk mode shows the first server ticked, as the table lists them, in a dia
   await expect(dialog.getByRole('button', { name: 'Next →', exact: true })).toBeVisible();
   await expect(dialog.getByRole('button', { name: 'Mark as added and Next →' })).toBeVisible();
   await expect(dialog.getByRole('button', { name: '← Back' })).toBeHidden();
+  await looksBulk(page, 'bulk-first', first);
 });
 
 // US-B36
 test('Next → shows the next server; on the last one it reads Close and closes the dialog', async ({ page }) => {
-  const dialog = await bulk(page, [catalog.online, catalog.sibling]);
+  const picks = [catalog.online, catalog.sibling, catalog.xftp];
+  const dialog = await bulk(page, picks);
+  const order = await inTableOrder(page, picks);
   await dialog.getByRole('button', { name: 'Next →', exact: true }).click();
-  await expect(dialog).toContainText('2 / 2');
+  await expect(dialog).toContainText('2 / 3');
+  await expect(dialog.getByText(order[1].host)).toBeVisible();
   await expect(dialog.getByRole('button', { name: '← Back' })).toBeVisible();
+  await expect(dialog.getByRole('button', { name: 'Mark as added and Next →' })).toBeVisible();
+  await looksBulk(page, 'bulk-middle', order[1]);
+  await dialog.getByRole('button', { name: 'Next →', exact: true }).click();
+  await expect(dialog).toContainText('3 / 3');
+  await expect(dialog.getByText(order[2].host)).toBeVisible();
+  await expect(dialog.getByRole('button', { name: '← Back' })).toBeVisible();
+  await expect(dialog.getByRole('button', { name: 'Mark as added and Close' })).toBeVisible();
+  await looksBulk(page, 'bulk-last', order[2]);
   await dialog.locator('button', { hasText: /^Close$/ }).click();
   await expect(dialog).toBeHidden();
 });
@@ -826,6 +878,9 @@ test('a page of a server the catalog does not have says so', async ({ page }) =>
 });
 
 // ---- Adding a server
+//
+// The website asks for the address and tells what it did in the browser's own dialogs, drawn outside the page: they
+// have no screenshot, and their texts are checked.
 
 // US-B43
 test('Add server anonymously asks for the server\'s address', async ({ page }) => {
