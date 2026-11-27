@@ -11,6 +11,7 @@ use std::io::Write;
 pub mod database;
 pub mod smp;
 pub mod types;
+pub mod validator;
 
 pub fn init_logger() {
     Builder::new()
