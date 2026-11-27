@@ -1,0 +1,51 @@
+name: End-to-end tests
+
+on:
+  pull_request:
+
+concurrency:
+  group: "e2e-${{ github.ref }}"
+  cancel-in-progress: true
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: e2e
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          # The approved screenshots are in Git LFS.
+          lfs: true
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: e2e/package-lock.json
+
+      - name: Install the tests' dependencies
+        run: npm ci
+
+      - name: Type-check the tests
+        run: npx tsc -p .
+
+      - name: Run end-to-end tests
+        run: npx playwright test --pass-with-no-tests
+
+      - name: Keep what failed, the screenshots' differences included
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-results
+          path: e2e/test-results
+          retention-days: 7
+
+      - name: Show the stack's logs
+        if: failure()
+        run: |
+          docker compose -p simplex-catalog-e2e logs --no-color
+          docker ps -a --filter name=supabase --format '{{.Names}}' | xargs -r -n1 docker logs --tail 100

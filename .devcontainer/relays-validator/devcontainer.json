@@ -1,0 +1,22 @@
+{
+  "name": "simplex-catalog-relays-validator",
+  "dockerComposeFile": [
+    "../../src/relays-validator/docker-compose.dev.yml"
+  ],
+  "workspaceFolder": "/workspace",
+  "service": "validator",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "rust-lang.rust-analyzer"
+      ],
+      "settings": {
+        "rust-analyzer.cargo.allFeatures": true,
+        "rust-analyzer.checkOnSave.command": "clippy",
+        "editor.formatOnSave": true
+      }
+    }
+  },
+  "postCreateCommand": "rustup component add clippy rustfmt",
+  "overrideCommand": true
+}

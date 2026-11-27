@@ -1,0 +1,11 @@
+name: Frontend CI
+
+on:
+  pull_request:
+    paths:
+      - 'src/frontend/**'
+      - '.github/workflows/frontend-*.yml'
+
+jobs:
+  build:
+    uses: ./.github/workflows/frontend-build.yml

@@ -1,0 +1,10 @@
+import type { Result, WorldMap, WorldTopology, WorldShapes as WorldShapesPort } from '../ports';
+
+/** The world map of the servers (US-B2). */
+export class WorldShapes implements WorldShapesPort {
+    constructor(private readonly worldMap: WorldMap) {}
+
+    countries(): Promise<Result<WorldTopology>> {
+        return this.worldMap.countries();
+    }
+}

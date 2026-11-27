@@ -1,0 +1,62 @@
+# The servers validator in the end-to-end stack, over its own compose file
+# (src/servers-validator/docker-compose.yml): the same gateway, CLI and
+# validator, with no overlay network behind them — Tor, I2P and Yggdrasil are
+# stand-ins that do nothing, so the gateway reaches clearnet only — and the CLI
+# on the stack's SMP server. Its network holder joins the stack and the local
+# Supabase. The harness sets E2E_SMP_SERVER, E2E_SUPABASE_KEY (the secret
+# one) and E2E_GEOIP_DB; e2e/harness/validators.ts runs it.
+services:
+  tor:
+    image: alpine:3.24
+    command: ["sleep", "infinity"]
+    healthcheck: !override
+      test: ["CMD", "true"]
+      interval: 1s
+
+  i2pd:
+    image: alpine:3.24
+    command: ["sleep", "infinity"]
+    user: root
+    healthcheck: !override
+      test: ["CMD", "true"]
+      interval: 1s
+
+  yggdrasil:
+    build: !reset null
+    image: alpine:3.24
+    entrypoint: !reset null
+    command: ["sleep", "infinity"]
+    cap_add: !reset []
+    devices: !reset []
+    dns: !reset []
+    environment: !reset []
+    healthcheck: !override
+      test: ["CMD", "true"]
+      interval: 1s
+    networks:
+      - default
+      - e2e
+      - supabase
+
+  smp-client:
+    command: ["sh", "-c", './simplex-chat --create-bot-display-name simplex-catalog.asriyan.me -p 80 --socks-proxy $$SOCKS5_PROXY --socks-mode always -s "$$SMP_SERVER"']
+    environment:
+      - SMP_SERVER=${E2E_SMP_SERVER:-}
+
+  validator:
+    environment:
+      - SUPABASE_URL=http://supabase_kong_simplex-catalog:8000/rest/v1
+      - SUPABASE_KEY=${E2E_SUPABASE_KEY:-}
+      - RETRY_COUNT=1
+      - DRY=
+    # The stack's GeoIP database, which knows the countries of the stack's addresses.
+    volumes:
+      - ${E2E_GEOIP_DB:-/dev/null}:/app/GeoLite2-Country.mmdb:ro
+
+networks:
+  e2e:
+    name: simplex-catalog-e2e_default
+    external: true
+  supabase:
+    name: supabase_network_simplex-catalog
+    external: true

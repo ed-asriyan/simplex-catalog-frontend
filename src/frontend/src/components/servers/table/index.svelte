@@ -1,0 +1,322 @@
+<script lang="ts">
+    import type { Server, ServersFilter as Filter, ServersSortField, Sort as SortOf } from '@/ports';
+    import { useWebsite } from '@/store/website';
+    import { valueOf } from '@/store/result';
+    import ServerModal from '../server-modal/index.svelte';
+    import TableHeader from './table-header.svelte';
+    import TableRow from './table-row.svelte';
+    import Icon from '@/components/icon.svelte';
+    import { countryCodeToName, delay } from '@/utils';
+    import LineCountry from '../fields/line-country.svelte';
+
+    type Sort = SortOf<ServersSortField>;
+
+    interface Props {
+        filter: Filter;
+        updateFilter: (filter: Filter) => void;
+        updateSort: (sort: Sort) => void;
+        updatePagination: (pageNumber: number, pageSize: number) => void;
+        sort: Sort;
+        pageNumber: number;
+        pageSize: number;
+        refresh: () => void;
+    }
+
+    let { filter, updateFilter, updateSort, updatePagination, sort, pageNumber, pageSize, refresh }: Props = $props();
+
+    const { ports, labels: labelsStore, countries: countriesStore } = useWebsite();
+
+    // The total of the list last read, kept while the next one is read.
+    let totalCount: number = $state(0);
+
+    let pageCount: number = $derived(Math.ceil(totalCount / pageSize));
+
+    let currentPageServers: Promise<Server[]> = $derived(
+        ports.servers.list(filter, sort, { size: pageSize, number: pageNumber }).then(result => {
+            const page = valueOf(result);
+            totalCount = page.total;
+            return page.items;
+        })
+    );
+
+    let selectedServersModal: Server[] = $state([]);
+
+    const changePage = async function (pageCount: number, newPage: number) {
+        if (newPage < 1 || newPage > pageCount) {
+            return;
+        }
+        updatePagination(newPage, pageSize);
+    };
+
+    let selectedUuids = $state<Set<string>>(new Set());
+    let selectedCount = $derived(selectedUuids.size);
+
+    const toggleServer = function (server: Server) {
+        const next = new Set(selectedUuids);
+        if (next.has(server.uuid)) {
+            next.delete(server.uuid);
+        } else {
+            next.add(server.uuid);
+        }
+        selectedUuids = next;
+    };
+
+    const getSelectedServers = async (): Promise<Server[]> => {
+        const servers = await currentPageServers;
+        return servers.filter(s => selectedUuids.has(s.uuid));
+    };
+
+    const exportLabels = function () {
+        ports.labels.export();
+    };
+
+    const importLabels = async function () {
+        const read = await ports.labels.read();
+        if (!read.ok) {
+            console.error('The labels file could not be read:', read.error);
+            return;
+        }
+        const labels = read.value;
+        if (labels === null) return;
+
+        const list = Object.entries(labels).map(([label, uuids]) => `Label "${label}": ${uuids.length} servers`).join('\n');
+        if (confirm(`The current labels in this browser will be replaced by the import:\n\n${list}\n\nContinue?`)) {
+            labelsStore.replace(labels);
+        }
+    };
+
+    // --- Filter helpers ---
+    let hostFilter = $derived(filter.host);
+    let protocolFilter = $derived(filter.protocol);
+    let statusFilter: 'any' | 'true' | 'false' | 'unknown' = $derived(filter.status === undefined ? 'any' : filter.status === 'unknown' ? 'unknown' : filter.status ? 'true' : 'false');
+    let infoPageFilter: 'any' | 'true' | 'false' = $derived(filter.infoPageAvailable === undefined ? 'any' : filter.infoPageAvailable ? 'true' : 'false');
+
+    let countriesFilterInclusive = $derived(!!filter.countries?.inclusive);
+    let countriesFilterValues = $derived(filter.countries?.values || []);
+    let countries = $derived(countriesStore.allCountries);
+    let countriesSorted = $derived(Array.from($countries).filter(x => x).sort((a, b) => {
+        const special = ['TOR', 'YGGDRASIL', 'I2P'];
+        const aIndex = special.indexOf(a);
+        const bIndex = special.indexOf(b);
+        if (aIndex !== -1 && bIndex !== -1) return aIndex - bIndex;
+        if (aIndex !== -1) return -1;
+        if (bIndex !== -1) return 1;
+        return countryCodeToName(a).localeCompare(countryCodeToName(b));
+    }));
+
+    let labelsFilterInclusive = $derived(!!filter.labels?.inclusive);
+    let labelsFilterValues = $derived(filter.labels?.values || []);
+
+    let identityFilter = $derived(filter.identity);
+</script>
+
+<ServerModal bind:servers={selectedServersModal} />
+
+<div class="uk-card uk-card-default uk-card-body uk-card-small uk-margin-bottom">
+    <div class="uk-grid-small uk-child-width-1-2@s uk-child-width-1-3@m uk-child-width-1-4@l" uk-grid>
+        <div>
+            <label class="uk-form-label uk-text-small uk-text-muted">URI</label>
+            <input class="uk-input uk-form-small" type="text" placeholder="Filter by host" value={hostFilter || ''} onkeyup={delay(e => updateFilter({ ...filter, host: e.target.value || undefined }), 1500)}>
+        </div>
+        <div>
+            <label class="uk-form-label uk-text-small uk-text-muted">Identity</label>
+            <input class="uk-input uk-form-small" type="text" placeholder="Filter by identity" value={identityFilter || ''} onkeyup={delay(e => updateFilter({ ...filter, identity: e.target.value || undefined }), 1500)}>
+        </div>
+        <div>
+            <label class="uk-form-label uk-text-small uk-text-muted">Type</label>
+            <select value={protocolFilter || ''} onchange={e => updateFilter({ ...filter, protocol: e.target.value || undefined })} class="uk-select uk-form-small">
+                <option value="">All</option>
+                <option value="smp">SMP</option>
+                <option value="xftp">XFTP</option>
+            </select>
+        </div>
+        <div>
+            <label class="uk-form-label uk-text-small uk-text-muted">Status</label>
+            <select value={statusFilter} onchange={e => {
+                const v = e.target.value;
+                updateFilter({ ...filter, status: v === 'any' ? undefined : v === 'unknown' ? 'unknown' : v === 'true' });
+            }} class="uk-select uk-form-small">
+                <option value="any">Any</option>
+                <option value="true">Active</option>
+                <option value="false">Inactive</option>
+                <option value="unknown">Unknown</option>
+            </select>
+        </div>
+        <div>
+            <label class="uk-form-label uk-text-small uk-text-muted">Info page</label>
+            <select value={infoPageFilter} onchange={e => {
+                const v = e.target.value;
+                updateFilter({ ...filter, infoPageAvailable: v === 'any' ? undefined : v === 'true' });
+            }} class="uk-select uk-form-small">
+                <option value="any">Any</option>
+                <option value="true">Yes</option>
+                <option value="false">No</option>
+            </select>
+        </div>
+        <div>
+            <label class="uk-form-label uk-text-small uk-text-muted">Location</label>
+            <div>
+                <button class="uk-button uk-button-default uk-button-small uk-width-1-1" type="button">
+                    {countriesFilterValues.length > 0 ? `${countriesFilterValues.length} selected` : 'Any'}
+                </button>
+                <div uk-dropdown class="uk-overflow-auto" style="height: 300px; max-height: 50vh">
+                    <a class="uk-link uk-block" onclick={() => updateFilter({ ...filter, countries: { inclusive: !countriesFilterInclusive, values: filter.countries?.values || [] } })}>
+                        {countriesFilterInclusive ? 'Inclusive' : 'Exclusive'}
+                    </a>
+                    {#if countriesFilterValues.length > 0}
+                        <a class="uk-link uk-float-right" onclick={() => updateFilter({ ...filter, countries: { inclusive: countriesFilterInclusive, values: [] } })}>Clear</a>
+                    {/if}
+                    {#each countriesSorted as country}
+                        <div class="uk-margin-small">
+                            <input type="checkbox" checked={countriesFilterValues.includes(country)} onchange={() => {
+                                const values = countriesFilterValues.includes(country)
+                                    ? countriesFilterValues.filter(c => c !== country)
+                                    : [...countriesFilterValues, country];
+                                updateFilter({ ...filter, countries: { inclusive: countriesFilterInclusive, values } });
+                            }} />
+                            {#if !countriesFilterInclusive} Not {/if}
+                            <LineCountry {country} largeFlag={false}/>
+                        </div>
+                    {/each}
+                </div>
+            </div>
+        </div>
+        <div>
+            <label class="uk-form-label uk-text-small uk-text-muted">Labels</label>
+            <div>
+                <button class="uk-button uk-button-default uk-button-small uk-width-1-1" type="button">
+                    {labelsFilterValues.length > 0 ? `${labelsFilterValues.length} selected` : 'Any'}
+                </button>
+                <div uk-dropdown class="uk-overflow-auto" style="height: 300px; max-height: 50vh">
+                    <a class="uk-link uk-block" onclick={() => updateFilter({ ...filter, labels: { inclusive: !labelsFilterInclusive, values: filter.labels?.values || [] } })}>
+                        {labelsFilterInclusive ? 'Inclusive' : 'Exclusive'}
+                    </a>
+                    {#if labelsFilterValues.length > 0}
+                        <a class="uk-link uk-float-right" onclick={() => updateFilter({ ...filter, labels: { inclusive: labelsFilterInclusive, values: [] } })}>Clear</a>
+                    {/if}
+                    {#each Object.keys($labelsStore) as label}
+                        <div class="uk-margin-small">
+                            <input type="checkbox" checked={labelsFilterValues.includes(label)} onchange={() => {
+                                const values = labelsFilterValues.includes(label)
+                                    ? labelsFilterValues.filter(l => l !== label)
+                                    : [...labelsFilterValues, label];
+                                updateFilter({ ...filter, labels: { inclusive: labelsFilterInclusive, values } });
+                            }} />
+                            {#if !labelsFilterInclusive} Not {/if}
+                            {label}
+                        </div>
+                    {/each}
+                </div>
+            </div>
+        </div>
+        <div>
+            <label class="uk-form-label uk-text-small uk-text-muted">Min uptime 7d (%)</label>
+            <input class="uk-input uk-form-small" type="number" min="0" max="100" placeholder="e.g. 90" value={filter.uptime7 === undefined ? '' : filter.uptime7 * 100} onkeyup={delay(e => updateFilter({ ...filter, uptime7: +e.target.value / 100 || undefined }), 1500)}>
+        </div>
+        <div>
+            <label class="uk-form-label uk-text-small uk-text-muted">Min uptime 30d (%)</label>
+            <input class="uk-input uk-form-small" type="number" min="0" max="100" placeholder="e.g. 80" value={filter.uptime30 === undefined ? '' : filter.uptime30 * 100} onkeyup={delay(e => updateFilter({ ...filter, uptime30: +e.target.value / 100 || undefined }), 1500)}>
+        </div>
+        <div>
+            <label class="uk-form-label uk-text-small uk-text-muted">Min uptime 90d (%)</label>
+            <input class="uk-input uk-form-small" type="number" min="0" max="100" placeholder="e.g. 70" value={filter.uptime90 === undefined ? '' : filter.uptime90 * 100} onkeyup={delay(e => updateFilter({ ...filter, uptime90: +e.target.value / 100 || undefined }), 1500)}>
+        </div>
+    </div>
+</div>
+
+<div class="uk-margin-small-bottom uk-flex uk-flex-between uk-flex-middle uk-flex-wrap">
+    <div class="uk-flex uk-flex-middle uk-flex-wrap" style="gap: 8px;">
+        {#await currentPageServers}
+            <span uk-spinner="ratio: 1.2"></span>
+        {:then}
+            <span class="cursor" onclick={refresh} title="Refresh">
+                <Icon icon="🔄" />
+            </span>
+        {/await}
+        <button class="uk-button uk-button-default uk-button-small" onclick={importLabels}>Import labels</button>
+        <button class="uk-button uk-button-default uk-button-small" onclick={exportLabels}>Export labels</button>
+    </div>
+    <div class="uk-flex uk-flex-middle uk-flex-wrap" style="gap: 8px;">
+        <select bind:value={pageSize} class="uk-select uk-form-small uk-width-small">
+            {#each [5, 10, 20, 50, 100] as size}
+                <option value={size}>Page size: { size }</option>
+            {/each}
+        </select>
+        <button class="uk-button uk-button-secondary uk-button-small"
+                onclick={async () => selectedServersModal = await getSelectedServers()}
+                disabled={selectedCount < 2}
+                uk-tooltip={selectedCount < 2 ? "Select 2 or more rows" : ""}
+            >
+            Bulk mode ({ selectedCount })
+        </button>
+    </div>
+</div>
+    <div class="uk-overflow-auto uk-width-1-1">
+        <table class="uk-table uk-table-small uk-table-divider">
+            <TableHeader
+                {sort}
+                {updateSort}
+                onAllServerSelected={async yes => {
+                    if (yes) {
+                        const servers = await currentPageServers;
+                        selectedUuids = new Set(servers.map(s => s.uuid));
+                    } else {
+                        selectedUuids = new Set();
+                    }
+                }}
+            />
+
+            <tbody class="uk-list-striped uk-table-hover">
+                {#await currentPageServers}
+                    <span uk-spinner="ratio: 1.2"></span>
+                {:then servers}
+                    {#each servers as server (server.uuid)}
+                        <TableRow
+                            {server}
+                            selected={selectedUuids.has(server.uuid)}
+                            onSelect={() => toggleServer(server)}
+                        />
+                    {/each}
+                {/await}
+            </tbody>
+            <tbody>
+                <tr>
+                    <td colspan="100">
+                        <div class="uk-flex uk-flex-middle uk-flex-center uk-margin-top uk-margin-bottom uk-flex-column uk-text-center pages">
+                            <div class="uk-margin-left uk-margin-right uk-margin-bottom">
+                                Total servers matching filters: {totalCount}
+                            </div>
+                            {#if totalCount}
+                                <div>
+                                    <div class="uk-margin-bottom">
+                                        {#each Array.from({ length: pageCount }, (_, i) => i + 1) as page}
+                                            <button class="uk-button uk-button-default uk-button-small uk-margin-small-right" class:uk-button-secondary={page === pageNumber} onclick={() => changePage(pageCount, page)}>
+                                                {page}
+                                            </button>
+                                        {/each}
+                                    </div>
+                                    {#if pageNumber > 1}
+                                        <button class="uk-button uk-button-default" onclick={() => changePage(pageCount, pageNumber - 1)}>
+                                            ← Previous page
+                                        </button>
+                                    {/if}
+                                    {#if pageNumber < pageCount}
+                                        <button class="uk-button uk-button-default" onclick={() => changePage(pageCount, pageNumber + 1)}>
+                                            Next page →
+                                        </button>
+                                    {/if}
+                                </div>
+                            {/if}
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+</div>
+
+<style lang="scss">
+    .pages {
+        width: 100%;
+        max-width: 100vw;;
+    }
+</style>

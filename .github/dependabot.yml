@@ -1,42 +1,196 @@
 version: 2
 updates:
-  - package-ecosystem: npm
-    directory: "/"
-    schedule:
-      interval: weekly
-    open-pull-requests-limit: 1
-    labels:
-      - dependencies
-    ignore:
-      - dependency-name: "*"
-        update-types:
-          - version-update:semver-patch
-
-  - package-ecosystem: "docker"
-    directory: "/"
-    open-pull-requests-limit: 1
-    schedule:
-      interval: "weekly"
-    ignore:
-      - dependency-name: "*"
-        update-types:
-          - "version-update:semver-patch"
-
-  - package-ecosystem: "github-actions"
-    directory: "/"
-    open-pull-requests-limit: 1
-    schedule:
-      interval: "weekly"
-    ignore:
-      - dependency-name: "*"
-        update-types:
-          - "version-update:semver-patch"
-
-  - package-ecosystem: "devcontainers"
-    directory: "/"
-    schedule:
-      interval: weekly
-    ignore:
-      - dependency-name: "*"
-        update-types:
-          - "version-update:semver-patch"
+- package-ecosystem: npm
+  directory: /src/frontend
+  schedule:
+    interval: weekly
+  open-pull-requests-limit: 1
+  labels:
+  - dependencies
+  ignore:
+  - dependency-name: '*'
+    update-types:
+    - version-update:semver-patch
+- package-ecosystem: docker
+  directory: /src/frontend
+  open-pull-requests-limit: 1
+  schedule:
+    interval: weekly
+  ignore:
+  - dependency-name: '*'
+    update-types:
+    - version-update:semver-patch
+- package-ecosystem: github-actions
+  directory: /
+  open-pull-requests-limit: 1
+  schedule:
+    interval: weekly
+  ignore:
+  - dependency-name: '*'
+    update-types:
+    - version-update:semver-patch
+- package-ecosystem: devcontainers
+  directory: /.devcontainer/frontend
+  schedule:
+    interval: weekly
+  ignore:
+  - dependency-name: '*'
+    update-types:
+    - version-update:semver-patch
+- package-ecosystem: npm
+  directory: /src/backend
+  schedule:
+    interval: weekly
+  open-pull-requests-limit: 1
+  labels:
+  - dependencies
+  ignore:
+  - dependency-name: '*'
+    update-types:
+    - version-update:semver-patch
+- package-ecosystem: devcontainers
+  directory: /.devcontainer/backend
+  schedule:
+    interval: weekly
+  open-pull-requests-limit: 1
+  labels:
+  - dependencies
+  ignore:
+  - dependency-name: '*'
+    update-types:
+    - version-update:semver-patch
+- package-ecosystem: cargo
+  directory: /src/servers-validator/validator
+  open-pull-requests-limit: 1
+  schedule:
+    interval: weekly
+  ignore:
+  - dependency-name: '*'
+    update-types:
+    - version-update:semver-patch
+- package-ecosystem: docker
+  directory: /src/servers-validator/validator
+  open-pull-requests-limit: 1
+  schedule:
+    interval: weekly
+  ignore:
+  - dependency-name: '*'
+    update-types:
+    - version-update:semver-patch
+- package-ecosystem: docker
+  directory: /src/servers-validator/gateway
+  open-pull-requests-limit: 1
+  schedule:
+    interval: weekly
+  ignore:
+  - dependency-name: '*'
+    update-types:
+    - version-update:semver-patch
+- package-ecosystem: pip
+  directory: /src/servers-validator/gateway
+  open-pull-requests-limit: 1
+  schedule:
+    interval: weekly
+  ignore:
+  - dependency-name: '*'
+    update-types:
+    - version-update:semver-patch
+- package-ecosystem: docker
+  directory: /src/servers-validator/yggdrasil
+  open-pull-requests-limit: 1
+  schedule:
+    interval: weekly
+  ignore:
+  - dependency-name: '*'
+    update-types:
+    - version-update:semver-patch
+- package-ecosystem: devcontainers
+  directory: /.devcontainer/servers-validator
+  schedule:
+    interval: weekly
+  open-pull-requests-limit: 1
+  ignore:
+  - dependency-name: '*'
+    update-types:
+    - version-update:semver-patch
+- package-ecosystem: cargo
+  directory: /src/relays-validator/validator
+  open-pull-requests-limit: 1
+  schedule:
+    interval: weekly
+  ignore:
+  - dependency-name: '*'
+    update-types:
+    - version-update:semver-patch
+- package-ecosystem: docker
+  directory: /src/relays-validator/validator
+  open-pull-requests-limit: 1
+  schedule:
+    interval: weekly
+  ignore:
+  - dependency-name: '*'
+    update-types:
+    - version-update:semver-patch
+- package-ecosystem: docker
+  directory: /src/relays-validator/yggdrasil
+  open-pull-requests-limit: 1
+  schedule:
+    interval: weekly
+  ignore:
+  - dependency-name: '*'
+    update-types:
+    - version-update:semver-patch
+- package-ecosystem: docker
+  directory: /src/relays-validator/gateway
+  open-pull-requests-limit: 1
+  schedule:
+    interval: weekly
+  ignore:
+  - dependency-name: '*'
+    update-types:
+    - version-update:semver-patch
+- package-ecosystem: pip
+  directory: /src/relays-validator/gateway
+  open-pull-requests-limit: 1
+  schedule:
+    interval: weekly
+  ignore:
+  - dependency-name: '*'
+    update-types:
+    - version-update:semver-patch
+- package-ecosystem: cargo
+  directory: /src/bots-validator/validator
+  open-pull-requests-limit: 1
+  schedule:
+    interval: weekly
+  ignore:
+  - dependency-name: '*'
+    update-types:
+    - version-update:semver-patch
+- package-ecosystem: docker
+  directory: /src/bots-validator/validator
+  open-pull-requests-limit: 1
+  schedule:
+    interval: weekly
+  ignore:
+  - dependency-name: '*'
+    update-types:
+    - version-update:semver-patch
+- package-ecosystem: docker
+  directory: /src/bots-validator/tor
+  open-pull-requests-limit: 1
+  schedule:
+    interval: weekly
+  ignore:
+  - dependency-name: '*'
+    update-types:
+    - version-update:semver-patch
+- package-ecosystem: npm
+  directory: /e2e
+  schedule:
+    interval: weekly
+  open-pull-requests-limit: 1
+  ignore:
+  - dependency-name: '*'
+    update-types:
+    - version-update:semver-patch

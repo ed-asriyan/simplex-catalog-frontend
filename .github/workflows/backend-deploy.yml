@@ -1,0 +1,37 @@
+name: Backend deploy
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'src/backend/**'
+      - '.github/workflows/backend-deploy.yml'
+  workflow_dispatch:
+
+defaults:
+  run:
+    working-directory: src/backend
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - uses: supabase/setup-cli@v3
+        with:
+          # The CLI the end-to-end tests run (e2e/package.json): 3.x does not read
+          # this project's config.toml.
+          version: 2.122.1
+
+      - name: Deploy to Supabase
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_PROJECT_ID: ${{ vars.SUPABASE_PROJECT_ID }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+        run: |
+          supabase link --project-ref $SUPABASE_PROJECT_ID --password $SUPABASE_DB_PASSWORD
+          supabase db push
+          supabase functions deploy
