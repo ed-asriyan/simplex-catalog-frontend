@@ -1,4 +1,4 @@
-name: Build
+name: Frontend build
 
 on:
   workflow_call:
@@ -7,6 +7,10 @@ on:
         description: 'Content of the .env file'
         required: true
         type: string
+
+defaults:
+  run:
+    working-directory: src/frontend
 
 jobs:
   build:
@@ -28,4 +32,4 @@ jobs:
       - name: Upload static files as artifact
         uses: actions/upload-pages-artifact@v5
         with:
-          path: dist
+          path: src/frontend/dist

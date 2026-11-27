@@ -1,0 +1,23 @@
+{
+	"name": "Supabase CLI",
+	"workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}/src/backend",
+	"image": "mcr.microsoft.com/devcontainers/base:bookworm",
+	"features": {
+		"ghcr.io/devcontainers/features/node:2": {},
+		"ghcr.io/devcontainers/features/docker-in-docker:4": {}
+	},
+	"forwardPorts": [
+		54321,
+		54323
+	],
+	"portsAttributes": {
+    "54321": {
+      "label": "Supabase API & Functions"
+    },
+	"54323": {
+      "label": "Supabase Studio"
+    }
+  },
+  "postCreateCommand": "npm install -g supabase",
+  "postStartCommand": "supabase start && (supabase functions serve &)"
+}

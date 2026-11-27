@@ -1,0 +1,41 @@
+name: Bots validator CI (PR)
+
+on:
+  pull_request_target:
+    branches:
+      - master
+    paths:
+      - 'src/bots-validator/**'
+      - '.github/workflows/bots-validator-*.yml'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    working-directory: src/bots-validator
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    if: github.actor == 'dependabot[bot]' || github.actor == 'ed-asriyan'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+
+      - name: Save .env file
+        env:
+          ENV_FILE_CONTENT: ${{ secrets.BOTS_VALIDATOR_ENV_FILE_CONTENT }}
+        shell: bash
+        run: |
+          echo "$ENV_FILE_CONTENT" > .env
+
+      - name: Append DRY=1 to .env file
+        run: echo -e "\nDRY=1" >> .env
+
+      - name: Run validation
+        run: make validate

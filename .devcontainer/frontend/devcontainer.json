@@ -1,9 +1,9 @@
 {
   "name": "Svelte App",
   "build": {
-    "dockerfile": "../Dockerfile",
+    "dockerfile": "../../src/frontend/Dockerfile",
     "target": "dev",
-    "context": ".."
+    "context": "../../src/frontend"
   },
   "customizations": {
     "vscode": {
@@ -22,6 +22,7 @@
       "onAutoForward": "openPreview"
     }
   },
-  "runArgs": ["--env-file", ".env"],
+  "runArgs": ["--env-file", "${localWorkspaceFolder}/src/frontend/.env"],
+  "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}/src/frontend",
   "remoteUser": "node"
 }

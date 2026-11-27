@@ -1,39 +1,32 @@
-# SimpleX Unofficial Catalog Frontend [![CD](https://github.com/ed-asriyan/simplex-catalog-frontend/actions/workflows/CD.yml/badge.svg)](https://github.com/ed-asriyan/simplex-catalog-frontend/actions/workflows/CD.yml)
-Web application built on Svelte.js and Supabase for https://simplex-catalog.asriyan.me
+# SimpleX Unofficial Catalog
+The catalog of SimpleX servers, relays and bots at https://simplex-catalog.asriyan.me: anyone adds one, and the catalog keeps checking whether it works.
 
-# Architecture
-This repository is one of components. The entire project works on the following:
-* **Supabase** project that stores list of all added SimpleX servers and bots and availability statuses. Code: [simplex-catalog-supabase](https://github.com/ed-asriyan/simplex-catalog-supabase)
-* **GitHub Actions Worker** running the app what validates SMP servers and updates date in Supabase. Code: [simplex-catalog-servers-validator](https://github.com/ed-asriyan/simplex-catalog-servers-validator)
-* **GitHub Actions Worker** running the app what validates bots and updates date in Supabase. Code: [simplex-catalog-bots-validator](https://github.com/ed-asriyan/simplex-catalog-bots-validator)
-* **GitHub Pages** serving SPA app. Code: this repository.
+## Layout
+The root holds the project's projections, each a view of the same catalog:
 
-# Setup
-## Init
-1. Setup [simplex-catalog-supabase](https://github.com/ed-asriyan/simplex-catalog-supabase) locally or in cloud. This is backend service for the frontend app
-2. *(optional)* Setup [Google Analytics](https://analytics.google.com)
-3. *(optional)* Setup [Sentry](https://sentry.io) account and create Svelte project
-4. Create `ENV_FILE_CONTENT` repository variable and copy content of filled by you [.env](.env) file in it
-5. Setup [simplex-catalog-servers-validator](https://github.com/ed-asriyan/simplex-catalog-servers-validator)
-6. Setup [simplex-catalog-bots-validator](https://github.com/ed-asriyan/simplex-catalog-bots-validator)
+| Directory | Projection |
+|---|---|
+| `stories/` | how the catalog should behave, as the people who use it see it |
+| `design/` | how it is built: its components, what each is responsible for, how they talk |
+| `e2e/` | the end-to-end tests: the stories played against the whole running catalog |
+| [`src/`](src) | the code: how it works in fact |
 
-## Local development
-1. Install docker
-2. Install dependencies:
-   ```console
-   make dev_install
-   ```
+## Components
+The code is five components, each deployed on its own:
 
-Now you can run the dev server locally:
-```console
-make dev_serve
-```
+| Directory | What it is | Runs on |
+|---|---|---|
+| [`src/frontend/`](src/frontend) | the web application, in Svelte | GitHub Pages, deployed on every change to it on `master` |
+| [`src/backend/`](src/backend) | the database and the edge functions that add servers, relays and bots, on Supabase | Supabase, deployed on every change to it on `master` |
+| [`src/servers-validator/`](src/servers-validator) | checks the SMP servers and writes their status | GitHub Actions, every 12 hours |
+| [`src/relays-validator/`](src/relays-validator) | checks the relays, over clearnet, Tor, I2P and Yggdrasil | GitHub Actions, every 12 hours |
+| [`src/bots-validator/`](src/bots-validator) | checks the bots | GitHub Actions, every 12 hours |
 
-## Generate prod bundle
-```console
-make prod_build_bundle
-```
+Each component's README says how to run it locally. The workflows are in [`.github/workflows`](.github/workflows), one set per component, each started by changes to its own directory.
 
-## GitHub Actions
-* Each push to `master` triggers deployment to production
-* Make sure that `ENV_FILE_CONTENT` repository variable is filled
+## Configuration
+Repository variable `FRONTEND_ENV_FILE_CONTENT`: the frontend's [`.env`](src/frontend/.env), filled in.
+
+Repository secrets:
+- `SUPABASE_ACCESS_TOKEN`, `SUPABASE_PROJECT_ID`, `SUPABASE_DB_PASSWORD`: the backend's deployment to Supabase;
+- `SERVERS_VALIDATOR_ENV_FILE_CONTENT`, `RELAYS_VALIDATOR_ENV_FILE_CONTENT`, `BOTS_VALIDATOR_ENV_FILE_CONTENT`: each validator's `.env`, filled in.
