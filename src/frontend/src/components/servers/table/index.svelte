@@ -237,7 +237,7 @@
         <button class="uk-button uk-button-default uk-button-small" onclick={exportLabels}>Export labels</button>
     </div>
     <div class="uk-flex uk-flex-middle uk-flex-wrap" style="gap: 8px;">
-        <select bind:value={pageSize} class="uk-select uk-form-small uk-width-small">
+        <select value={pageSize} onchange={e => updatePagination(1, +e.currentTarget.value)} class="uk-select uk-form-small uk-width-small" aria-label="Page size">
             {#each [5, 10, 20, 50, 100] as size}
                 <option value={size}>Page size: { size }</option>
             {/each}
