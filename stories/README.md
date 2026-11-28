@@ -56,10 +56,8 @@ The catalog at [simplex-catalog.asriyan.me](https://simplex-catalog.asriyan.me) 
     > [Official guide: Bot](https://github.com/simplex-chat/simplex-chat/tree/stable/bots#readme)
   - **I submitted a bot but it didn't appear**
 
-    > 1. Ensure that the bot's [ChatPeerType](https://github.com/simplex-chat/simplex-chat/blob/stable/bots/api/TYPES.md#chatpeertype) is `bot`. If it's not set or is `human`, the bot won't appear.
-    >    *Note: This prevents regular user contacts from appearing in the catalog.*
-    > 2. Wait up to 12 hours for the bot to appear in the catalog.
-    > 3. If the bot hasn't appeared after 12 hours, check if the bot is online and the submitted contact link is active. If it's online and the contact link is active, please submit [a bug report](https://github.com/ed-asriyan/simplex-catalog-bots-validator/issues/new).
+    > 1. All bots go through manual moderation. Wait up to 3 days for the bot to appear in the catalog.
+    > 2. If the bot hasn't appeared after 3 days, check that the bot is online, the submitted contact link is active, and it does not contain NSFW or other unacceptable content. If everything looks good, please submit [a bug report](https://github.com/ed-asriyan/simplex-catalog/issues/new).
 
 ## B. Servers
 ### The page
