@@ -221,15 +221,16 @@ test('the status filter shows the bots online, offline, or all, from the first p
 });
 
 // US-C8
-test('a search that finds no bot after one that found some says so, with the earlier line below', async ({ page }) => {
+test('a search that finds no bot after one that found some says so, with 0 matching and no page buttons', async ({ page }) => {
   await bots(page, 'filterStatus=any');
   await typeInto(search(page), 'echo');
   await expect(cards(page)).toHaveCount(1);
   await total(page, 1);
   await typeInto(search(page), 'no bot has this in its name');
-  await expect(page.getByText('No bots found.')).toBeVisible();
   await expect(cards(page)).toHaveCount(0);
-  await total(page, 1);
+  await total(page, 0);
+  await expect(page.locator('.pages button')).toHaveCount(0);
+  await looks(page, 'bots-empty');
 });
 
 // US-C9
@@ -438,7 +439,8 @@ test('a bot the maintainer has not approved is not listed, and its page is not f
   const row = await addedBot(pending.address);
   expect(row).toMatchObject({ approved: null });
   await bots(page, 'filterStatus=any&q=Pending');
-  await expect(page.getByText('No bots found.')).toBeVisible();
+  await total(page, 0);
+  await expect(cards(page)).toHaveCount(0);
   await open(page, `/#/bots/${row!.id}`);
   // Not the "Bot not found." of an id nobody has: an error, in red.
   await expect(page.getByText('Error: Bot not found')).toBeVisible();
@@ -511,7 +513,8 @@ test('the bot the maintainer approves is checked from the next check on, and lis
   expect(await addedBot(pending.address)).toMatchObject({ approved: true });
   // Not listed before a check has read its profile.
   await bots(page, 'filterStatus=any&q=Pending');
-  await expect(page.getByText('No bots found.')).toBeVisible();
+  await total(page, 0);
+  await expect(cards(page)).toHaveCount(0);
   await validate('bots');
   await bots(page, 'filterStatus=true&q=Pending');
   await expect(card(page, pending)).toBeVisible();

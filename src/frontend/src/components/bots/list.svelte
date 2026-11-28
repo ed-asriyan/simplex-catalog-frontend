@@ -262,16 +262,14 @@
           </div>
         {/each}
       </div>
-      {#if currentPageBots.length === 0}
-        <p class="uk-text-center">No bots found.</p>
-      {/if}
-      {#if totalCount > 0}
-        <div
-          class="uk-flex uk-flex-middle uk-flex-center uk-margin-large-top uk-flex-column uk-text-center pages"
-        >
-          <div class="uk-margin-bottom">
-            Total bots matching filters: {totalCount}
-          </div>
+      <div
+        class="uk-flex uk-flex-middle uk-flex-center uk-flex-column uk-text-center pages"
+        class:uk-margin-large-top={currentPageBots.length > 0}
+      >
+        <div class:uk-margin-bottom={totalCount > 0}>
+          Total bots matching filters: {totalCount}
+        </div>
+        {#if totalCount > 0}
           <div>
             <div class="uk-margin-bottom">
               {#each Array.from({ length: pageCount }, (_, i) => i + 1) as page}
@@ -301,8 +299,8 @@
               </button>
             {/if}
           </div>
-        </div>
-      {/if}
+        {/if}
+      </div>
     {:catch error}
       <p class="uk-text-center uk-text-danger">
         Error loading bots: {error.message}

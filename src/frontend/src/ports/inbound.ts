@@ -33,8 +33,7 @@ export interface ServersCatalog {
 /** The bots' cards and a bot's page (US-C1…US-C15). */
 export interface BotsCatalog {
     /**
-     * The page of the bots the filter lets through, sorted, and how many it lets through in all; when the
-     * filter lets none through, `total` is that of the last list that found some (US-C8).
+     * The page of the bots the filter lets through, sorted, and how many it lets through in all (US-C1, US-C8).
      */
     list(filter: BotsFilter, sort: Sort<BotsSortField>, page: Page): Promise<Result<PageOf<Bot>>>;
 

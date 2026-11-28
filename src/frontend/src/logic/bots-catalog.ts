@@ -2,19 +2,13 @@ import type {
     Bot, BotCheck, BotDetails, BotsFilter, BotsRead, BotsSortField, Page, PageOf, Result, Sort, BotsCatalog as BotsCatalogPort } from '../ports';
 
 /**
- * The bots' cards: what the database narrows is asked of it, and the total a list that finds none keeps is kept
- * here (US-C8): it is that of the latest list that found some, and a bot asked for by its id is no list.
+ * The bots' cards: what the database narrows is asked of it (US-C1…US-C15).
  */
 export class BotsCatalog implements BotsCatalogPort {
-    private lastTotal = 0;
-
     constructor(private readonly bots: BotsRead) {}
 
     async list(filter: BotsFilter, sort: Sort<BotsSortField>, page: Page): Promise<Result<PageOf<Bot>>> {
-        const found = await this.bots.list(filter, sort, page);
-        if (!found.ok) return found;
-        if (found.value.total > 0) this.lastTotal = found.value.total;
-        return { ok: true, value: { items: found.value.items, total: found.value.total || this.lastTotal } };
+        return this.bots.list(filter, sort, page);
     }
 
     async bot(uuid: string): Promise<Result<Bot | null>> {
