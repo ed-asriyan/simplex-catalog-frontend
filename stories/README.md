@@ -71,7 +71,12 @@ The catalog at [simplex-catalog.asriyan.me](https://simplex-catalog.asriyan.me) 
   >
   > Active servers: 12 · TOR servers: 3 · Total countries: 5
 
-  — the counts of the servers found online at their latest check: all of them, those reached over Tor, and the locations they are in, where *TOR*, *Yggdrasil* and *I2P* each count as one —, then **Add server anonymously**, the link [How to deploy your own server?](/#/faq), and the world map (US-B2). Below are the filters (US-B10), 🔄 (US-B52), **Import labels** and **Export labels** (US-B31), **Page size: 50** (US-B28) and **Bulk mode (0)** (US-B34), and the table of the servers (US-B5), sorted by *Last Check* `▼`.
+  then **Add server anonymously**, the link [How to deploy your own server?](/#/faq), and the world map (US-B2). Below are the filters (US-B10), 🔄 (US-B52), **Import labels** and **Export labels** (US-B31), **Page size: 50** (US-B28) and **Bulk mode (0)** (US-B34), and the table of the servers (US-B5), sorted by *Last Check* `▼`.
+
+  The counts are computed from the servers found online at their latest check:
+  - **Active servers** — the total number of servers online at their latest check;
+  - **TOR servers** — the number of servers online at their latest check that are reached over Tor;
+  - **Total countries** — the number of distinct countries that have at least one server online at its latest check, excluding *TOR*, *Yggdrasil* and *I2P*.
 - **US-B2.** As a visitor, when I open `/#/servers`, the world map beside its text has each country with servers found online at their latest check coloured, the more of them the darker; countries with none are left blank.
 - **US-B3.** As a visitor, when I hover a coloured country on the servers' map, I see its flag and name and `8 servers`, the number of its servers found online.
 - **US-B4.** As a visitor, when I click a coloured country on the servers' map, the table shows the servers online in that country: the **Location** filter holds that country alone, *Inclusive*, and **Status** is *Active*; the other filters stay as they were.
@@ -115,7 +120,7 @@ The catalog at [simplex-catalog.asriyan.me](https://simplex-catalog.asriyan.me) 
 - **US-B23.** As a visitor, when I open `/#/servers` with no filter in its address, the filters are those I used last in this browser; on my first visit, **Status** *Active*, the others empty.
 - **US-B24.** As a visitor, when I click **Active servers** in the counts, **Status** becomes *Active*; the other filters stay as they were.
 - **US-B25.** As a visitor, when I click **TOR servers** in the counts, **Location** holds *TOR* alone, *Inclusive*, and **Status** becomes *Active*; the other filters stay as they were.
-- **US-B26.** As a visitor, when I click **Total countries** in the counts, **Location** holds `Not TOR` alone, *Exclusive*, and **Status** becomes *Active*; the other filters stay as they were.
+- **US-B26.** As a visitor, when I click **Total countries** in the counts, **Location** holds `Not TOR`, `Not Yggdrasil` and `Not 🧄 I2P`, *Exclusive*, and **Status** becomes *Active*; the other filters stay as they were.
 
 ### Sorting and pages
 - **US-B27.** As a visitor, when I click a column's title in the servers' table — *Type*, *URI*, *Location*, *Info page*, *Status*, *7d*, *30d*, *90d*, *Last Check* or *Added at* — the table is sorted by it, descending, the title marked `▼`; when I click it again, ascending, `▲`.
