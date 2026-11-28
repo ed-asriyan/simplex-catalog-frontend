@@ -55,7 +55,7 @@ export interface Submission {
 
 /**
  * What the browser keeps of the visitor's own, there between visits, for this visitor only. What earlier
- * visits kept is read as they left it (US-B23, US-B30, US-C10, US-D10).
+ * visits kept is read as they left it (US-B23, US-B30, US-B38, US-C10, US-D10).
  */
 export interface VisitorStorage {
     /** The filters of a list as they were saved last; `null` when there are none, an error when the browser does not let them be read. */

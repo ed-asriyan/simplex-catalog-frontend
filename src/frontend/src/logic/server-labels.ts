@@ -16,9 +16,9 @@ const asLabels = (value: unknown): Labels | null => {
 
 /**
  * The labels `added` and `ignored` a visitor gives servers (US-B30…US-B33, US-B38). They are kept in memory and
- * saved in the browser with every toggle and replacement; `markAdded` does not save, the next saving takes it along.
- * The browser keeps them under the key and in the shape earlier visits left them in (`VisitorStorage`), so a
- * returning visitor finds them; what it does not let be read or kept leaves the labels on the page as they are.
+ * saved in the browser with every toggle, addition and replacement. The browser keeps them under the key and in
+ * the shape earlier visits left them in (`VisitorStorage`), so a returning visitor finds them; what it does not let
+ * be read or kept leaves the labels on the page as they are.
  */
 export class ServerLabels implements ServerLabelsPort {
     private labels: Labels;
@@ -47,7 +47,10 @@ export class ServerLabels implements ServerLabelsPort {
     }
 
     markAdded(serverUuid: string): void {
-        if (!this.labels.added.includes(serverUuid)) this.labels.added = [...this.labels.added, serverUuid];
+        if (!this.labels.added.includes(serverUuid)) {
+            this.labels.added = [...this.labels.added, serverUuid];
+            this.save();
+        }
     }
 
     export(): void {
