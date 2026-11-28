@@ -5,7 +5,7 @@ use log::{error, info};
 use rand::seq::SliceRandom;
 
 use super::ports::{
-    Page, Relay, RelayCheck, RelayRepositoryPort, RelayTestPort, RelaysValidatorPort,
+    Page, Relay, RelayCheck, RelayRepositoryPort, RelayTestPort, RelaysValidatorPort, RunError,
 };
 
 /// How many relays one page asks for.
@@ -55,7 +55,7 @@ impl<R: RelayRepositoryPort, T: RelayTestPort> App<R, T> {
         None
     }
 
-    async fn write_check(&self, relay: &Relay, check: &RelayCheck) {
+    async fn write_check(&self, relay: &Relay, check: &RelayCheck) -> Result<(), RunError> {
         if let RelayCheck::Online { profile } = check {
             if self
                 .relay_repository
@@ -64,7 +64,7 @@ impl<R: RelayRepositoryPort, T: RelayTestPort> App<R, T> {
                 .is_none()
             {
                 error!("Failed to replace the profile of relay {}", relay.id);
-                return;
+                return Err(RunError::NotWritten);
             }
         }
         if self
@@ -74,23 +74,29 @@ impl<R: RelayRepositoryPort, T: RelayTestPort> App<R, T> {
             .is_none()
         {
             error!("Failed to create the check of relay {}", relay.id);
+            return Err(RunError::NotWritten);
         }
+        Ok(())
     }
 }
 
 impl<R: RelayRepositoryPort, T: RelayTestPort> RelaysValidatorPort for App<R, T> {
-    async fn check_relays(&self, retry_count: u32) {
+    async fn check_relays(&self, retry_count: u32) -> Result<(), RunError> {
         let Some(mut relays) = self.read_all_relays().await else {
             error!("Failed to retrieve relays from repository");
-            return;
+            return Err(RunError::NotRead);
         };
         info!("Retrieved {} relays", relays.len());
         relays.shuffle(&mut rand::rng());
+        let mut result = Ok(());
         for relay in &relays {
             if let Some(check) = self.test_relay(&relay.url, retry_count).await {
-                self.write_check(relay, &check).await;
+                if let Err(error) = self.write_check(relay, &check).await {
+                    result = Err(error);
+                }
             }
         }
+        result
     }
 }
 

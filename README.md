@@ -39,8 +39,7 @@ Variables:
 
 | Name | Used by | Value |
 |---|---|---|
-| `SUPABASE_PROJECT_ID` | the deployment of the database and the functions | the project's reference ID: **Project Settings → General**, the `<ref>` of `https://<ref>.supabase.co` |
-| `SUPABASE_URL` | the website (`VITE_SUPABASE_URL`) and the validators (`SUPABASE_URL`) | `https://<ref>.supabase.co`, **Project Settings → Data API** |
+| `SUPABASE_PROJECT_ID` | the deployment of the database and the functions, the website and the validators, which make the project's address `https://<ref>.supabase.co` of it | the project's reference ID: **Project Settings → General**, the `<ref>` of `https://<ref>.supabase.co` |
 | `SUPABASE_ANON_KEY` | the website (`VITE_SUPABASE_KEY`) | **Project Settings → API Keys** → the publishable key (`sb_publishable_…`, or the legacy `anon` one) |
 | `WEBSITE_URL` | the website (`VITE_URL`) | `https://simplex-catalog.asriyan.me` |
 | `SIMPLEX_GROUP_LINK` | the website (`VITE_SIMPLEX_GROUP_LINK`) | the link of the catalog's SimpleX group, which **Join the group chat** opens |

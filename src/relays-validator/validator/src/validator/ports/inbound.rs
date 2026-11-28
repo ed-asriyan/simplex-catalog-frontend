@@ -2,8 +2,12 @@
 
 use std::future::Future;
 
+use super::types::RunError;
+
 pub trait RelaysValidatorPort {
     /// Reads every page of the relays the backend lists, and checks each, once, in random order, and writes a check of each; a relay whose
     /// test cannot be asked is asked once and then again up to `retry_count` times, and then not written (US-D22…US-D24).
-    fn check_relays(&self, retry_count: u32) -> impl Future<Output = ()>;
+    /// The answer is an error when the relays could not be read or a check could not be written: the program then ends
+    /// with a failure, so that its run is not taken for a success.
+    fn check_relays(&self, retry_count: u32) -> impl Future<Output = Result<(), RunError>>;
 }

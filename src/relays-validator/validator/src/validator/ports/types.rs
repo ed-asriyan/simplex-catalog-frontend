@@ -42,3 +42,10 @@ pub enum RelayCheck {
         profile: RelayProfile,
     },
 }
+
+/// Why a run failed: what it checks could not be read, or a check could not be written.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum RunError {
+    NotRead,
+    NotWritten,
+}

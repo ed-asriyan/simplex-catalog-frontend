@@ -6,7 +6,7 @@
 
 use super::ports::{
     Availability, GeoIpPort, HttpCheckerPort, Page, Server, ServerCheckerPort,
-    ServerRepositoryPort, ServerStatus, ServerType, ServersValidatorPort,
+    RunError, ServerRepositoryPort, ServerStatus, ServerType, ServersValidatorPort,
 };
 use log::{error, info};
 use rand::seq::SliceRandom;
@@ -71,12 +71,12 @@ impl<R: ServerRepositoryPort, SC: ServerCheckerPort, Geo: GeoIpPort, HC: HttpChe
         answer
     }
 
-    async fn check_server(&self, server: &Server, retry_count: u32) {
+    async fn check_server(&self, server: &Server, retry_count: u32) -> Result<(), RunError> {
         let uri = get_server_uri(server);
         info!("Checking server status: {uri}");
         let Some(availability) = self.test_server(&uri, retry_count).await else {
             error!("Could not test server {uri}");
-            return;
+            return Ok(());
         };
         info!("Server check result: {availability:?}");
 
@@ -87,7 +87,7 @@ impl<R: ServerRepositoryPort, SC: ServerCheckerPort, Geo: GeoIpPort, HC: HttpChe
                 "No location found for {}; the check is not written",
                 server.host
             );
-            return;
+            return Ok(());
         }
 
         let status = ServerStatus {
@@ -102,22 +102,28 @@ impl<R: ServerRepositoryPort, SC: ServerCheckerPort, Geo: GeoIpPort, HC: HttpChe
             .is_none()
         {
             error!("Could not write the check of server {uri}");
+            return Err(RunError::NotWritten);
         }
+        Ok(())
     }
 }
 
 impl<R: ServerRepositoryPort, SC: ServerCheckerPort, Geo: GeoIpPort, HC: HttpCheckerPort>
     ServersValidatorPort for App<R, SC, Geo, HC>
 {
-    async fn check_servers(&self, retry_count: u32) {
+    async fn check_servers(&self, retry_count: u32) -> Result<(), RunError> {
         let Some(mut servers) = self.get_all_servers().await else {
             error!("Failed to retrieve servers from repository");
-            return;
+            return Err(RunError::NotRead);
         };
         servers.shuffle(&mut rand::rng());
+        let mut result = Ok(());
         for server in &servers {
-            self.check_server(server, retry_count).await;
+            if let Err(error) = self.check_server(server, retry_count).await {
+                result = Err(error);
+            }
         }
+        result
     }
 }
 

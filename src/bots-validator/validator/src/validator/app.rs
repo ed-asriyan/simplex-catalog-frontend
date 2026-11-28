@@ -12,7 +12,7 @@ use rand::seq::SliceRandom;
 
 use super::ports::{
     Bot, BotAddressPort, BotCheck, BotContactPort, BotProfile, BotRepositoryPort,
-    BotsValidatorPort, Connection, FirstMessage, Page, VisitorPort,
+    BotsValidatorPort, Connection, FirstMessage, Page, RunError, VisitorPort,
 };
 
 /// How many bots a page of them holds: PostgREST's own limit on a page.
@@ -50,16 +50,20 @@ impl<V: VisitorPort, A: BotAddressPort, C: BotContactPort, R: BotRepositoryPort>
 impl<V: VisitorPort, A: BotAddressPort, C: BotContactPort, R: BotRepositoryPort> BotsValidatorPort
     for App<V, A, C, R>
 {
-    async fn check_bots(&self, retry_count: u32) {
+    async fn check_bots(&self, retry_count: u32) -> Result<(), RunError> {
         let Some(mut bots) = self.read_bots().await else {
             error!("The bots could not be read");
-            return;
+            return Err(RunError::NotRead);
         };
         info!("Found {} bots", bots.len());
         bots.shuffle(&mut rand::rng());
+        let mut result = Ok(());
         for bot in &bots {
-            self.check_bot(bot, retry_count).await;
+            if let Err(error) = self.check_bot(bot, retry_count).await {
+                result = Err(error);
+            }
         }
+        result
     }
 }
 
@@ -85,8 +89,8 @@ impl<V: VisitorPort, A: BotAddressPort, C: BotContactPort, R: BotRepositoryPort>
     }
 
     /// Tries the bot once, and again up to `retry_count` times while it is not online or the try could not be
-    /// made, and writes what the last try found.
-    async fn check_bot(&self, bot: &Bot, retry_count: u32) {
+    /// made, and writes what the last try found; an error when that could not be written.
+    async fn check_bot(&self, bot: &Bot, retry_count: u32) -> Result<(), RunError> {
         let mut found = None;
         for attempt in 1..=retry_count.saturating_add(1) {
             info!("Checking {}, attempt {attempt}", bot.address);
@@ -105,10 +109,12 @@ impl<V: VisitorPort, A: BotAddressPort, C: BotContactPort, R: BotRepositoryPort>
                 info!("Found: {found:?}");
                 if self.write(bot, &found).await.is_none() {
                     error!("The check of {} could not be written", bot.address);
+                    return Err(RunError::NotWritten);
                 }
             }
             None => error!("No check of {} could be made", bot.address),
         }
+        Ok(())
     }
 
     /// One try of the check, as a new visitor; `None` when a step of it could not be asked.

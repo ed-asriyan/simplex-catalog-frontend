@@ -124,5 +124,7 @@ async fn main() {
     let relay_checker = adapters::relays_checker::RelaysChecker::new(args.smp_server_uri);
     let app = validator::App::new(relay_repository, relay_checker);
 
-    app.check_relays(args.retry_count).await;
+    if app.check_relays(args.retry_count).await.is_err() {
+        std::process::exit(1);
+    }
 }
