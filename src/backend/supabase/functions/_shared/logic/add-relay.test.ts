@@ -9,17 +9,16 @@ const FINGERPRINT = b64url(new Uint8Array(32).fill(9));
 const SHORT = `https://smp.example.com/r#${KEY}`;
 const FULL = `${SHORT}?h=abcdefghijklmnop.onion&p=5223&c=${FINGERPRINT}`;
 
-/** In-memory relay store: a duplicate address fails with the database's message. */
+/** In-memory relay store: a duplicate address does nothing. */
 class FakeRelayStore implements RelayStore {
   urls: string[] = [];
   failWith: string | null = null;
 
   insert(url: string): Promise<Result<void>> {
     if (this.failWith) return Promise.resolve({ ok: false, error: this.failWith });
-    if (this.urls.includes(url)) {
-      return Promise.resolve({ ok: false, error: 'duplicate key value violates unique constraint "relays_url_key"' });
+    if (!this.urls.includes(url)) {
+      this.urls.push(url);
     }
-    this.urls.push(url);
     return Promise.resolve({ ok: true, value: undefined });
   }
 }
@@ -102,17 +101,14 @@ Deno.test('add-relay: localhost among its hosts is a 400 with status 4', async (
 });
 
 // US-D19
-Deno.test('add-relay: an address stored twice is a 500 with the database\'s message', async () => {
+Deno.test('add-relay: an address stored twice is a 204 and changes nothing', async () => {
   const { store, logic } = setup();
   assertEquals(await logic.add({ url: SHORT }), { http: 204 });
-  assertEquals(await logic.add({ url: SHORT }), {
-    http: 500,
-    body: { status: 3, error: 'duplicate key value violates unique constraint "relays_url_key"' },
-  });
+  assertEquals(await logic.add({ url: SHORT }), { http: 204 });
   assertEquals(store.urls, [SHORT]);
 });
 
-// US-D19
+// US-D18
 Deno.test('add-relay: a store that fails is a 500 with status 3 and its message', async () => {
   const { store, logic } = setup();
   store.failWith = 'database down';

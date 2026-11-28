@@ -39,10 +39,10 @@ it('gives the backend\'s answer to a bot\'s link with anything after its key as 
 });
 
 // US-C19
-it('gives the backend\'s answer to a bot the catalog has already, its words untouched', async () => {
-    const duplicate = 'duplicate key value violates unique constraint "bots_address_key"';
-    submission.answers.set('https://smp.example.com/a#known', duplicate);
-    expect(await adding.addBot('https://smp.example.com/a#known')).toEqual({ ok: false, error: duplicate });
+it('is ok when the backend accepts a bot the catalog has already', async () => {
+    const url = 'https://smp.example.com/a#known';
+    expect(await adding.addBot(url)).toEqual({ ok: true, value: undefined });
+    expect(submission.entered).toEqual([{ kind: 'bot', text: url }]);
 });
 
 // US-D18
@@ -53,10 +53,10 @@ it('hands the backend the relay\'s address as it was entered', async () => {
 });
 
 // US-D19
-it('gives the backend\'s answer to a relay the catalog has already, its words untouched', async () => {
-    const duplicate = 'duplicate key value violates unique constraint "relays_url_key"';
-    submission.answers.set('https://smp.example.com/r#known', duplicate);
-    expect(await adding.addRelay('https://smp.example.com/r#known')).toEqual({ ok: false, error: duplicate });
+it('is ok when the backend accepts a relay the catalog has already', async () => {
+    const url = 'https://smp.example.com/r#known';
+    expect(await adding.addRelay(url)).toEqual({ ok: true, value: undefined });
+    expect(submission.entered).toEqual([{ kind: 'relay', text: url }]);
 });
 
 // US-D20

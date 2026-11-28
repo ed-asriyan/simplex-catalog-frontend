@@ -8,17 +8,16 @@ const KEY = b64url(new Uint8Array(32).fill(7));
 const SHORT = `https://smp.example.com/a#${KEY}`;
 const FULL = 'https://simplex.chat/contact#/?v=2-7&smp=' + encodeURIComponent('smp://abc@smp.example.com/key');
 
-/** In-memory bot store: a duplicate address fails with the database's message. */
+/** In-memory bot store: a duplicate address does nothing. */
 class FakeBotStore implements BotStore {
   addresses: string[] = [];
   failWith: string | null = null;
 
   insert(address: string): Promise<Result<void>> {
     if (this.failWith) return Promise.resolve({ ok: false, error: this.failWith });
-    if (this.addresses.includes(address)) {
-      return Promise.resolve({ ok: false, error: 'duplicate key value violates unique constraint "bots_address_key"' });
+    if (!this.addresses.includes(address)) {
+      this.addresses.push(address);
     }
-    this.addresses.push(address);
     return Promise.resolve({ ok: true, value: undefined });
   }
 }
@@ -104,17 +103,14 @@ Deno.test('add-bot: a full address without its SMP server is a 400 with status 6
 });
 
 // US-C19
-Deno.test('add-bot: an address stored twice is a 500 with the database\'s message', async () => {
+Deno.test('add-bot: an address stored twice is a 204 and changes nothing', async () => {
   const { store, logic } = setup();
   assertEquals(await logic.add({ url: SHORT }), { http: 204 });
-  assertEquals(await logic.add({ url: SHORT }), {
-    http: 500,
-    body: { status: 3, error: 'duplicate key value violates unique constraint "bots_address_key"' },
-  });
+  assertEquals(await logic.add({ url: SHORT }), { http: 204 });
   assertEquals(store.addresses, [SHORT]);
 });
 
-// US-C19
+// US-C17
 Deno.test('add-bot: a store that fails is a 500 with status 3 and its message', async () => {
   const { store, logic } = setup();
   store.failWith = 'database down';

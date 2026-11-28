@@ -45,7 +45,7 @@ export interface RelaysRead {
 
 /**
  * Hands the backend what a visitor entered. Each is `ok` once the backend has taken it; otherwise its error is
- * the backend's answer, to show as it is (US-B47, US-C18…US-C20, US-D19, US-D20).
+ * the backend's answer, to show as it is (US-B47, US-C18, US-C20, US-D20).
  */
 export interface Submission {
     addServer(uri: string): Promise<Result<void>>;
