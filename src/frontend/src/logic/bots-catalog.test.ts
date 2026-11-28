@@ -31,42 +31,13 @@ it('asks the backend for the filter and the sort as they are', async () => {
 });
 
 // US-C8
-it('keeps the total of the list that found some when the next finds none', async () => {
+it('gives a total of 0 when the search or filter finds no bot, even after one that found some', async () => {
     read.bots = Array.from({ length: 14 }, (_, i) => bot(`b${i}`));
     expect(unwrap(await catalog.list({}, sort, page)).total).toBe(14);
 
     const none = unwrap(await catalog.list({ text: 'nothing like it' }, sort, page));
     expect(none.items).toEqual([]);
-    expect(none.total).toBe(14);
-});
-
-// US-C8
-it('keeps the total of the latest list that found some, not of the first', async () => {
-    read.bots = Array.from({ length: 14 }, (_, i) => bot(`b${i}`, { status: i < 3 }));
-    await catalog.list({}, sort, page);
-    expect(unwrap(await catalog.list({ status: true }, sort, page)).total).toBe(3);
-    expect(unwrap(await catalog.list({ text: 'nothing like it' }, sort, page)).total).toBe(3);
-});
-
-// US-C8
-it('gives a total of 0 when nothing was found before either', async () => {
-    expect(unwrap(await catalog.list({ text: 'x' }, sort, page))).toEqual({ items: [], total: 0 });
-});
-
-// US-C8
-it('gives the true total again once a list finds some after one that found none', async () => {
-    read.bots = [bot('a', { name: 'Weather' }), bot('b', { name: 'News' })];
-    await catalog.list({}, sort, page);
-    await catalog.list({ text: 'zzz' }, sort, page);
-    expect(unwrap(await catalog.list({ text: 'news' }, sort, page)).total).toBe(1);
-});
-
-// US-C8
-it('does not take the total of a bot asked for by its id for that of the list', async () => {
-    read.bots = [bot('a'), bot('b'), bot('c')];
-    await catalog.list({}, sort, page);
-    await catalog.bot('a');
-    expect(unwrap(await catalog.list({ text: 'zzz' }, sort, page)).total).toBe(3);
+    expect(none.total).toBe(0);
 });
 
 // US-C12
@@ -101,14 +72,4 @@ it('gives an error, and does not throw, whenever the backend fails', async () =>
     expect((await catalog.bot('a')).ok).toBe(false);
     expect((await catalog.details('a')).ok).toBe(false);
     expect((await catalog.checks(['a'], page)).ok).toBe(false);
-});
-
-// US-C8
-it('keeps the total through an error, and gives the error', async () => {
-    read.bots = [bot('a'), bot('b'), bot('c')];
-    await catalog.list({}, sort, page);
-    read.failure = 'down';
-    expect((await catalog.list({}, sort, page)).ok).toBe(false);
-    read.failure = null;
-    expect(unwrap(await catalog.list({ text: 'zzz' }, sort, page)).total).toBe(3);
 });

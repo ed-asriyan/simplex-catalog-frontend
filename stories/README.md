@@ -200,7 +200,7 @@ The catalog at [simplex-catalog.asriyan.me](https://simplex-catalog.asriyan.me) 
   > Discover and share community-run SimpleX bots.
   > Here anyone can anonymously add bots to the public list. The availability of each bot is checked periodically.
 
-  then **Add bot anonymously** and the link [How to create your own bot?](/#/faq); below, 🔄 (*Refresh*), the search field *Search* and the status filter, and the bots as cards, 12 a page, those online at their latest check first. A bot's card shows its image, or 🤖 without one; its name; *Offline* (red) when it was offline at its latest check; `Last check: 2 hours ago`; its description, or "No description"; and **Visit**. Under the cards I read `Total bots matching filters: 14`; with no bot to show, "No bots found."
+  then **Add bot anonymously** and the link [How to create your own bot?](/#/faq); below, 🔄 (*Refresh*), the search field *Search* and the status filter, and the bots as cards, 12 a page, those online at their latest check first. A bot's card shows its image, or 🤖 without one; its name; *Offline* (red) when it was offline at its latest check; `Last check: 2 hours ago`; its description, or "No description"; and **Visit**. Under the cards I read `Total bots matching filters: 14`; with no bot to show, `Total bots matching filters: 0`.
 - **US-C2.** As a visitor, when I click **Visit** on a bot's card, the bot's address opens in a new tab, for SimpleX to connect to it.
 - **US-C3.** As a visitor, when I click a bot's card anywhere but **Visit**, I am on the bot's page, `/#/bots/<id>` (US-C12).
 - **US-C4.** As a visitor, when I click [How to create your own bot?](/#/faq) on `/#/bots`, I am on `/#/faq` (US-A14).
@@ -209,7 +209,7 @@ The catalog at [simplex-catalog.asriyan.me](https://simplex-catalog.asriyan.me) 
 ### Search, filter and pages
 - **US-C6.** As a visitor, when I type `echo` in *Search*, a moment after I stop typing the cards are the bots whose name or description contains it, in any case, from the first page.
 - **US-C7.** As a visitor, when I choose *Online* or *Offline* in the status filter, the cards are the bots online at their latest check, or offline at it, from the first page; *All* shows them all.
-- **US-C8.** As a visitor, when my search or filter finds no bot after one that found some, I read "No bots found.", followed by the line and the page buttons of that earlier one, its number unchanged: `Total bots matching filters: 14`.
+- **US-C8.** As a visitor, when my search or filter finds no bot after one that found some, I read `Total bots matching filters: 0`, and no page buttons.
 - **US-C9.** As a visitor, when I open a link to `/#/bots` with a search and a filter in its address, as the page wrote them (`/#/bots?filterStatus=false&q=echo`), I see the cards they find.
 - **US-C10.** As a visitor, when I open `/#/bots` with neither in its address, the search and the filter are those I used last in this browser; on my first visit, no search and *Online*.
 - **US-C11.** As a visitor, when I click a page's button under the cards, or **← Previous page** or **Next page →**, the cards are that page's, and the page goes into the address.
