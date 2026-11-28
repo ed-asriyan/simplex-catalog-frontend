@@ -291,7 +291,7 @@ test('a relay\'s page: the image, the name and status, the QR code, the address 
   await openRelayPage(page);
   const title = page.getByRole('heading', { name: /^relay/ });
   await expect(title).toContainText('Online');
-  await expect(page.locator('div.uk-border-circle').filter({ hasText: '🤖' })).toBeVisible();
+  await expect(page.locator('div.uk-border-circle').filter({ hasText: '📡' })).toBeVisible();
   await expect(page.getByText(/^Last check: .*ago$/)).toBeVisible();
   await expect(page.locator('canvas, svg:not([viewBox="0 0 250 250"]), img').filter({ visible: true }).first()).toBeVisible();
   await expect(page.locator('[uk-tooltip="Click to copy URI"]')).toContainText('…');
