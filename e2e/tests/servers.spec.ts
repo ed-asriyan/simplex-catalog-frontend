@@ -777,7 +777,7 @@ test('← Back shows the server before', async ({ page }) => {
 });
 
 // US-B38
-test('Mark as added sets the ✅ label and goes on; it is saved only by a later label click', async ({ page }) => {
+test('Mark as added sets the ✅ label, goes on as Next → does, and saves the label in my browser', async ({ page }) => {
   const dialog = await bulk(page, [catalog.online, catalog.sibling]);
   await dialog.getByRole('button', { name: 'Mark as added and Next →' }).click();
   await expect(dialog).toContainText('2 / 2');
@@ -785,21 +785,9 @@ test('Mark as added sets the ✅ label and goes on; it is saved only by a later 
   await expect(dialog).toBeHidden();
   await expect(labelOf(row(page, catalog.online.host), '✅')).not.toHaveClass(/uk-label-muted/);
   await expect(labelOf(row(page, catalog.sibling.host), '✅')).not.toHaveClass(/uk-label-muted/);
-  expect(await page.evaluate(() => localStorage.getItem('labels_servers_uuid'))).toBeNull();
   await page.reload();
-  await expect(labelOf(row(page, catalog.online.host), '✅')).toHaveClass(/uk-label-muted/);
-
-});
-
-test('a label set by a click saves all my labels, the one marked as added included', async ({ page }) => {
-  const dialog = await bulk(page, [catalog.online, catalog.sibling]);
-  await dialog.getByRole('button', { name: 'Mark as added and Next →' }).click();
-  await dialog.getByRole('button', { name: 'Mark as added and Close' }).click();
-  await expect(dialog).toBeHidden();
-  await labelOf(row(page, catalog.xftp.host), '🚫').click();
-  await page.reload();
-  await expect(labelOf(row(page, catalog.xftp.host), '🚫')).not.toHaveClass(/uk-label-muted/);
   await expect(labelOf(row(page, catalog.online.host), '✅')).not.toHaveClass(/uk-label-muted/);
+  await expect(labelOf(row(page, catalog.sibling.host), '✅')).not.toHaveClass(/uk-label-muted/);
 });
 
 // US-B39

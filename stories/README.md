@@ -159,7 +159,7 @@ The catalog at [simplex-catalog.asriyan.me](https://simplex-catalog.asriyan.me) 
 - **US-B37.** As a visitor, when I click **← Back** in the dialog, it shows the server before.
 - **US-B38.** As a visitor, when I click **Mark as added and Next →** (**Mark as added and Close** on the last), the server's ✅ is set in the table and the dialog goes on as **Next →** does.
 
-  The label is not saved in my browser then: after a reload it is gone, unless I have since set or cleared a label by clicking it (US-B30), which saves all my labels, this one included.
+  The label is saved in my browser, for me only, and is there when I come back.
 - **US-B39.** As a visitor, when I click the dialog's ✕ or press Escape, it closes.
 
 ### A server's page

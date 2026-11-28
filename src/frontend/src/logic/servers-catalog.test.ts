@@ -98,7 +98,7 @@ describe('filters', () => {
     });
 
     // US-B38
-    it('counts the server marked as added, though that is not saved', async () => {
+    it('counts the server marked as added', async () => {
         read.servers = [server('a'), server('b')];
         labels.markAdded('b');
         expect((await uuids({ labels: { inclusive: true, values: ['added'] } })).uuids).toEqual(['b']);

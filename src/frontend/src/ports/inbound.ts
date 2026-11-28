@@ -78,7 +78,7 @@ export interface ServerLabels {
     /** Sets the label on the server, or clears it when it has it, and saves all the labels in the browser (US-B30). */
     toggle(serverUuid: string, label: string): void;
 
-    /** Sets the `added` label on the server on the page, without saving it: the next saving takes it along (US-B38). */
+    /** Sets the `added` label on the server, and saves all the labels in the browser (US-B38). */
     markAdded(serverUuid: string): void;
 
     /** Makes the browser save the labels as `<host>_labels_<time>.json` (US-B31). */

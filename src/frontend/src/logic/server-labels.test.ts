@@ -82,29 +82,37 @@ describe('toggle', () => {
 
 describe('the added label', () => {
     // US-B38
-    it('sets the label on the page without saving it', () => {
+    it('sets the label on the page and saves it in the browser immediately', () => {
         labels.markAdded('a');
         expect(labels.current().added).toEqual(['a']);
-        expect(storage.labelSaves).toEqual([]);
+        expect(storage.labels).toEqual({ added: ['a'], ignored: [] });
     });
 
     // US-B38
-    it('is saved along by the next toggle of any server', () => {
+    it('has the label saved earlier when the visitor comes back', () => {
         labels.markAdded('a');
-        labels.toggle('b', 'ignored');
-        expect(storage.labels).toEqual({ added: ['a'], ignored: ['b'] });
+        const back = new ServerLabels(storage, files, environment);
+        expect(back.current().added).toEqual(['a']);
     });
 
     // US-B38
-    it('is gone after a reload when nothing was toggled since', () => {
+    it('does not duplicate the label if already added', () => {
         labels.markAdded('a');
-        expect(new ServerLabels(storage, files, environment).current().added).toEqual([]);
+        labels.markAdded('a');
+        expect(labels.current().added).toEqual(['a']);
     });
 
     // US-B38
     it('does not clear the label of a server that has it', () => {
         labels.toggle('a', 'added');
         labels.markAdded('a');
+        expect(labels.current().added).toEqual(['a']);
+    });
+
+    // US-B38
+    it('still sets the label on the page, and does not throw, when the browser does not keep it', () => {
+        storage.saveFailure = 'quota';
+        expect(() => labels.markAdded('a')).not.toThrow();
         expect(labels.current().added).toEqual(['a']);
     });
 });
