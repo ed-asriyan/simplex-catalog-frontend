@@ -6,7 +6,7 @@ use std::rc::Rc;
 
 use super::App;
 use crate::validator::ports::{
-    Availability, GeoIpPort, HttpCheckerPort, Page, PageOf, Server, ServerCheckerPort,
+    Availability, GeoIpPort, HttpCheckerPort, Page, PageOf, RunError, Server, ServerCheckerPort,
     ServerRepositoryPort, ServerStatus, ServerType, ServersValidatorPort,
 };
 
@@ -173,7 +173,7 @@ impl World {
         }
     }
 
-    async fn run(&self, retry_count: u32) {
+    async fn run_result(&self, retry_count: u32) -> Result<(), RunError> {
         App::new(
             self.repository.clone(),
             self.checker.clone(),
@@ -181,7 +181,11 @@ impl World {
             self.http.clone(),
         )
         .check_servers(retry_count)
-        .await;
+        .await
+    }
+
+    async fn run(&self, retry_count: u32) {
+        assert_eq!(self.run_result(retry_count).await, Ok(()));
     }
 
     fn writes(&self) -> Vec<Written> {
@@ -241,8 +245,9 @@ async fn unreadable_backend_writes_nothing() {
     world.server(false, "a", "a.example", &[ONLINE], Some("DE"), true);
     world.repository.0.borrow_mut().unreadable = true;
 
-    world.run(1).await;
+    let result = world.run_result(1).await;
 
+    assert_eq!(result, Err(RunError::NotRead));
     assert!(world.writes().is_empty());
     assert!(world.checker.0.borrow().asked.is_empty());
 }
@@ -439,8 +444,9 @@ async fn rejected_write_does_not_stop_the_run() {
     world.server(false, "b", "b.example", &[ONLINE], Some("DE"), true);
     world.repository.0.borrow_mut().rejects_writes = true;
 
-    world.run(1).await;
+    let result = world.run_result(1).await;
 
+    assert_eq!(result, Err(RunError::NotWritten));
     assert_eq!(world.checker.asked("smp://identity-a@a.example"), 1);
     assert_eq!(world.checker.asked("smp://identity-b@b.example"), 1);
 }

@@ -18,13 +18,14 @@ jobs:
       - name: Save .env file
         env:
           VITE_URL: ${{ vars.WEBSITE_URL }}
-          VITE_SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+          SUPABASE_PROJECT_ID: ${{ vars.SUPABASE_PROJECT_ID }}
           VITE_SUPABASE_KEY: ${{ vars.SUPABASE_ANON_KEY }}
           VITE_SIMPLEX_GROUP_LINK: ${{ vars.SIMPLEX_GROUP_LINK }}
           VITE_SENTRY_DSN: ${{ vars.SENTRY_DSN }}
           VITE_ANALYTICS_MEASHUREMENT_ID: ${{ vars.ANALYTICS_MEASUREMENT_ID }}
         shell: bash
         run: |
+          export VITE_SUPABASE_URL="https://$SUPABASE_PROJECT_ID.supabase.co"
           for name in VITE_URL VITE_SUPABASE_URL VITE_SUPABASE_KEY VITE_SIMPLEX_GROUP_LINK VITE_SENTRY_DSN VITE_ANALYTICS_MEASHUREMENT_ID; do
             echo "$name=${!name}"
           done > .env

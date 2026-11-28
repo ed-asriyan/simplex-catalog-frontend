@@ -27,16 +27,16 @@ jobs:
           ref: ${{ github.event.pull_request.head.ref }}
           repository: ${{ github.event.pull_request.head.repo.full_name }}
 
-      # The validators share the project's address, its secret key and the number of tries (README.md).
+      # The validators share the project (its address is made of its ID), its secret key and the number of tries (README.md).
       - name: Save .env file
         env:
-          SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+          SUPABASE_PROJECT_ID: ${{ vars.SUPABASE_PROJECT_ID }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           RETRY_COUNT: ${{ vars.VALIDATORS_RETRY_COUNT || '3' }}
         shell: bash
         run: |
           {
-            echo "SUPABASE_URL=$SUPABASE_URL"
+            echo "SUPABASE_URL=https://$SUPABASE_PROJECT_ID.supabase.co/rest/v1"
             echo "SUPABASE_KEY=$SUPABASE_KEY"
             echo "RETRY_COUNT=$RETRY_COUNT"
           } > .env

@@ -153,5 +153,7 @@ async fn main() {
 
     let app = validator::App::new(servers_repository, servers_checker, geoip, http_checker);
 
-    app.check_servers(args.retry_count).await;
+    if app.check_servers(args.retry_count).await.is_err() {
+        std::process::exit(1);
+    }
 }

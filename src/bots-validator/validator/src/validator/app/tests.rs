@@ -9,8 +9,8 @@ use std::time::Duration;
 use super::App;
 use crate::validator::ports::{
     Bot, BotAddress, BotAddressPort, BotCheck, BotCommand, BotContactPort, BotProfile,
-    BotRepositoryPort, BotsValidatorPort, Connection, Contact, FirstMessage, Page, PageOf, Visitor,
-    VisitorPort,
+    BotRepositoryPort, BotsValidatorPort, Connection, Contact, FirstMessage, Page, PageOf, RunError,
+    Visitor, VisitorPort,
 };
 
 const TIME_LIMIT: Duration = Duration::from_secs(42);
@@ -87,6 +87,7 @@ struct State {
     visitor_of_address: HashMap<i64, String>,
     next_visitor: i64,
     read_bots_fails: bool,
+    create_check_fails: bool,
     new_visitor_fails: bool,
     log: Vec<Event>,
 }
@@ -270,6 +271,9 @@ impl BotRepositoryPort for FakeRepository {
     }
 
     async fn create_check(&self, bot_id: &str, check: &BotCheck) -> Option<()> {
+        if self.0.0.borrow().create_check_fails {
+            return None;
+        }
         self.0
             .0
             .borrow_mut()
@@ -288,7 +292,7 @@ fn is_online(check: &BotCheck) -> bool {
 async fn every_page_of_the_bots_is_read() {
     let world = World::with_bots(2_500);
 
-    world.app().check_bots(0).await;
+    world.app().check_bots(0).await.unwrap();
 
     let pages: Vec<Page> = world
         .log()
@@ -315,10 +319,23 @@ async fn nothing_is_checked_when_the_bots_could_not_be_read() {
     let world = World::with_bots(3);
     world.0.borrow_mut().read_bots_fails = true;
 
-    world.app().check_bots(2).await;
+    let result = world.app().check_bots(2).await;
 
+    assert_eq!(result, Err(RunError::NotRead));
     assert!(world.new_visitors().is_empty());
     assert!(world.writes().is_empty());
+}
+
+// US-C22
+#[tokio::test]
+async fn a_check_the_backend_did_not_take_fails_the_run_after_the_others_are_checked() {
+    let world = World::with_bots(2);
+    world.0.borrow_mut().create_check_fails = true;
+
+    let result = world.app().check_bots(0).await;
+
+    assert_eq!(result, Err(RunError::NotWritten));
+    assert_eq!(world.new_visitors().len(), 2);
 }
 
 // US-C25
@@ -326,7 +343,7 @@ async fn nothing_is_checked_when_the_bots_could_not_be_read() {
 async fn each_check_is_made_as_a_new_visitor() {
     let world = World::with_bots(3);
 
-    world.app().check_bots(0).await;
+    world.app().check_bots(0).await.unwrap();
 
     let log = world.log();
     let mut visitor_of_bot: HashMap<String, Visitor> = HashMap::new();
@@ -369,7 +386,7 @@ async fn each_try_is_made_as_a_new_visitor() {
         }],
     );
 
-    world.app().check_bots(2).await;
+    world.app().check_bots(2).await.unwrap();
 
     let looked_up: HashSet<i64> = world
         .log()
@@ -388,7 +405,7 @@ async fn an_address_without_a_profile_is_offline_and_no_contact_is_asked() {
     let world = World::with_bots(1);
     world.script("bot1", vec![Try::of("bot1", None)]);
 
-    world.app().check_bots(0).await;
+    world.app().check_bots(0).await.unwrap();
 
     let log = world.log();
     assert!(!log.iter().any(|e| matches!(
@@ -406,7 +423,7 @@ async fn an_address_without_a_profile_is_offline_and_no_contact_is_asked() {
 async fn a_bot_that_accepted_and_wrote_has_its_profile_and_greeting_replaced_and_is_online() {
     let world = World::with_bots(1);
 
-    world.app().check_bots(0).await;
+    world.app().check_bots(0).await.unwrap();
 
     let log = world.log();
     let writes = world.writes();
@@ -440,7 +457,7 @@ async fn a_bot_that_accepted_but_wrote_nothing_is_online_and_its_greeting_is_lef
         }],
     );
 
-    world.app().check_bots(0).await;
+    world.app().check_bots(0).await.unwrap();
 
     let writes = world.writes();
     assert!(
@@ -476,7 +493,7 @@ async fn a_bot_that_did_not_accept_within_the_time_limit_has_its_profile_replace
         }],
     );
 
-    world.app().check_bots(0).await;
+    world.app().check_bots(0).await.unwrap();
 
     let log = world.log();
     assert!(!log.iter().any(|e| matches!(e, Event::FirstMessage(..))));
@@ -494,7 +511,7 @@ async fn a_bot_that_did_not_accept_within_the_time_limit_has_its_profile_replace
 async fn the_time_limit_is_given_to_connecting_and_to_the_first_message() {
     let world = World::with_bots(1);
 
-    world.app().check_bots(0).await;
+    world.app().check_bots(0).await.unwrap();
 
     let log = world.log();
     assert!(
@@ -524,7 +541,7 @@ async fn a_bot_that_is_not_online_is_checked_again_up_to_the_retry_count_and_one
         }],
     );
 
-    world.app().check_bots(3).await;
+    world.app().check_bots(3).await.unwrap();
 
     let tries = world
         .log()
@@ -548,7 +565,7 @@ async fn a_bot_that_is_online_on_a_retry_is_online_and_is_not_checked_again() {
         vec![not_accepted.clone(), not_accepted, answers("bot1")],
     );
 
-    world.app().check_bots(5).await;
+    world.app().check_bots(5).await.unwrap();
 
     let tries = world
         .log()
@@ -566,7 +583,7 @@ async fn a_bot_that_is_online_on_a_retry_is_online_and_is_not_checked_again() {
 async fn a_bot_that_is_online_at_once_is_checked_once() {
     let world = World::with_bots(1);
 
-    world.app().check_bots(5).await;
+    world.app().check_bots(5).await.unwrap();
 
     let tries = world
         .log()
@@ -606,7 +623,7 @@ async fn a_step_that_could_not_be_asked_writes_nothing_for_that_try() {
         let world = World::with_bots(1);
         world.script("bot1", vec![broken_try]);
 
-        world.app().check_bots(0).await;
+        world.app().check_bots(0).await.unwrap();
 
         assert!(
             world.writes().is_empty(),
@@ -617,7 +634,7 @@ async fn a_step_that_could_not_be_asked_writes_nothing_for_that_try() {
 
     let world = World::with_bots(1);
     world.0.borrow_mut().new_visitor_fails = true;
-    world.app().check_bots(0).await;
+    world.app().check_bots(0).await.unwrap();
     assert!(
         world.writes().is_empty(),
         "no visitor, yet something was written"
@@ -640,7 +657,7 @@ async fn a_try_that_could_not_be_made_is_made_again_and_the_one_that_could_is_wr
         ],
     );
 
-    world.app().check_bots(1).await;
+    world.app().check_bots(1).await.unwrap();
 
     let checks = world.checks();
     assert_eq!(checks.len(), 1);
@@ -659,7 +676,7 @@ async fn a_bot_that_could_not_be_checked_does_not_stop_the_others() {
         }],
     );
 
-    world.app().check_bots(0).await;
+    world.app().check_bots(0).await.unwrap();
 
     let checked: HashSet<String> = world.checks().into_iter().map(|(id, _)| id).collect();
     assert_eq!(

@@ -74,7 +74,7 @@ async fn main() {
 
     let Some(cli) = SimplexCli::connect(smp_client_ws_url).await else {
         error!("No bot can be checked without the SimpleX CLI");
-        return;
+        std::process::exit(1);
     };
     let repository = BotsRepository::new(supabase_url, supabase_key, dry);
     let app = App::new(
@@ -85,5 +85,7 @@ async fn main() {
         Duration::from_secs(timeout),
     );
 
-    app.check_bots(retry_count).await;
+    if app.check_bots(retry_count).await.is_err() {
+        std::process::exit(1);
+    }
 }

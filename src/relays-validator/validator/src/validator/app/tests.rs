@@ -8,7 +8,7 @@ use std::sync::Mutex;
 use super::App;
 use crate::validator::ports::{
     Page, PageOf, Relay, RelayCheck, RelayProfile, RelayRepositoryPort, RelayTestPort,
-    RelaysValidatorPort,
+    RelaysValidatorPort, RunError,
 };
 
 /// The most relays the fake backend gives in one page, whatever size is asked: a list longer than that is
@@ -18,6 +18,8 @@ const MAX_PAGE_SIZE: u32 = 2;
 #[derive(Default)]
 struct FakeRepository {
     relays: Vec<Relay>,
+    unreadable: bool,
+    rejects_writes: bool,
     profiles: Mutex<Vec<(String, RelayProfile)>>,
     checks: Mutex<Vec<(String, RelayCheck)>>,
 }
@@ -50,6 +52,9 @@ impl FakeRepository {
 impl RelayRepositoryPort for FakeRepository {
     async fn read_relays(&self, page: Page) -> Option<PageOf<Relay>> {
         assert!(page.number >= 1 && page.size >= 1, "a page is numbered from 1");
+        if self.unreadable {
+            return None;
+        }
         let size = page.size.min(MAX_PAGE_SIZE) as usize;
         let items = self
             .relays
@@ -72,6 +77,9 @@ impl RelayRepositoryPort for FakeRepository {
     }
 
     async fn create_check(&self, relay_id: &str, check: &RelayCheck) -> Option<()> {
+        if self.rejects_writes {
+            return None;
+        }
         self.checks
             .lock()
             .unwrap()
@@ -148,7 +156,7 @@ async fn every_page_of_the_relays_is_read_and_each_relay_is_checked() {
         .also("url5", vec![Some(online("five"))]);
     let app = App::new(repository, test);
 
-    app.check_relays(1).await;
+    app.check_relays(1).await.unwrap();
 
     let checked: Vec<String> = app.relay_repository.checks().into_iter().map(|(id, _)| id).collect();
     assert_eq!(checked, ["r1", "r2", "r3", "r4", "r5"]);
@@ -164,7 +172,7 @@ async fn an_online_relay_has_its_profile_replaced_and_an_online_check_created() 
     let test = FakeTest::answering("url1", vec![Some(online("Relay One"))]);
     let app = App::new(repository, test);
 
-    app.check_relays(3).await;
+    app.check_relays(3).await.unwrap();
 
     assert_eq!(
         app.relay_repository.profiles(),
@@ -184,7 +192,7 @@ async fn an_offline_relay_has_an_offline_check_created_and_its_profile_left_as_i
     let test = FakeTest::answering("url1", vec![Some(RelayCheck::Offline)]);
     let app = App::new(repository, test);
 
-    app.check_relays(3).await;
+    app.check_relays(3).await.unwrap();
 
     assert_eq!(
         app.relay_repository.checks(),
@@ -204,7 +212,7 @@ async fn a_test_that_could_not_be_asked_is_asked_again_and_the_answer_is_written
     let test = FakeTest::answering("url1", vec![None, None, Some(online("Relay One"))]);
     let app = App::new(repository, test);
 
-    app.check_relays(3).await;
+    app.check_relays(3).await.unwrap();
 
     assert_eq!(app.relay_test.times_asked("url1"), 3);
     assert_eq!(
@@ -225,7 +233,7 @@ async fn a_test_that_could_not_be_asked_once_and_retry_count_times_again_writes_
         .also("url2", vec![Some(RelayCheck::Offline)]);
     let app = App::new(repository, test);
 
-    app.check_relays(3).await;
+    app.check_relays(3).await.unwrap();
 
     assert_eq!(app.relay_test.times_asked("url1"), 4, "asked once and retry_count times again, no more");
     assert_eq!(
@@ -234,4 +242,38 @@ async fn a_test_that_could_not_be_asked_once_and_retry_count_times_again_writes_
         "nothing is written for the relay that could not be asked, and the others are not held up"
     );
     assert!(app.relay_repository.profiles().is_empty());
+}
+
+// US-D22
+#[tokio::test]
+async fn relays_that_could_not_be_read_are_not_checked_and_the_run_fails() {
+    let repository = FakeRepository {
+        unreadable: true,
+        ..FakeRepository::with_relays(&[("r1", "url1")])
+    };
+    let test = FakeTest::answering("url1", vec![Some(RelayCheck::Offline)]);
+    let app = App::new(repository, test);
+
+    let result = app.check_relays(1).await;
+
+    assert_eq!(result, Err(RunError::NotRead));
+    assert_eq!(app.relay_test.times_asked("url1"), 0);
+}
+
+// US-D22
+#[tokio::test]
+async fn a_check_the_backend_did_not_take_fails_the_run_after_the_others_are_checked() {
+    let repository = FakeRepository {
+        rejects_writes: true,
+        ..FakeRepository::with_relays(&[("r1", "url1"), ("r2", "url2")])
+    };
+    let test = FakeTest::answering("url1", vec![Some(RelayCheck::Offline)])
+        .also("url2", vec![Some(RelayCheck::Offline)]);
+    let app = App::new(repository, test);
+
+    let result = app.check_relays(1).await;
+
+    assert_eq!(result, Err(RunError::NotWritten));
+    assert_eq!(app.relay_test.times_asked("url1"), 1);
+    assert_eq!(app.relay_test.times_asked("url2"), 1);
 }
