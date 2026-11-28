@@ -69,6 +69,18 @@ describe('filters', () => {
         expect((await uuids({ countries: { inclusive: false, values: ['DE', 'TOR'] } })).uuids).toEqual(['jp']);
     });
 
+    // US-B26
+    it('excludes TOR, Yggdrasil and I2P and keeps only active servers when Total countries is selected', async () => {
+        read.servers = [
+            server('de', { country: 'DE', status: true }),
+            server('de-off', { country: 'DE', status: false }),
+            server('tor', { country: 'TOR', status: true }),
+            server('ygg', { country: 'YGGDRASIL', status: true }),
+            server('i2p', { country: 'I2P', status: true }),
+        ];
+        expect((await uuids({ countries: { inclusive: false, values: ['TOR', 'YGGDRASIL', 'I2P'] }, status: true })).uuids).toEqual(['de']);
+    });
+
     // US-B18
     it('shows only the servers in the locations ticked when the filter is inclusive', async () => {
         read.servers = [server('de', { country: 'DE' }), server('jp', { country: 'JP' }), server('tor', { country: 'TOR' })];

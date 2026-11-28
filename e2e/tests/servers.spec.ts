@@ -542,16 +542,20 @@ test('TOR servers sets Location to TOR alone, inclusive, and Status to Active', 
 });
 
 // US-B26
-test('Total countries sets Location to Not TOR, exclusive, and Status to Active', async ({ page }) => {
+test('Total countries sets Location to Not TOR, Not Yggdrasil and Not I2P, exclusive, and Status to Active', async ({ page }) => {
   await servers(page, 'filterStatus=false&filterHost=.');
-  await page.getByText(/Total countries:/).click();
+  await page.getByRole('button', { name: /^Total countries: \d+$/ }).click();
   await expect(select(page, 'Inactive')).toHaveValue('true');
-  await expect(page).toHaveURL(/filterCountriesList=TOR/);
+  await expect(page.getByPlaceholder('Filter by host')).toHaveValue('.');
+  await expect(locationFilter(page).getByRole('button').first()).toHaveText('3 selected');
+  await expect(page).toHaveURL(/filterCountriesList=TOR%2CYGGDRASIL%2CI2P/);
   await expect(page).toHaveURL(/filterCountriesInclusive=false/);
   const list = await locations(page);
   await expect(list.getByText('Exclusive', { exact: true })).toBeVisible();
-  await expect(location(list, 'TOR').getByRole('checkbox')).toBeChecked();
-  await expect(location(list, 'TOR')).toContainText('Not');
+  for (const network of ['TOR', 'Yggdrasil', 'I2P']) {
+    await expect(location(list, network).getByRole('checkbox')).toBeChecked();
+    await expect(location(list, network)).toContainText('Not');
+  }
 });
 
 // ---- Sorting and pages

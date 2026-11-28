@@ -9,10 +9,13 @@
 
     let { updateFilter, filter }: Props = $props();
 
+    const OVERLAY_NETWORKS = new Set(['TOR', 'YGGDRASIL', 'I2P']);
+
     const { countries: countriesStore } = useWebsite();
     let countries = $derived(countriesStore.items);
     let activeCountries = $derived($countries.filter(({ active }) => !!active));
     let activeTorCountries = $derived(activeCountries.filter(({ country }) => country === 'TOR'));
+    let activeRealCountries = $derived(activeCountries.filter(({ country }) => !OVERLAY_NETWORKS.has(country)));
     let activeServersTotal = $derived(activeCountries.reduce((total, { active }) => total + active, 0));
     let activeTorServersTotal = $derived(activeTorCountries.reduce((total, { active }) => total + active, 0));
 
@@ -29,15 +32,26 @@
         },
         {
             title: 'Total countries',
-            value: activeCountries.length,
-            onClick: () => updateFilter?.({ ...filter, countries: { inclusive: false, values: ['TOR'] }, status: true })
+            value: activeRealCountries.length,
+            onClick: () => updateFilter?.({ ...filter, countries: { inclusive: false, values: ['TOR', 'YGGDRASIL', 'I2P'] }, status: true })
         },
     ]);
 </script>
 
 <div class="uk-margin-small-bottom">
     {#each cards as { title, value, onClick }}
-        <span onclick={onClick} class="uk-link uk-text-muted">
+        <span
+            role="button"
+            tabindex="0"
+            onclick={onClick}
+            onkeydown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    onClick();
+                }
+            }}
+            class="uk-link uk-text-muted"
+        >
             {title}: {value}
         </span>{#if onClick !== cards[cards.length - 1].onClick}&nbsp;·&nbsp;{/if}
     {/each}
