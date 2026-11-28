@@ -581,12 +581,15 @@ test('a column\'s title sorts the table by it, descending, then ascending', asyn
 });
 
 // US-B28
-test('Page size shows that many servers a page, and is not kept in the address', async ({ page }) => {
+test('Page size shows that many servers a page, and puts it in the address', async ({ page }) => {
   await servers(page, 'filterHost=.test&filterStatus=');
-  const size = select(page, 'Page size: 5');
+  const size = select(page, 'Page size: 50');
   await size.selectOption({ label: 'Page size: 5' });
+  await expect(page).toHaveURL(/pageSize=5/);
   await expect.poll(async () => (await hosts(page)).length).toBe(5);
-  expect(page.url()).not.toContain('pageSize');
+  await page.reload();
+  await expect(size).toHaveValue('5');
+  await expect.poll(async () => (await hosts(page)).length).toBe(5);
   await servers(page, 'filterHost=.test&filterStatus=&pageSize=10');
   await expect(size).toHaveValue('10');
   await expect.poll(async () => (await hosts(page)).length).toBeGreaterThanOrEqual(9);

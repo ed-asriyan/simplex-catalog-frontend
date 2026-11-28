@@ -126,9 +126,9 @@ The catalog at [simplex-catalog.asriyan.me](https://simplex-catalog.asriyan.me) 
 - **US-B27.** As a visitor, when I click a column's title in the servers' table — *Type*, *URI*, *Location*, *Info page*, *Status*, *7d*, *30d*, *90d*, *Last Check* or *Added at* — the table is sorted by it, descending, the title marked `▼`; when I click it again, ascending, `▲`.
 
   The sort goes into the page's address (US-B22b).
-- **US-B28.** As a visitor, when I choose 5, 10, 20, 50 or 100 in **Page size: 50**, the table shows that many servers a page.
+- **US-B28.** As a visitor, when I choose 5, 10, 20, 50 or 100 in **Page size: 50**, the table shows that many servers a page, and the size goes into the page's address (`pageSize=20`).
 
-  The choice does not go into the page's address: reloading the page, or opening its link, gives the size the address gives (`pageSize=20`), 50 without one.
+  Reloading the page, or opening its link, gives that size, 50 without one.
 - **US-B29.** As a visitor, when there are more servers than a page holds, under the table are a button for each page, the current one marked, and **← Previous page** and **Next page →**, each shown when there is a page that way; when I click one, the table shows that page, and the page goes into the address.
 - **US-B52.** As a visitor, when I click 🔄 (*Refresh*) on `/#/servers`, the table is fetched again with what the latest checks found, a spinner in 🔄's place while it loads.
 
