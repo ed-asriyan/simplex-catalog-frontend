@@ -8,7 +8,7 @@ import type {
     WorldTopology,
 } from './types';
 
-/** The servers' table, a server's page and the counts (US-B1…US-B29, US-B40…US-B42). */
+/** The servers' table, a server's page and the counts (US-B1…US-B29, US-B40…US-B42, US-B52). */
 export interface ServersCatalog {
     /**
      * The page of the servers the filter lets through, sorted, and how many it lets through in all. Filtering
@@ -62,7 +62,7 @@ export interface RelaysCatalog {
 
 /**
  * What a visitor adds. Each is `ok` once the catalog has taken it; otherwise its error is what the website
- * tells the visitor (US-B43…US-B47, US-C16…US-C21, US-D17…US-D21).
+ * tells the visitor (US-B43…US-B47, US-B54, US-C16…US-C21, US-D17…US-D21).
  */
 export interface Adding {
     addServer(uri: string): Promise<Result<void>>;

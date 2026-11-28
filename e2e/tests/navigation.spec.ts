@@ -193,7 +193,7 @@ test.describe('on a phone', () => {
     for (const item of MENU) await expect(header.getByRole('link', { name: item, exact: true })).toBeHidden();
   });
 
-  // US-A4
+  // US-A4, US-A15
   test('Open menu slides the menu in, and Close menu or a tap beside it closes it', async ({ page }) => {
     await open(page, '/#/faq');
     const menu = page.locator('#mobile-nav');
