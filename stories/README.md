@@ -290,7 +290,7 @@ The catalog at [simplex-catalog.asriyan.me](https://simplex-catalog.asriyan.me) 
 - **US-D13.** As a visitor, when there are more relays than a page holds, under the table are a button for each page, the current one marked, and **← Previous page** and **Next page →**, each shown when there is a page that way; when I click one, the table shows that page, and the page goes into the address.
 
 ### A relay's page
-- **US-D14.** As a visitor, when I open a relay's page, `/#/relays/<id>`, I see its image, or 🤖 without one; its name with *Online* or *Offline*; `Last check: 2 hours ago`; the QR code of its address and the address to copy, its first 28 characters then `…` when longer; **Availability History**, the timeline of its checks that found it different from the one before, each with its date and time and *Is Online*, `Online` (green) or `Offline` (red), or "No availability data yet."; and "Added to the catalog 3 days ago".
+- **US-D14.** As a visitor, when I open a relay's page, `/#/relays/<id>`, I see its image, or 📡 without one; its name with *Online* or *Offline*; `Last check: 2 hours ago`; the QR code of its address and the address to copy, its first 28 characters then `…` when longer; **Availability History**, the timeline of its checks that found it different from the one before, each with its date and time and *Is Online*, `Online` (green) or `Offline` (red), or "No availability data yet."; and "Added to the catalog 3 days ago".
 - **US-D15.** As a visitor, when I click the address on a relay's page, it is copied, and *Copied to clipboard* stands in its place for 4 seconds.
 - **US-D16.** As a visitor, when I open `/#/relays/<id>` with an id of no relay the catalog lists, I read "Relay not found."
 

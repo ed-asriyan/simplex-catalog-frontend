@@ -58,7 +58,7 @@
                                 <img class="uk-border-circle" width="80" height="80" src={relay.photo} alt={relay.name}>
                             {:else}
                                 <div class="uk-border-circle uk-background-muted uk-flex uk-flex-center uk-flex-middle" style="width: 80px; height: 80px; font-size: 40px;">
-                                    🤖
+                                    📡
                                 </div>
                             {/if}
                         </div>
