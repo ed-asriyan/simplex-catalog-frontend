@@ -23,7 +23,7 @@
 		"@sveltejs/vite-plugin-svelte": "^7.3.1",
 		"@tsconfig/svelte": "^5.0.2",
 		"@types/d3": "^7.4.3",
-		"@types/node": "^26.4.0",
+		"@types/node": "^26.6.7",
 		"d3": "^7.9.0",
 		"eslint": "^10.15.0",
 		"eslint-plugin-svelte": "^3.24.1",
