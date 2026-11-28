@@ -360,11 +360,11 @@ test('a relay\'s address is added, with or without the hosts, port and certifica
 });
 
 // US-D19
-test('an address the catalog has already is refused with the database\'s message', async ({ page }) => {
+test('an address the catalog has already is accepted the same way, and nothing changes', async ({ page }) => {
   await relaysPage(page);
   const url = unreachable();
   expect((await add(page, ADD, url)).told).toBe(ADDED);
-  expect((await add(page, ADD, url)).told).toBe('duplicate key value violates unique constraint "relays_url_key"');
+  expect((await add(page, ADD, url)).told).toBe(ADDED);
   expect(await relayAdded(url)).toBe(true);
 });
 

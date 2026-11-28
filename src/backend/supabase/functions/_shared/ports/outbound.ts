@@ -18,12 +18,12 @@ export interface ServerStore {
 
 /** Where the bots are kept. */
 export interface BotStore {
-  /** Stores the bot's address, not approved; an error with the database's message when it could not. */
+  /** Stores the bot's address, not approved, or does nothing when it is already there; an error with the database's message when it could not. */
   insert(address: string): Promise<Result<void>>;
 }
 
 /** Where the relays are kept. */
 export interface RelayStore {
-  /** Stores the relay's address; an error with the database's message when it could not. */
+  /** Stores the relay's address, or does nothing when it is already there; an error with the database's message when it could not. */
   insert(url: string): Promise<Result<void>>;
 }

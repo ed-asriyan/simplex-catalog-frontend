@@ -235,7 +235,11 @@ The catalog at [simplex-catalog.asriyan.me](https://simplex-catalog.asriyan.me) 
 
   It is not listed until the maintainer approves it (US-C22).
 - **US-C18.** As a visitor, when I enter a bot's short link with anything after its key, such as the certificate of a bot's own server, `https://smp.example.com/a#lW0aZ7sMhEoQXxqk2ZRVrbq2yCwYrJkqM1gYbJcJbG0?c=…`, I am told "URL has invalid format. Invalid contact data.", and nothing is added.
-- **US-C19.** As a visitor, when I enter an address the catalog has already, I am told `duplicate key value violates unique constraint "bots_address_key"`, and nothing changes.
+- **US-C19.** As a visitor, when I enter an address the catalog has already, I am told:
+
+  > The bot was submitted and will appear after it has been moderated and approved.
+
+  and nothing changes.
 - **US-C20.** As a visitor, when I enter an address that is not a bot's, I am told why, and nothing is added:
   - not a link at all: "Invalid URL format";
   - not HTTPS, `http://smp.example.com/a#…`: "URL has invalid format. Schema must be HTTPS";
@@ -299,7 +303,11 @@ The catalog at [simplex-catalog.asriyan.me](https://simplex-catalog.asriyan.me) 
   > The relay is added to the database. If the relay is available, it will soon appear in the table for everyone.
 
   It is listed once a check has reached it (US-D22).
-- **US-D19.** As a visitor, when I enter an address the catalog has already, I am told `duplicate key value violates unique constraint "relays_url_key"`, and nothing changes.
+- **US-D19.** As a visitor, when I enter an address the catalog has already, I am told:
+
+  > The relay is added to the database. If the relay is available, it will soon appear in the table for everyone.
+
+  and nothing changes.
 - **US-D20.** As a visitor, when I enter an address that is not a relay's, I am told why, and nothing is added:
   - not a link at all: "Invalid URL format";
   - not HTTPS: "URL has invalid format. Schema must be HTTPS";

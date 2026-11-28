@@ -392,11 +392,11 @@ test('a short link with anything after its key is refused, and nothing is added'
 });
 
 // US-C19
-test('an address the catalog has already is refused with the database\'s message, and nothing changes', async ({ page }) => {
+test('an address the catalog has already is accepted the same way, and nothing changes', async ({ page }) => {
   await bots(page);
   const link = shortLink();
   expect((await add(page, ADD, link)).told).toBe(SUBMITTED);
-  expect((await add(page, ADD, link)).told).toBe('duplicate key value violates unique constraint "bots_address_key"');
+  expect((await add(page, ADD, link)).told).toBe(SUBMITTED);
   expect(await addedBot(link)).toMatchObject({ approved: null });
 });
 

@@ -21,11 +21,11 @@ export interface AddServer {
 /** Adds a bot's address to the catalog, not approved (US-C16…US-C21). */
 export interface AddBot {
   /**
-   * `body` is the request's JSON, of any shape: one that is not an object is answered as one without the field. Answers 204 when the address is stored; 400 `{ error: 'Missing url' }`
+   * `body` is the request's JSON, of any shape: one that is not an object is answered as one without the field. Answers 204 when the address is stored or was there; 400 `{ error: 'Missing url' }`
    * without a `url`; 400 `{ status, error }` for an address that is not a bot's: 1 not a URL, 2 not HTTPS,
    * 4 on `localhost`, 6 a short link whose fragment is not a key of 32 bytes or a full address without its
    * SMP server, 3 a group's link or any other path; and 500 `{ status: 3, error }` with the database's
-   * message when it could not be stored, an address already there among them.
+   * message when it could not be stored.
    */
   add(body: unknown): Promise<Answer>;
 }
@@ -33,11 +33,11 @@ export interface AddBot {
 /** Adds a relay's address to the catalog (US-D17…US-D21). */
 export interface AddRelay {
   /**
-   * `body` is the request's JSON, of any shape: one that is not an object is answered as one without the field. Answers 204 when the address is stored; 400 `{ error: 'Missing url' }`
+   * `body` is the request's JSON, of any shape: one that is not an object is answered as one without the field. Answers 204 when the address is stored or was there; 400 `{ error: 'Missing url' }`
    * without a `url`; 400 `{ status, error }` for an address that is not a relay's: 1 not a URL, 2 not HTTPS,
    * 3 a path other than `/r`, 6 a port in its host part, a query, or a key, host, port or certificate that
    * cannot be read, 4 `localhost` among its hosts; and 500 `{ status: 3, error }` with the database's message
-   * when it could not be stored, an address already there among them.
+   * when it could not be stored.
    */
   add(body: unknown): Promise<Answer>;
 }
