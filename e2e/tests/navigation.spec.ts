@@ -259,13 +259,10 @@ test('the FAQ: the questions, with their answers open', async ({ page }) => {
   await guide('Unofficial guide: SMP & XFTP - one command with docker compose', 'https://github.com/ed-asriyan/simplex-servers-docker');
   await guide('Official guide: Relay', 'https://simplex.chat/docs/chat-relay.html');
   await guide('Official guide: Bot', 'https://github.com/simplex-chat/simplex-chat/tree/stable/bots#readme');
-  await guide('ChatPeerType', 'https://github.com/simplex-chat/simplex-chat/blob/stable/bots/api/TYPES.md#chatpeertype');
-  await guide('a bug report', 'https://github.com/ed-asriyan/simplex-catalog-bots-validator/issues/new');
+  await guide('a bug report', 'https://github.com/ed-asriyan/simplex-catalog/issues/new');
 
   const steps = page.getByRole('region', { name: "I submitted a bot but it didn't appear" });
-  await expect(steps).toContainText("Ensure that the bot's ChatPeerType is bot. If it's not set or is human, the bot won't appear.");
-  await expect(page.getByText('Note: This prevents regular user contacts from appearing in the catalog.')).toBeVisible();
-  await expect(page.getByText('Wait up to 12 hours for the bot to appear in the catalog.')).toBeVisible();
-  await expect(page.getByText("If the bot hasn't appeared after 12 hours, check if the bot is online and the submitted contact link is active. If it's online and the contact link is active, please submit a bug report.")).toBeVisible();
+  await expect(steps).toContainText('All bots go through manual moderation. Wait up to 3 days for the bot to appear in the catalog.');
+  await expect(steps).toContainText("If the bot hasn't appeared after 3 days, check that the bot is online, the submitted contact link is active, and it does not contain NSFW or other unacceptable content. If everything looks good, please submit a bug report.");
   await looks(page, 'faq');
 });
