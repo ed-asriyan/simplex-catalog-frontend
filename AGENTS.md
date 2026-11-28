@@ -12,7 +12,7 @@ The root holds the project's projections, each a view of the same catalog:
 - `e2e/` — the end-to-end tests: the stories played against the whole running catalog;
 - `src/` — the code: how it works in fact. It is six components, each deployed on its own: `frontend/` (the website, Svelte), the database and the functions, which `backend/` holds as the one Supabase project they are deployed to (`supabase/migrations/` and `supabase/tests/` the database, `supabase/functions/` the functions), and `servers-validator/`, `relays-validator/` and `bots-validator/` (Rust, each run by GitHub Actions on a schedule).
 
-A component's unit tests live in it, beside its code; the root holds what is about the whole catalog. `.github/` and `.devcontainer/` (one dev container per component) are at the root because the tools read them only there.
+A component's unit tests live in it, beside its code; the root holds what is about the whole catalog. `.github/` and `.devcontainer/` are at the root because the tools read them only there.
 
 ## Status
 The code is implemented and in production. The stories and the design describe it; the end-to-end tests play every story that can be played from outside; every component has unit tests, and all but the database an architecture check.

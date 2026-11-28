@@ -1,0 +1,52 @@
+{
+  "name": "SimpleX Catalog",
+  "image": "mcr.microsoft.com/devcontainers/base:bookworm",
+  "features": {
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {},
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "22"
+    },
+    "ghcr.io/devcontainers/features/rust:1": {},
+    "ghcr.io/devcontainers/features/git-lfs:1": {},
+    "ghcr.io/devcontainers/features/github-cli:1": {}
+  },
+  "containerEnv": {
+    "NODE_PATH": "${containerWorkspaceFolder}/e2e/node_modules"
+  },
+  "remoteEnv": {
+    "PATH": "${containerEnv:PATH}:${containerWorkspaceFolder}/e2e/node_modules/.bin"
+  },
+  "postCreateCommand": "bash .devcontainer/setup.sh",
+  "forwardPorts": [5173, 54321, 54323, 18081],
+  "portsAttributes": {
+    "5173": {
+      "label": "Svelte Dev Server"
+    },
+    "54321": {
+      "label": "Supabase API & Functions"
+    },
+    "54323": {
+      "label": "Supabase Studio"
+    },
+    "18081": {
+      "label": "E2E Website"
+    }
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "svelte.svelte-vscode",
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "rust-lang.rust-analyzer",
+        "denoland.vscode-deno"
+      ],
+      "settings": {
+        "rust-analyzer.cargo.allFeatures": true,
+        "rust-analyzer.checkOnSave.command": "clippy",
+        "editor.formatOnSave": true
+      }
+    }
+  },
+  "remoteUser": "vscode"
+}
